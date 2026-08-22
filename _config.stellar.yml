@@ -9,20 +9,34 @@
 menubar:
   items:
     - id: post
-      theme: '#1BCDFC'
+      theme: '#00E5FF'
       icon: default:documents
       title: 博客
       url: /
     - id: wiki
-      theme: '#3DC550'
+      theme: '#00FFA3'
       icon: example:notebook
       title: 知识库
       url: /wiki/
     - id: about
-      theme: '#FA6400'
+      theme: '#FF2D95'
       icon: example:planet
       title: 关于
       url: /about/
+
+######## Style ########
+style:
+  # 强制深色模式（黑色科技风）
+  prefers_theme: dark
+  color:
+    theme: 'hsl(187 100% 50%)' # 电光青（主题色）
+    accent: 'hsl(330 100% 60%)' # 霓虹品红（强调色）
+    link: 'hsl(190 95% 62%)' # 链接色
+
+######## Head 注入 ########
+inject:
+  head:
+    - '<link rel="stylesheet" href="/css/tech.css">'
 
 ######## Article ########
 article:
@@ -57,6 +71,7 @@ plugins:
   # 卡片鼠标跟随光斑 + 3D 倾斜，提升动感
   card_hover:
     enable: true
+    spotlight_color: 'rgba(0, 229, 255, 0.10)'
   # 滚动进入视口时的渐显动画
   scrollreveal:
     enable: true
