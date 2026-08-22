@@ -1,0 +1,3 @@
+# 知识库上架列表：列出要在 /wiki/ 列表页展示的项目 id
+# 每个 id 对应 source/_data/wiki/<id>.yml 中的项目定义
+- dev-notes

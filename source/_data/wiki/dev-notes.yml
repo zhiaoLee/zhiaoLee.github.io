@@ -1,0 +1,18 @@
+# wiki 项目定义：开发笔记
+# 页面通过 front-matter 中的 `wiki: dev-notes` 归属到本项目
+title: 开发笔记
+name: 开发笔记
+tags:
+  - 开发
+  - 工具
+# 页面所在目录（相对 source），tree 中的路径相对于此目录
+base_dir: wiki/dev-notes
+# 侧边栏目录树；键为分组名，值为页面路径列表（不含 .md）
+tree:
+  开始:
+    - intro/
+    - workflow/
+  速查:
+    - git-cheatsheet/
+# 多个项目时的排序权重，越大越靠前
+sort: 1
