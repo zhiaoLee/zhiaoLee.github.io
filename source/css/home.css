@@ -1,0 +1,533 @@
+/* 首页（个人主页）样式，复刻参考站的 hero + 玻璃卡片网格 */
+.home-page {
+  --a: hsl(187 100% 50%);
+  --a2: #14b8a6;
+  --a3: #818cf8;
+  --abg: rgba(0, 229, 255, 0.07);
+  --aglow: rgba(0, 229, 255, 0.2);
+  --abdr: rgba(0, 229, 255, 0.24);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --glass: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 229, 255, 0.04) 100%);
+  --gbdr: rgba(255, 255, 255, 0.18);
+  --gshine: rgba(255, 255, 255, 0.2);
+  position: relative;
+  margin: 0 -1rem;
+  color: #fff;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+
+.home-page .hp-font-serif {
+  font-family: 'DM Serif Display', 'Songti SC', serif;
+}
+
+/* ---- 粒子画布 ---- */
+#home-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---- Hero ---- */
+.home-page .hp-hero {
+  position: relative;
+  z-index: 1;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 4.5rem;
+  align-items: center;
+  min-height: 82svh;
+}
+
+.home-page .hp-wave {
+  font-size: 2.2rem;
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: hpWave 2.2s ease 0.9s 2, hpFadeUp 0.65s var(--ease) 0.05s both;
+  margin-bottom: 0.55rem;
+  line-height: 1;
+}
+
+.home-page .hp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--a);
+  margin-bottom: 0.85rem;
+  opacity: 0;
+  animation: hpFadeUp 0.65s var(--ease) 0.1s forwards;
+}
+
+.home-page .hp-eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1.5px;
+  background: var(--a);
+  display: block;
+}
+
+.home-page .hp-name {
+  font-family: 'DM Serif Display', 'Songti SC', serif;
+  font-size: clamp(2.6rem, 5vw, 4.6rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  margin: 0 0 0.75rem;
+  color: #fff;
+  opacity: 0;
+  animation: hpFadeUp 0.65s var(--ease) 0.15s forwards;
+}
+
+.home-page .hp-name-grad {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--a) 0%, var(--a2) 50%, var(--a3) 100%);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: hpGradShift 6s ease infinite;
+}
+
+.home-page .hp-role-wrap {
+  height: 1.7rem;
+  overflow: hidden;
+  margin-bottom: 1.3rem;
+  opacity: 0;
+  animation: hpFadeUp 0.65s var(--ease) 0.2s forwards;
+}
+
+.home-page .hp-role {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--a);
+  letter-spacing: 0.01em;
+}
+
+.home-page .hp-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--a);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: hpBlink 1s step-end infinite;
+}
+
+.home-page .hp-desc {
+  font-size: 0.96rem;
+  line-height: 1.85;
+  max-width: 500px;
+  margin: 0 0 1.9rem;
+  opacity: 0;
+  animation: hpFadeUp 0.65s var(--ease) 0.25s forwards;
+}
+
+.home-page .hp-desc-inner {
+  opacity: 0.56;
+}
+
+.home-page .hp-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: hpFadeUp 0.65s var(--ease) 0.35s forwards;
+}
+
+.home-page .hp-btn-fill,
+.home-page .hp-btn-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.55rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.28s var(--ease);
+}
+
+.home-page .hp-btn-fill {
+  background: linear-gradient(135deg, var(--a), var(--a2));
+  border: none;
+  color: #04141a !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-page .hp-btn-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--a2), var(--a3));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.home-page .hp-btn-fill:hover::after {
+  opacity: 1;
+}
+
+.home-page .hp-btn-fill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px var(--aglow);
+  color: #fff !important;
+}
+
+.home-page .hp-btn-fill-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.home-page .hp-btn-out {
+  background: var(--glass);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  opacity: 0.7;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: 0 1px 0 var(--gshine) inset;
+}
+
+.home-page .hp-btn-out:hover {
+  opacity: 1;
+  border-color: var(--abdr);
+  color: var(--a) !important;
+  background: var(--abg);
+  transform: translateY(-2px);
+}
+
+.home-page .hp-scroll-hint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  animation: hpFadeIn 1s var(--ease) 1.8s forwards;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-page .hp-scroll-hint span {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  opacity: 0.3;
+}
+
+.home-page .hp-scroll-arrow {
+  width: 18px;
+  height: 18px;
+  opacity: 0.25;
+  animation: hpScrollBounce 2s ease-in-out infinite;
+}
+
+/* ---- Hero 右侧视觉 ---- */
+.home-page .hp-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  opacity: 0;
+  animation: hpFadeIn 1s var(--ease) 0.45s forwards;
+}
+
+.home-page .hp-photo-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.home-page .hp-photo-glow {
+  position: absolute;
+  inset: -32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--aglow) 0%, transparent 66%);
+  z-index: 0;
+  animation: hpGlowPulse 3.5s ease-in-out infinite;
+}
+
+.home-page .hp-photo-svg {
+  position: absolute;
+  inset: -9px;
+  width: calc(100% + 18px);
+  height: calc(100% + 18px);
+  pointer-events: none;
+  z-index: 2;
+  animation: hpSpin 16s linear infinite;
+  transform-origin: center;
+}
+
+.home-page .hp-photo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.home-page .hp-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-page .hp-caption-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--a);
+  box-shadow: 0 0 8px var(--a);
+  animation: hpGlowPulse 2s ease-in-out infinite;
+}
+
+/* ---- 卡片网格 ---- */
+.home-page .hp-cards {
+  position: relative;
+  z-index: 1;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 2.5rem 6rem;
+}
+
+.home-page .hp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.home-page .hp-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.3rem;
+  border: 1px solid var(--gbdr);
+  border-radius: 16px;
+  text-decoration: none !important;
+  color: #fff !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 229, 255, 0.04) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 1px rgba(255, 255, 255, 0.18) inset, 0 16px 48px rgba(0, 0, 0, 0.45);
+  transition: color 0.25s var(--ease), border-color 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease), opacity 0.75s var(--ease), transform 0.75s var(--ease);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: transform;
+}
+
+.home-page .hp-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.home-page .hp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--sx, 50%) var(--sy, -10%), rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 40%, transparent 62%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-page .hp-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--a), var(--a2));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.38s var(--ease);
+  z-index: 1;
+}
+
+.home-page .hp-card:hover {
+  border-color: var(--abdr);
+  box-shadow: 0 1px rgba(255, 255, 255, 0.22) inset, 0 22px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--abdr);
+  background: linear-gradient(160deg, rgba(0, 229, 255, 0.14) 0%, rgba(20, 184, 166, 0.08) 100%);
+}
+
+.home-page .hp-card:hover::before {
+  opacity: 1;
+}
+
+.home-page .hp-card:hover::after {
+  transform: scaleX(1);
+}
+
+.home-page .hp-card-ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--abg);
+  border: 1px solid var(--abdr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--a);
+  flex-shrink: 0;
+  transition: all 0.28s var(--ease);
+  position: relative;
+  z-index: 1;
+}
+
+.home-page .hp-card:hover .hp-card-ico {
+  background: var(--a);
+  color: #04141a;
+  border-color: var(--a);
+  transform: rotate(-6deg) scale(1.08);
+}
+
+.home-page .hp-card-body {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.home-page .hp-card-title {
+  font-size: 0.89rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.home-page .hp-card-arr {
+  color: var(--a);
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.home-page .hp-card:hover .hp-card-arr {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.home-page .hp-card-sub {
+  font-size: 0.73rem;
+  opacity: 0.55;
+  line-height: 1.5;
+  display: block;
+}
+
+/* ---- 动画 ---- */
+@keyframes hpWave {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes hpFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hpFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes hpGradShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes hpBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes hpScrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@keyframes hpGlowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes hpSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---- 响应式 ---- */
+@media screen and (max-width: 900px) {
+  .home-page .hp-hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 3rem 1.5rem 2rem;
+    min-height: 0;
+  }
+  .home-page .hp-visual {
+    order: -1;
+  }
+  .home-page .hp-scroll-hint {
+    display: none;
+  }
+  .home-page .hp-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .home-page .hp-cards {
+    padding: 0 1.75rem 4rem;
+  }
+}
+
+@media screen and (max-width: 560px) {
+  .home-page .hp-grid {
+    grid-template-columns: 1fr;
+  }
+  .home-page .hp-cards {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page *,
+  .home-page *::before,
+  .home-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -12,7 +12,7 @@ menubar:
       theme: '#00E5FF'
       icon: default:documents
       title: 博客
-      url: /
+      url: /blog/
     - id: wiki
       theme: '#00FFA3'
       icon: example:notebook
@@ -33,10 +33,25 @@ style:
     accent: 'hsl(330 100% 60%)' # 霓虹品红（强调色）
     link: 'hsl(190 95% 62%)' # 链接色
 
+######## Site Tree ########
+site_tree:
+  # 首页（个人主页）为沉浸式全屏布局，不显示左右侧栏
+  home:
+    leftbar: ''
+    rightbar: ''
+  page:
+    leftbar: recent
+    rightbar: ''
+
 ######## Head 注入 ########
 inject:
   head:
+    - '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    - '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    - '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=DM+Serif+Display:ital@0;1&display=swap">'
     - '<link rel="stylesheet" href="/css/tech.css">'
+    - '<link rel="stylesheet" href="/css/home.css">'
+    - '<script defer src="/js/home.js"></script>'
 
 ######## Article ########
 article:
@@ -52,7 +67,8 @@ footer:
   sitemap:
     - title: 博客
       items:
-        - '[近期发布](/)'
+        - '[主页](/)'
+        - '[近期发布](/blog/)'
         - '[分类](/categories/)'
         - '[标签](/tags/)'
         - '[归档](/archives/)'
