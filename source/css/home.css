@@ -103,3 +103,4 @@ body.hp-page .hp a{color:inherit}
 body.hp-page .hp .hp-btn-fill{color:#fff!important}
 body.hp-page .hp .hp-btn-out:hover{color:var(--a)!important}
 body.hp-page footer.footer{position:relative;z-index:2;background:rgba(13,17,23,.82);backdrop-filter:blur(16px)}
+body.hp-page .hp-photo{border-radius:50%!important}

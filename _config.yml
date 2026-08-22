@@ -14,7 +14,7 @@ author: Zio
 language: zh-CN
 timezone: Asia/Shanghai
 # 头像：之后可替换为自己的图片链接
-avatar: https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg
+avatar: /images/avatar.svg
 
 # URL
 ## 部署后必须改为真实站点地址，例如 GitHub Pages：

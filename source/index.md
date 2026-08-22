@@ -29,7 +29,7 @@ rightbar: []
 <div class="hp-photo-wrap">
 <div class="hp-photo-glow" aria-hidden="true"></div>
 <svg class="hp-photo-svg" viewBox="0 0 238 238" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="rg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0ea5e9"/><stop offset="50%" stop-color="#14b8a6"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs><circle cx="119" cy="119" r="113" stroke="url(#rg1)" stroke-width="2.5" stroke-dasharray="490 230" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 119 119" to="360 119 119" dur="5s" repeatCount="indefinite"/></circle><circle cx="119" cy="119" r="113" stroke="url(#rg1)" stroke-width="1" stroke-dasharray="55 610" stroke-linecap="round" opacity=".35"><animateTransform attributeName="transform" type="rotate" from="180 119 119" to="540 119 119" dur="9s" repeatCount="indefinite"/></circle></svg>
-<img class="hp-photo" src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg" alt="Zio 的头像" loading="eager">
+<img class="hp-photo" src="/images/avatar.svg" alt="Zio 的头像" loading="eager">
 <div class="hp-badge"><i class="fa-solid fa-cube"></i>&nbsp; 博客 × 知识库</div>
 </div>
 <div class="hp-anim-carousel" id="hp-anim-carousel" aria-label="动画轮播">
