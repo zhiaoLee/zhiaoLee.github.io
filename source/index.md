@@ -4,6 +4,8 @@ permalink: /index.html
 seo_title: Zio 的个人主页
 menu_id: post
 robots: index,follow
+leftbar: []
+rightbar: []
 ---
 
 <canvas id="neural-canvas" aria-hidden="true"></canvas>

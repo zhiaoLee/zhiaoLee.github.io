@@ -90,13 +90,16 @@ html,body{background:#0d1117!important;color:#fff!important}
 .hp::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(0,0,0,.15),rgba(0,0,0,.55));pointer-events:none;z-index:0}
 .hp>*{position:relative;z-index:1}
 
-/* ---- Stellar 主题适配：首页全屏沉浸（仅在含 .hp 的页面生效） ---- */
-body:has(.hp) .article-banner-wrap{display:none!important}
-body:has(.hp) .l_main{max-width:none;padding:0}
-body:has(.hp) article.md-text,body:has(.hp) .md-text.content{max-width:none;padding:0;margin:0;background:transparent;box-shadow:none;border-radius:0}
-body:has(.hp) .l_main .content{max-width:none}
-body:has(.hp) .hp h1,body:has(.hp) .hp h2{border:0;background:transparent;padding:0}
-body:has(.hp) .hp a{color:inherit}
-body:has(.hp) .hp .hp-btn-fill{color:#fff!important}
-body:has(.hp) .hp .hp-btn-out:hover{color:var(--a)!important}
-body:has(.hp) footer.footer{position:relative;z-index:2;background:rgba(13,17,23,.82);backdrop-filter:blur(16px)}
+/* ---- Stellar 主题适配：首页全屏沉浸（home.js 为 body 注入 hp-page 类，不依赖 :has()） ---- */
+body.hp-page .l_left{display:none!important}
+body.hp-page .l_right{display:none!important}
+body.hp-page .l_body{display:block;margin:0}
+body.hp-page .article-banner-wrap{display:none!important}
+body.hp-page .l_main{max-width:none;padding:0;margin:0}
+body.hp-page article.md-text,body.hp-page .md-text.content{max-width:none;padding:0;margin:0;background:transparent;box-shadow:none;border-radius:0}
+body.hp-page .l_main .content{max-width:none}
+body.hp-page .hp h1,body.hp-page .hp h2{border:0;background:transparent;padding:0}
+body.hp-page .hp a{color:inherit}
+body.hp-page .hp .hp-btn-fill{color:#fff!important}
+body.hp-page .hp .hp-btn-out:hover{color:var(--a)!important}
+body.hp-page footer.footer{position:relative;z-index:2;background:rgba(13,17,23,.82);backdrop-filter:blur(16px)}
