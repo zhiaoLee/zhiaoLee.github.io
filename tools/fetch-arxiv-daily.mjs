@@ -284,7 +284,7 @@ async function summarizeWithKimi(paper) {
     },
     body: JSON.stringify({
       model: process.env.KIMI_MODEL || llm.model,
-      temperature: 0.2,
+      temperature: 1,
       max_tokens: Number(process.env.KIMI_MAX_TOKENS || llm.maxTokens || 900),
       messages: [
         {
