@@ -1,5 +1,5 @@
 ---
-layout: wiki
+layout: page
 title: 简介
 wiki: dev-notes
 ---

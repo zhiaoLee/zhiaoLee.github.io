@@ -1,5 +1,5 @@
 ---
-layout: wiki
+layout: page
 title: 发布流程
 wiki: dev-notes
 ---

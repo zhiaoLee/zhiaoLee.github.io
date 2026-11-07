@@ -1,5 +1,5 @@
 ---
-layout: wiki
+layout: page
 title: Git 速查表
 wiki: dev-notes
 ---

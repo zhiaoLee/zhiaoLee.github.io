@@ -1,0 +1,38 @@
+{
+  "categories": ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.CG", "cs.RO"],
+  "interestGroups": [
+    {
+      "name": "LLM + 知识图谱",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["knowledge graph", "knowledge-graph", "graph rag", "graph retrieval", "kg-augmented"]
+      ]
+    },
+    {
+      "name": "LLM + CAD",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["text-to-cad", "text to cad", "computer-aided design", "parametric cad", "cad generation", "geometric modeling"]
+      ]
+    },
+    {
+      "name": "LLM + Agent",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["agent", "agentic", "tool use", "tool-use", "multi-agent", "autonomous agent"]
+      ]
+    }
+  ],
+  "keywords": [],
+  "excludeKeywords": [],
+  "maxPapers": 12,
+  "includeCrossList": false,
+  "timezone": "Asia/Shanghai",
+  "feedBase": "https://rss.arxiv.org/atom",
+  "llm": {
+    "enabled": true,
+    "apiUrl": "https://api.kimi.com/coding/v1/chat/completions",
+    "model": "kimi-for-coding",
+    "maxTokens": 900
+  }
+}
