@@ -24,3 +24,5 @@ npm run arxiv:daily -- --date 2026-11-06 --max 3 --dry-run
 ```
 
 GitHub Actions 页面可以手动触发工作流，并填写 `date` 重跑指定日期。
+
+手动验证已存在日期时，可将 `force` 设为 `true` 覆盖当天文章；定时运行默认保持幂等，不会重复覆盖已有文章。

@@ -377,6 +377,7 @@ function buildPost(date, papers) {
 const date = argValue('--date') || process.env.ARXIV_DAILY_DATE || yesterday(config.timezone || 'Asia/Shanghai');
 if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error(`Invalid date: ${date}`);
 const maxPapers = Number(argValue('--max') || process.env.ARXIV_DAILY_MAX || config.maxPapers || 12);
+const force = process.argv.includes('--force') || process.env.ARXIV_DAILY_FORCE === 'true';
 const rawPapers = await retrievePapers(date);
 const seen = new Set();
 const papers = rawPapers
@@ -401,8 +402,11 @@ if (!papers.length) {
 const outputPath = path.join(root, 'source', '_posts', `arxiv-daily-${date}.md`);
 try {
   await fs.access(outputPath);
-  console.log(`Post already exists: ${path.relative(root, outputPath)}`);
-  process.exit(0);
+  if (!force) {
+    console.log(`Post already exists: ${path.relative(root, outputPath)}`);
+    process.exit(0);
+  }
+  console.log(`Force regenerating: ${path.relative(root, outputPath)}`);
 } catch {
   // The daily post does not exist yet.
 }
