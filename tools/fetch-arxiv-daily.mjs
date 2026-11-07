@@ -303,7 +303,16 @@ async function summarizeWithKimi(paper) {
       ]
     })
   });
-  if (!response.ok) throw new Error(`Kimi HTTP ${response.status}`);
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const error = await response.json();
+      detail = error?.error?.message || error?.message || '';
+    } catch {
+      // Keep the status-only error when the provider does not return JSON.
+    }
+    throw new Error(`Kimi HTTP ${response.status}${detail ? `: ${clean(detail).slice(0, 240)}` : ''}`);
+  }
   const payload = await response.json();
   return summaryFields(parseJsonObject(payload.choices?.[0]?.message?.content));
 }
