@@ -4,7 +4,7 @@
 
 兴趣规则位于 [`config/arxiv-daily.json`](config/arxiv-daily.json)：
 
-- `categories`：arXiv 分类，例如 `cs.AI`、`cs.LG`、`cs.CV`、`cs.CL`；
+- `categories`：arXiv 分类，当前覆盖 AI、语言、机器学习、视觉、图形学、机器人和人机交互；
 - `interestGroups`：组合兴趣组。每个 `allOf` 子数组表示一个“至少命中一个词”的条件，数组之间是 AND，不同兴趣组之间是 OR；
 - `keywords`：标题、摘要或分类中至少命中一个才收录；为空表示收录分类中的全部论文；
 - `excludeKeywords`：命中任一词就排除；
@@ -12,6 +12,8 @@
 - `includeCrossList`：是否包含 cross-list 论文。
 
 当前默认兴趣组是“LLM + 知识图谱”“LLM + CAD”“LLM + Agent”，默认分类覆盖 AI、语言、机器学习、视觉、计算机图形学和机器人学。具体研究方向变化后，可以直接编辑 `config/arxiv-daily.json`。
+
+当前还额外覆盖“LLM + BREP”“LLM + CAD 二维图纸”和“LLM + CAD 三维模型”，每日上限提高到 20 篇。每个兴趣组要求同时命中 LLM 相关词和领域词，减少只有单一关键词造成的误收录。
 
 本实现使用分类和组合兴趣组进行轻量筛选，不需要 Zotero 或额外 API Key。`zotero-arxiv-daily` 的 Zotero 相似度排序和 PDF 全文提取可以作为后续增强；当前的 LLM 摘要层已经独立接入 Kimi。
 
@@ -23,6 +25,6 @@
 npm run arxiv:daily -- --date 2026-11-06 --max 3 --dry-run
 ```
 
-GitHub Actions 页面可以手动触发工作流，并填写 `date` 重跑指定日期。
+GitHub Actions 页面可以手动触发工作流：填写 `date` 重跑指定日期，或填写 `month`（例如 `2026-10`）生成上一自然月的月度汇总文章 `source/_posts/arxiv-monthly-YYYY-MM.md`。月度汇总最多收录 60 篇，默认对前 30 篇调用 Kimi 生成中文速读，其余保留原始摘要。
 
 手动验证已存在日期时，可将 `force` 设为 `true` 覆盖当天文章；定时运行默认保持幂等，不会重复覆盖已有文章。

@@ -1,5 +1,5 @@
 {
-  "categories": ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.CG", "cs.RO"],
+  "categories": ["cs.AI", "cs.CL", "cs.LG", "cs.CV", "cs.CG", "cs.GR", "cs.RO", "cs.HC"],
   "interestGroups": [
     {
       "name": "LLM + 知识图谱",
@@ -16,6 +16,27 @@
       ]
     },
     {
+      "name": "LLM + BREP",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["brep", "b-rep", "boundary representation", "boundary-representation", "solid modeling", "parametric solid", "feature-based modeling"]
+      ]
+    },
+    {
+      "name": "LLM + CAD 二维图纸",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["2d cad", "2d drawing", "engineering drawing", "technical drawing", "mechanical drawing", "blueprint", "drafting", "sketch-based cad"]
+      ]
+    },
+    {
+      "name": "LLM + CAD 三维模型",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["3d cad", "3d model", "3d modeling", "3d modelling", "mesh generation", "point cloud", "solid model", "shape generation", "geometry generation", "parametric model"]
+      ]
+    },
+    {
       "name": "LLM + Agent",
       "allOf": [
         ["llm", "large language model", "language model"],
@@ -25,7 +46,9 @@
   ],
   "keywords": [],
   "excludeKeywords": [],
-  "maxPapers": 12,
+  "maxPapers": 20,
+  "monthlyMaxPapers": 60,
+  "llmMaxPapers": 30,
   "includeCrossList": false,
   "timezone": "Asia/Shanghai",
   "feedBase": "https://rss.arxiv.org/atom",

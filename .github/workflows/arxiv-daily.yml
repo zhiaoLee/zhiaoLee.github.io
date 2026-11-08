@@ -10,10 +10,19 @@ on:
         description: 'Target date in YYYY-MM-DD; blank means yesterday in Asia/Shanghai'
         required: false
         type: string
+      month:
+        description: 'Backfill a month in YYYY-MM; leave blank for daily mode'
+        required: false
+        type: string
       max_papers:
         description: 'Maximum papers in the digest'
         required: false
-        default: '12'
+        default: '20'
+        type: string
+      llm_max_papers:
+        description: 'Maximum papers to summarize with Kimi'
+        required: false
+        default: '30'
         type: string
       force:
         description: 'Regenerate an existing date (manual verification only)'
@@ -38,7 +47,9 @@ jobs:
     env:
       TZ: Asia/Shanghai
       ARXIV_DAILY_DATE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.date || '' }}
-      ARXIV_DAILY_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.max_papers || '12' }}
+      ARXIV_DAILY_MONTH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.month || '' }}
+      ARXIV_DAILY_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.max_papers || '20' }}
+      ARXIV_DAILY_LLM_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.llm_max_papers || '30' }}
       ARXIV_DAILY_FORCE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force || 'false' }}
       KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
       KIMI_API_URL: ${{ vars.KIMI_API_URL || 'https://api.kimi.com/coding/v1/chat/completions' }}

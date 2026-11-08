@@ -134,6 +134,18 @@ function addDays(date, days) {
   return value.toISOString().slice(0, 10);
 }
 
+function monthRange(month, timezone) {
+  const [year, monthNumber] = month.split('-').map(Number);
+  const nextMonth = new Date(Date.UTC(year, monthNumber, 1)).toISOString().slice(0, 10);
+  return {
+    kind: 'month',
+    label: month,
+    startDate: `${month}-01`,
+    endDateExclusive: nextMonth,
+    timezone
+  };
+}
+
 function arxivTimestamp(value) {
   return value.toISOString().replace(/\D/g, '').slice(0, 12);
 }
@@ -164,7 +176,7 @@ async function fetchText(url) {
   throw lastError;
 }
 
-async function retrievePapers(targetDate) {
+async function retrievePapers(range) {
   const categories = config.categories ?? [];
   if (!categories.length) throw new Error('config.categories must contain at least one arXiv category');
   const papers = [];
@@ -181,25 +193,42 @@ async function retrievePapers(targetDate) {
     throw new Error(`All arXiv feeds failed: ${errors.join('; ')}`);
   }
   if (errors.length) console.warn(`Some arXiv feeds failed: ${errors.join('; ')}`);
-  const timezone = config.timezone || 'Asia/Shanghai';
-  const hasTargetDate = papers.some((paper) => paper.published && dateInTimezone(new Date(paper.published), timezone) === targetDate);
-  if (!hasTargetDate) {
-    const startUtc = localMidnightToUtc(targetDate, timezone);
-    const endUtc = new Date(localMidnightToUtc(addDays(targetDate, 1), timezone).getTime() - 60_000);
+  const timezone = range.timezone || config.timezone || 'Asia/Shanghai';
+  const hasTargetDate = papers.some((paper) => {
+    if (!paper.published) return false;
+    const localDate = dateInTimezone(new Date(paper.published), timezone);
+    return localDate >= range.startDate && localDate < range.endDateExclusive;
+  });
+  if (range.kind === 'month' || !hasTargetDate) {
+    const startUtc = localMidnightToUtc(range.startDate, timezone);
+    const endUtc = new Date(localMidnightToUtc(range.endDateExclusive, timezone).getTime() - 60_000);
     const query = `(${categories.map((category) => `cat:${category}`).join(' OR ')}) AND submittedDate:[${arxivTimestamp(startUtc)} TO ${arxivTimestamp(endUtc)}]`;
-    const params = new URLSearchParams({
-      search_query: query,
-      start: '0',
-      max_results: '1000',
-      sortBy: 'submittedDate',
-      sortOrder: 'descending'
-    });
     try {
-      const apiPapers = parseFeed(await fetchText(`https://export.arxiv.org/api/query?${params}`));
+      const apiPapers = [];
+      const pageSize = 1000;
+      let start = 0;
+      let total = Infinity;
+      do {
+        const params = new URLSearchParams({
+          search_query: query,
+          start: String(start),
+          max_results: String(pageSize),
+          sortBy: 'submittedDate',
+          sortOrder: 'descending'
+        });
+        const xml = await fetchText(`https://export.arxiv.org/api/query?${params}`);
+        const page = parseFeed(xml);
+        apiPapers.push(...page);
+        const totalMatch = xml.match(/<opensearch:totalResults>(\d+)<\/opensearch:totalResults>/i);
+        total = totalMatch ? Number(totalMatch[1]) : start + page.length;
+        start += page.length;
+        if (!page.length || start >= total) break;
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      } while (start < total);
       papers.push(...apiPapers);
-      console.log(`Used arXiv API fallback for ${targetDate}; received ${apiPapers.length} entries.`);
+      console.log(`Used arXiv API ${range.kind === 'month' ? 'backfill' : 'fallback'} for ${range.startDate}${range.kind === 'month' ? ` to ${range.endDateExclusive}` : ''}; received ${apiPapers.length} entries.`);
     } catch (error) {
-      console.warn(`arXiv API fallback failed for ${targetDate}: ${error.message}`);
+      console.warn(`arXiv API ${range.kind === 'month' ? 'backfill' : 'fallback'} failed for ${range.startDate}: ${error.message}`);
     }
   }
   return papers;
@@ -317,14 +346,18 @@ async function summarizeWithKimi(paper) {
   return summaryFields(parseJsonObject(payload.choices?.[0]?.message?.content));
 }
 
-async function enrichPapers(papers) {
+async function enrichPapers(papers, limit = papers.length) {
   const token = (process.env.KIMI_API_KEY || '').trim();
   if (config.llm?.enabled === false || !token) {
     if (config.llm?.enabled !== false) console.warn('Kimi summary skipped: KIMI_API_KEY is not configured.');
     return papers;
   }
   const enriched = [];
-  for (const paper of papers) {
+  for (const [index, paper] of papers.entries()) {
+    if (index >= limit) {
+      enriched.push({ ...paper, llmSummary: null });
+      continue;
+    }
     try {
       const summary = await summarizeWithKimi(paper);
       enriched.push({ ...paper, llmSummary: summary });
@@ -336,20 +369,23 @@ async function enrichPapers(papers) {
   return enriched;
 }
 
-function buildPost(date, papers) {
-  const title = `arXiv 每日论文速递（${date}）`;
+function buildPost(period, papers) {
+  const isMonthly = period.kind === 'month';
+  const title = isMonthly ? `arXiv 月度论文汇总（${period.label}）` : `arXiv 每日论文速递（${period.startDate}）`;
+  const endDate = isMonthly ? addDays(period.endDateExclusive, -1) : period.startDate;
+  const description = isMonthly ? `按配置的兴趣方向筛选 ${period.label} 月 arXiv 论文，并生成中文速读。` : '按配置的 arXiv 分类与关键词筛选的每日论文摘要。';
   const lines = [
     '---',
     `title: ${yamlQuote(title)}`,
-    `date: ${date} 09:00:00`,
+    `date: ${isMonthly ? period.endDateExclusive : period.startDate} 09:00:00`,
     'categories:',
     '  - 论文速递',
     'tags:',
     '  - arXiv',
-    'description: "按配置的 arXiv 分类与关键词筛选的每日论文摘要。"',
+    `description: ${yamlQuote(description)}`,
     '---',
     '',
-    `> 本文由 GitHub Actions 自动生成，收录 ${date} 发布的 arXiv 论文。论文内容及版权归原作者与 arXiv 所有。`,
+    `> 本文由 GitHub Actions 自动生成，收录 ${isMonthly ? `${period.startDate} 至 ${endDate}` : `${period.startDate}`} 发布的 arXiv 论文。论文内容及版权归原作者与 arXiv 所有。`,
     '',
     `共筛选出 **${papers.length}** 篇论文。`,
     ''
@@ -383,18 +419,30 @@ function buildPost(date, papers) {
   return `${lines.join('\n')}\n`;
 }
 
-const date = argValue('--date') || process.env.ARXIV_DAILY_DATE || yesterday(config.timezone || 'Asia/Shanghai');
-if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error(`Invalid date: ${date}`);
-const maxPapers = Number(argValue('--max') || process.env.ARXIV_DAILY_MAX || config.maxPapers || 12);
+const timezone = config.timezone || 'Asia/Shanghai';
+const requestedMonth = argValue('--month') || process.env.ARXIV_DAILY_MONTH || '';
+const requestedDate = argValue('--date') || process.env.ARXIV_DAILY_DATE || yesterday(timezone);
+let period;
+if (requestedMonth) {
+  if (!/^\d{4}-\d{2}$/.test(requestedMonth)) throw new Error(`Invalid month: ${requestedMonth}`);
+  period = monthRange(requestedMonth, timezone);
+} else {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) throw new Error(`Invalid date: ${requestedDate}`);
+  period = { kind: 'day', label: requestedDate, startDate: requestedDate, endDateExclusive: addDays(requestedDate, 1), timezone };
+}
+const maxPapers = Number(argValue('--max') || process.env.ARXIV_DAILY_MAX || (period.kind === 'month' ? config.monthlyMaxPapers : config.maxPapers) || 12);
+const llmMaxPapers = Number(argValue('--llm-max') || process.env.ARXIV_DAILY_LLM_MAX || config.llmMaxPapers || maxPapers);
 const force = process.argv.includes('--force') || process.env.ARXIV_DAILY_FORCE === 'true';
-const rawPapers = await retrievePapers(date);
+const rawPapers = await retrievePapers(period);
 const seen = new Set();
 const papers = rawPapers
   .filter((paper) => {
     const key = paper.id || paper.absUrl;
     if (seen.has(key)) return false;
     seen.add(key);
-    if (!paper.published || dateInTimezone(new Date(paper.published), config.timezone || 'Asia/Shanghai') !== date) return false;
+    if (!paper.published) return false;
+    const localDate = dateInTimezone(new Date(paper.published), timezone);
+    if (localDate < period.startDate || localDate >= period.endDateExclusive) return false;
     if (!config.includeCrossList && paper.announceType && paper.announceType !== 'new') return false;
     return true;
   })
@@ -404,11 +452,12 @@ const papers = rawPapers
   .slice(0, maxPapers);
 
 if (!papers.length) {
-  console.log(`No matching arXiv papers found for ${date}.`);
+  console.log(`No matching arXiv papers found for ${period.label}.`);
   process.exit(0);
 }
 
-const outputPath = path.join(root, 'source', '_posts', `arxiv-daily-${date}.md`);
+const outputName = period.kind === 'month' ? `arxiv-monthly-${period.label}.md` : `arxiv-daily-${period.startDate}.md`;
+const outputPath = path.join(root, 'source', '_posts', outputName);
 try {
   await fs.access(outputPath);
   if (!force) {
@@ -420,8 +469,8 @@ try {
   // The daily post does not exist yet.
 }
 
-const enrichedPapers = await enrichPapers(papers);
-const content = buildPost(date, enrichedPapers);
+const enrichedPapers = await enrichPapers(papers, llmMaxPapers);
+const content = buildPost(period, enrichedPapers);
 if (process.argv.includes('--dry-run')) {
   console.log(content);
 } else {
