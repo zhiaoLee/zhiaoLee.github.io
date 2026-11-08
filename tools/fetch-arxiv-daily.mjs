@@ -202,29 +202,35 @@ async function retrievePapers(range) {
   if (range.kind === 'month' || !hasTargetDate) {
     const startUtc = localMidnightToUtc(range.startDate, timezone);
     const endUtc = new Date(localMidnightToUtc(range.endDateExclusive, timezone).getTime() - 60_000);
-    const query = `(${categories.map((category) => `cat:${category}`).join(' OR ')}) AND submittedDate:[${arxivTimestamp(startUtc)} TO ${arxivTimestamp(endUtc)}]`;
     try {
       const apiPapers = [];
       const pageSize = 1000;
-      let start = 0;
-      let total = Infinity;
-      do {
-        const params = new URLSearchParams({
-          search_query: query,
-          start: String(start),
-          max_results: String(pageSize),
-          sortBy: 'submittedDate',
-          sortOrder: 'descending'
-        });
-        const xml = await fetchText(`https://export.arxiv.org/api/query?${params}`);
-        const page = parseFeed(xml);
-        apiPapers.push(...page);
-        const totalMatch = xml.match(/<opensearch:totalResults>(\d+)<\/opensearch:totalResults>/i);
-        total = totalMatch ? Number(totalMatch[1]) : start + page.length;
-        start += page.length;
-        if (!page.length || start >= total) break;
+      const queryTerms = range.kind === 'month'
+        ? categories.map((category) => `cat:${category}`)
+        : [`(${categories.map((category) => `cat:${category}`).join(' OR ')})`];
+      for (const queryTerm of queryTerms) {
+        const query = `${queryTerm} AND submittedDate:[${arxivTimestamp(startUtc)} TO ${arxivTimestamp(endUtc)}]`;
+        let start = 0;
+        let total = Infinity;
+        do {
+          const params = new URLSearchParams({
+            search_query: query,
+            start: String(start),
+            max_results: String(pageSize),
+            sortBy: 'submittedDate',
+            sortOrder: 'descending'
+          });
+          const xml = await fetchText(`https://export.arxiv.org/api/query?${params}`);
+          const page = parseFeed(xml);
+          apiPapers.push(...page);
+          const totalMatch = xml.match(/<opensearch:totalResults>(\d+)<\/opensearch:totalResults>/i);
+          total = totalMatch ? Number(totalMatch[1]) : start + page.length;
+          start += page.length;
+          if (!page.length || start >= total) break;
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        } while (start < total);
         await new Promise((resolve) => setTimeout(resolve, 3000));
-      } while (start < total);
+      }
       papers.push(...apiPapers);
       console.log(`Used arXiv API ${range.kind === 'month' ? 'backfill' : 'fallback'} for ${range.startDate}${range.kind === 'month' ? ` to ${range.endDateExclusive}` : ''}; received ${apiPapers.length} entries.`);
     } catch (error) {
