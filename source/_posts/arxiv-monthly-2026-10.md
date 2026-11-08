@@ -12,811 +12,1143 @@ description: "按配置的兴趣方向筛选 2026-10 月 arXiv 论文，并生�
 
 共筛选出 **60** 篇论文。
 
-## 1. Constraint Dependency Graph Retrieval for Compliance Detection on Long SKILL Documents
+## 1. 面向长SKILL文档合规检测的约束依赖图检索
 
+- **英文标题**：Constraint Dependency Graph Retrieval for Compliance Detection on Long SKILL Documents
 - **作者**：Shuaitao Zhao、Feng Ni、Lichao Ma、Yuchen Wei、Shuaike Li、Jiaye Lin、Fei Han、Yang Wei、Lu Pan
 - **分类**：cs.AI
 - **发布时间**：2026-10-31 15:31:27 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.01042v1) · [PDF](https://arxiv.org/pdf/2611.01042v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.01042v1) · [PDF](https://arxiv.org/pdf/2611.01042v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：LLM agent 需要依据企业标准作业程序等长篇幅 SKILL 文档执行业务操作，但小型审计模型的上下文预算不足以处理这些高度交叉引用的规则。相似度检索容易引入无关规则、遗漏强制前置条件，且两阶段审计策略无法为检索阶段提供可训练信号。
-- **核心创新**：SkillCDG 将 SKILL 文档重构为约束依赖图，将规则检索从相似度匹配转变为受上下文预算约束的依赖闭包选择。图中的原子规则锚定源文本跨度，强制前置关系构成唯一边类型，同一图还支撑后续联合优化。
-- **方法概览**：该方法利用策略生成的检索关键词激活种子规则，并在上下文预算内取依赖闭包，形成紧凑且条件完整的规则上下文。检索阶段采用结合输出格式有效性与下游裁决正确性的可验证奖励进行组相对策略优化，同时通过选择性在线蒸馏将教师监督集中在高熵推理 token 上。
-- **结果与结论**：实验覆盖三个企业数据集和两个公开基准，结果显示 SkillCDG 相比完整文档基线和检索基线均提升了准确率与 F1。摘要未提供具体指标数值。
-- **一句话 takeaway**：将文档规则显式组织为依赖闭包，能够在有限上下文中兼顾规则完整性与相关性，并为检索阶段引入由最终审计结果驱动的可训练反馈。该方法表明，结构化约束传播与检索—推理联合优化是改进长文档合规检测的有效方向。
+- **研究背景**：LLM智能体需要在SOP式的SKILL文档约束下执行企业操作，但长文档和密集交叉引用常超出小型审计器的上下文预算。相似度检索容易引入无关规则并漏掉强制前置条件，两阶段审计又缺少让检索阶段可学习的训练信号。
+- **核心创新**：SkillCDG将SKILL文档重构为约束依赖图，以源文本跨度的原子规则为节点、强制前置关系为唯一边，把检索从相似度匹配改为上下文预算内的依赖闭包选择。该图还同时支持检索与裁决的联合优化，使闭环训练成为可能。
+- **方法概览**：框架将每条原子规则锚定到源文本跨度，策略生成关键词激活种子规则后取其依赖闭包，以在预算内得到紧凑且条件完备的规则上下文。检索阶段用组相对策略优化训练，奖励融合格式有效性与下游裁决正确性，并以闭包非空作为有效性门控；同时采用选择性在策略蒸馏，只监督高熵推理令牌且始终保留裁决与终止令牌。
+- **结果与结论**：摘要在三个企业数据集和两个公开基准上报告SkillCDG相较全文档基线与检索基线提升了准确率和F1。摘要未提供明确实验数值，因此不编造具体提升幅度。
+- **一句话 takeaway**：将合规规则显式建模为前置依赖图并按闭包检索，能在有限上下文内兼顾条件完备性与紧凑性。该方法的关键价值在于为检索阶段提供可验证奖励和联合优化信号，适用于长SOP类文档的部署审计。
 
-**摘要**：Large Language Model (LLM) agents carry out business operations under enterprise documents we refer to as SKILL documents, which take the form of standard operating procedures (SOPs) that state the conditions to verify and the actions to take before an operation proceeds. Long, densely cross-referenced SKILL documents exceed the context budget of small deployed auditors. Similarity-based retrieval then brings in irrelevant rules while omitting mandatory prerequisites, and the two-stage audit policy provides no trainable signal for the retrieval stage. We present SkillCDG, a compliance detection framework that reformulates each SKILL document as a constraint dependency graph, shifting rule retrieval from similarity-based matching to closure-based selection under the deployment's context budget. Each atomic rule is anchored to its source text span as a graph node, and mandatory prerequisite relations form the sole edge type. Policy-generated retrieval keywords activate seed rules, whose dependency closure yields a compact and conditionally complete rule context within that budget. The same graph also supports a joint optimization scheme. The retrieval stage is trained with group-relative policy optimization using a verifiable reward that combines output-format validity with downstream verdict correctness, with closure non-emptiness serving as a validity gate, while selective on-policy distillation concentrates teacher supervision on high-entropy reasoning tokens, with verdict and termination tokens always included, to improve verdict accuracy. Experiments on three enterprise datasets and two public benchmarks show that SkillCDG improves accuracy and F1 over the full-document and retrieval-based baselines.
+**中文摘要**：大语言模型智能体在我们称为SKILL文档的企业规范下执行业务操作，这类文档通常是以标准作业程序形式给出操作前需核验的条件与应执行动作。长且密集交叉引用的SKILL文档会超出小型部署审计器的上下文预算；基于相似度的检索会引入无关规则并遗漏强制前置条件，而两阶段审计策略也无法为检索阶段提供可训练信号。本文提出SkillCDG合规检测框架，将每个SKILL文档重构为约束依赖图，把规则检索从相似度匹配转变为在部署上下文预算下的闭包选择。每条原子规则锚定到其源文本跨度作为图节点，强制前置关系构成唯一边类型；由策略生成的检索关键词激活种子规则，再通过依赖闭包在预算内得到紧凑且条件完备的规则上下文。同一图还支撑联合优化：检索阶段采用组相对策略优化，奖励结合输出格式有效性与下游裁决正确性，并以闭包非空作为有效性门控；选择性在策略蒸馏将教师监督集中于高熵推理令牌，且始终包含裁决与终止令牌，以提升裁决准确率。三个企业数据集和两个公开基准上的实验表明，SkillCDG相比全文档基线与检索基线提升了准确率和F1。
 
-## 2. GURU: A Hierarchical Neuro-Symbolic Multi-Agent System for Verification-Aware Automation of Mission-Critical Digital Engineering and Operations
+## 2. GURU：面向任务关键型数字工程与运营验证感知自动化的分层神经符号多智能体系统
 
+- **英文标题**：GURU: A Hierarchical Neuro-Symbolic Multi-Agent System for Verification-Aware Automation of Mission-Critical Digital Engineering and Operations
 - **作者**：Allan Grosvenor、Anton Zemlyansky、Abdul Wahab、Kyrylo Bohachov、Aras Dogan、Ryland Adams、Dwyer Deighan
 - **分类**：cs.AI, cs.CE, cs.MA, eess.SY
 - **发布时间**：2026-10-31 14:41:00 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.01001v1) · [PDF](https://arxiv.org/pdf/2611.01001v1)
-- **匹配方向**：LLM + 知识图谱、LLM + Agent
-
-**摘要**：An AI can find a safe action faster than any human, but it must never decide what counts as safe. We present GURU, a hierarchical neuro-symbolic multi-agent system for mission-critical digital engineering and operations, built on one partition of authority: learned models propose, rank, and accelerate; a symbolic rules engine checks every consequential action against hard limits before it executes; and validated physics confirms and decides. GURU runs a workflow as a closed control loop, with Navigation, Action, and Planning agents sharing one Common Internal Language and one training factory. Nuclear, aviation, and national-security guidance now requires this pattern; a harnessed language model keeps the model at the center, GURU puts a validated reference there. In computational fluid dynamics, the workflow raised the converged-simulation rate on unseen aircraft geometries from under 1 percent to 74 percent over 100 single-attempt cases, ran 54 live cases to Mach 6 on three facilities, and an ablation put the symbolic layer at 13 points of boundary-layer capture. Knowledge-graph retrieval and role adapters raised ParaView control success from 55 to 75 percent. In space domain awareness, where a language model cannot be trusted to decide, a frozen self-supervised world model under validated propagation scored highest of five methods at conjunction risk, including fully fine-tuned language models, with several-times-lower seed variance: the trustworthy design gives up nothing in accuracy, and the recipe transferred to reactor anomaly detection. A radar-to-avoidance debris pipeline was demonstrated in stages on a 2026 reentry; the hierarchy coordinates simulated teams of 200 aircraft. Training scaled near-linearly past 1,000 Aurora nodes and ran at 8,000. The approach extends to a control-grade microreactor digital twin with validated physics, not a learned model, as the safety basis.
-
-## 3. ImplicitHop: Evaluating knowledge integration across context and memory
-
-- **作者**：Alexander Detkov、Dashiel Karish、Matthew Oleynikov、Matt Thomson
-- **分类**：cs.AI
-- **发布时间**：2026-10-30 02:44:51 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.41169v1) · [PDF](https://arxiv.org/pdf/2610.41169v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.01001v1) · [PDF](https://arxiv.org/pdf/2611.01001v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：整合新信息并推演其全局后果是大语言模型学习、理解与推理的核心能力。无论是训练中还是上下文中的信息，模型都需要将局部事实传播为长程推论。
-- **核心创新**：作者提出两个互补的自然语言基准：一个是覆盖多种图拓扑结构和整合任务的形式化图基准，另一个是基于真实知识图谱的知识组合基准，用于按推理深度大规模评估演绎推理。
-- **方法概览**：研究在无前导推理链（implicit）的条件下，对比开源模型从上下文信息中整合知识与从预训练权重中整合知识的表现，并将推理准确率作为组合长度的函数进行分析。
-- **结果与结论**：随着组合长度增加，无论知识来自预训练权重还是上下文，模型准确率都急剧下降；但上下文中的信息在推理表现上显著优于权重中编码的信息。
-- **一句话 takeaway**：研究结果量化了当前模型在深层推理上的根本局限，对基于提示的agent行为控制和持续学习策略有直接影响，也为开发支持更深推理的训练、提示与信息整合方法奠定基础。
+- **研究背景**：在核、航空和国家安全等任务关键领域，监管机构越来越要求AI系统在做出关键决策前必须经过符号化硬约束核查，而非让语言模型直接承担安全决策。现有系统多将大语言模型置于决策中心，缺乏可验证的安全边界。
+- **核心创新**：核心创新是权责划分原则：学习模型负责提议与加速、符号规则引擎执行硬约束核查、经验证的物理模型负责确认与决策，形成神经符号分层架构。多智能体（导航、动作、规划）共享统一内部语言与训练工厂，并以闭环控制方式运行工作流。
+- **方法概览**：系统采用分层多智能体闭环控制架构，工作流由导航、动作和规划智能体协同执行，关键动作在执行前须经符号规则引擎校验，最终决策由经验证的物理模型确认。训练依托统一训练工厂实现大规模并行扩展，并在CFD、ParaView控制、空间态势感知和反应堆异常检测等场景验证。
+- **结果与结论**：CFD任务中未见几何收敛率从不足1%提升至74%（100次单次尝试），完成54个直至马赫6的实时算例，消融显示符号层贡献边界层捕捉率13个百分点；ParaView控制成功率从55%升至75%；空间交会风险评估中冻结自监督世界模型在五种方法中得分最高且种子方差低数倍，并迁移至反应堆异常检测；训练近线性扩展至1000以上节点并达8000节点。
+- **一句话 takeaway**：关键启示是：将学习模型与符号约束、验证物理分离权责，可以在不牺牲准确率的前提下获得更高的可信度和更低的运行方差。该模式满足任务关键领域的监管要求，并可推广到CFD自动化、空间态势感知和反应堆数字孪生等高风险场景。
 
-**摘要**：The ability to integrate new information and deduce its consequences is central to learning, understanding, and reasoning in large language models (LLMs). Whether information arrives during training or in-context, models must not only store local facts, but propagate their long-range implications globally. To explore information integration in LLMs, we introduce two complementary natural language benchmarks for large-scale evaluation of deductive reasoning as a function of inference depth. The first is a formal graph benchmark enabling controlled evaluation over a wide range of graph topologies and integration tasks; the second is a knowledge composition benchmark grounded in real-world knowledge graphs. We use these benchmarks to compare knowledge integration from information encoded in context versus information encoded in model weights during pretraining, evaluating a set of open models implicitly, without chain of thought. We find that accuracy decays sharply with increased composition length for both pretrained and in-context knowledge. Information presented in-context, however, substantially outperforms deduction over information encoded in weights. These results quantify a fundamental limitation of current models with direct implications for prompt-based control of agent behavior and for continual learning strategies, and they provide a foundation for developing training, prompting, and integration methods that support deeper reasoning.
+**中文摘要**：本论文提出GURU，一个面向任务关键型数字工程与运营的分层神经符号多智能体系统，其核心是权责划分：学习模型负责提议、排序和加速；符号规则引擎在执行每个关键动作前依据硬约束进行核查；经验证的物理模型负责确认与最终决策。GURU将工作流运行为一个闭环控制系统，导航、动作与规划智能体共享统一的通用内部语言和统一的训练工厂。在计算流体力学任务中，该系统将未见过的飞机几何上的收敛仿真成功率从不足1%提升至100次单次尝试中的74%；在三个设施上完成54个直至马赫6的实时算例；消融实验表明符号规则层贡献了边界层捕捉率13个百分点的提升。知识图谱检索与角色适配器将ParaView控制成功率从55%提高到75%。在空间态势感知领域，冻结的自监督世界模型配合经验证的传播算法在交会风险评估中优于包括全量微调语言模型在内的五种方法，且种子方差低数倍；该方案同样迁移到反应堆异常检测。论文还演示了针对2026年再入事件的雷达到规避碎片处理管道，系统可协调200架飞机的模拟机群。训练规模在近线性地扩展至超过1000个Aurora节点并扩展到8000节点。该方法进一步扩展至控制级微型反应堆数字孪生，其安全基础是经验证的物理模型而非学习模型。
 
-## 4. CAD-WAM: Anticipating Geometry for Text-to-CAD Generation
+## 3. ImplicitHop：评估跨上下文与记忆的知识整合
 
+- **英文标题**：ImplicitHop: Evaluating knowledge integration across context and memory
+- **作者**：Alexander Detkov、Dashiel Karish、Matthew Oleynikov、Matt Thomson
+- **分类**：cs.AI
+- **发布时间**：2026-10-30 02:44:51 UTC
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.41169v1) · [PDF](https://arxiv.org/pdf/2610.41169v1)
+- **匹配方向**：LLM + 知识图谱、LLM + Agent
+
+### 快速理解
+
+- **研究背景**：大语言模型需要在训练或推理时整合新事实，并传播其长程后果，而不仅是记忆局部信息。现有评估缺少能系统控制推理深度、并比较上下文知识与权重知识整合能力的基准。
+- **核心创新**：提出ImplicitHop两个互补自然语言基准：可控图拓扑与整合任务的形式化图基准，以及 grounded 于真实世界知识图谱的知识组合基准。该设计将演绎推理评估为推理深度的函数，并区分上下文内知识与预训练权重知识的整合。
+- **方法概览**：在广泛图拓扑和知识图谱任务上构造组合式自然语言推理问题，对开放模型进行无思维链的隐式评估。比较同一模型利用上下文新信息与利用预训练权重信息进行多跳演绎的准确率随组合长度变化的趋势。
+- **结果与结论**：随着组合长度增加，预训练知识与上下文知识的推理准确率都急剧下降；在相同演绎需求下，上下文呈现的信息显著优于编码在模型权重中的信息。
+- **一句话 takeaway**：当前模型在全局传播事实的长程含义上存在根本限制，且上下文学习通常比从权重中回忆并重组知识更可靠。该结论对用提示约束智能体行为、设计持续学习方案以及改进深层推理的训练与整合方法具有直接意义。
+
+**中文摘要**：整合新信息并推断其后果的能力是大语言模型学习、理解与推理的核心。无论信息来自训练还是上下文，模型都必须不仅存储局部事实，还要将其长程影响全局传播。为研究大语言模型中的信息整合，我们提出两个互补的自然语言基准，用于大规模评估演绎推理能力随推理深度变化的表现。第一个是形式化图基准，可在多种图拓扑与整合任务上进行受控评估；第二个是基于真实世界知识图谱的知识组合基准。我们利用这些基准比较来自上下文的信息与预训练期间编码进模型权重的信息的知识整合差异，并在不使用思维链的情况下隐式评估一组开放模型。我们发现，无论是预训练知识还是上下文知识，准确率都随组合长度增加而急剧下降；但上下文呈现的信息在基于权重信息的演绎上显著更优。这些结果量化了当前模型的一个基本限制，对基于提示的智能体行为控制与持续学习策略具有直接启示，并为发展支持更深推理的训练、提示与整合方法奠定基础。
+
+## 4. CAD-WAM：面向文本到CAD生成的几何状态预测
+
+- **英文标题**：CAD-WAM: Anticipating Geometry for Text-to-CAD Generation
 - **作者**：Zhengyang Li、Weijie Zheng、Yuxin Cui、Sijie Wang、Wenjie Feng、Qiyu Kang
 - **分类**：cs.CV, cs.GR
 - **发布时间**：2026-10-29 03:52:21 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.39306v1) · [PDF](https://arxiv.org/pdf/2610.39306v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.39306v1) · [PDF](https://arxiv.org/pdf/2610.39306v1)
 - **匹配方向**：LLM + CAD、LLM + CAD 三维模型
 
 ### 快速理解
 
-- **研究背景**：从文本生成可编辑 CAD 模型需要依据当前已构建几何选择正确操作，错误操作会损害后续步骤，因此可靠的多步生成很困难。现有基于大语言模型的方法多学习预测命令，缺乏对命令应产生的几何状态进行显式监督。
-- **核心创新**：CAD-WAM 受世界-动作模型启发，将几何条件动作生成与下一状态预测耦合。它将完整建模操作定义为 CAD 领域专用语言中的动作，并用预训练变分自编码器把中间实体表面点云编码为紧凑潜状态；同一 LLM 主干生成下一动作，同时通过辅助头预测下一状态以提供几何监督。
-- **方法概览**：研究基于 DeepCAD 数据集中的参数化 CAD 模型构造逐步训练轨迹，并为每条轨迹配对专家级文本描述。推理时，每个生成动作由 CAD 内核执行，得到的新实体再被编码，用于决定下一步操作。
-- **结果与结论**：在 DeepCAD 测试集上，CAD-WAM 在几何精度和输出有效性方面优于任务特定基线，且在需要更多操作的模型上提升更大；相比使用相同 DSL 提示的通用 LLM，其生成几何更准确。消融实验表明，加入下一状态监督使平均 Chamfer 距离相比仅预测动作的同等模型相对降低 13.2%。
-- **一句话 takeaway**：显式预测和约束中间几何状态能提升文本到 CAD 多步生成的可靠性，尤其适合长操作序列和可编辑 CAD 场景。该方法证明了“动作预测 + 世界状态建模”对结构化几何生成的价值，且代码已开源。
+- **研究背景**：文本到CAD的多步生成要求每一步操作都能正确改变当前几何，错误操作会累积并破坏后续建模。已有大语言模型方法多把重点放在命令序列预测上，缺少对操作应产生几何结果的显式约束。
+- **核心创新**：CAD-WAM借鉴世界-动作模型思想，将“根据当前几何选择动作”与“预测动作后的下一几何状态”联合建模。它把完整建模操作组织为CAD DSL动作，并用预训练VAE把中间实体表面点云压缩为隐状态，使语言模型获得显式几何条件与几何监督信号。
+- **方法概览**：作者从DeepCAD参数化模型构建逐步训练轨迹并配套专家文本描述；用预训练VAE编码中间实体表面点云得到紧凑状态。LLM主干以目标文本和当前几何隐状态为条件生成下一动作，同时通过辅助头预测下一状态；推理时由CAD内核执行动作并将新实体重新编码，闭环推进多步生成。
+- **结果与结论**：摘要报告了明确结果：在DeepCAD测试集上，CAD-WAM在几何精度和输出有效性上超过任务专用基线，且在操作数更多的模型上增益更明显；其几何也比使用相同DSL提示的通用LLM更准确。消融显示，下一状态监督相较仅动作预测训练使平均Chamfer距离相对降低13.2%。
+- **一句话 takeaway**：核心启示是文本到CAD不能只看命令是否合理，还要让模型预判并约束命令带来的几何后果。将下一状态几何监督引入动作生成，可提高多步建模的一致性、有效性和复杂模型上的鲁棒性。
 
-**摘要**：Generating editable computer-aided design (CAD) models from text requires selecting operations that produce the intended changes to the geometry constructed so far. An incorrect operation can compromise subsequent steps, making reliable multi-step generation challenging. Existing methods based on large language models (LLMs) primarily learn to predict commands, without explicit supervision of the geometric states those commands should produce. Inspired by world-action models, we introduce CAD-WAM, which couples geometry-conditioned action generation with next-state prediction. We define complete modeling operations as actions in a CAD domain-specific language (DSL) and encode surface point clouds of intermediate solids into compact latent states using a pretrained variational autoencoder. An LLM backbone generates the next action from the target description and current geometric state, while an auxiliary head on the same backbone predicts the next state to provide geometric supervision during training. We construct step-wise training trajectories from parametric CAD models in the DeepCAD dataset, pairing each trajectory with an expert-level textual description. At inference, each generated action is executed by a CAD kernel, and the resulting solid is re-encoded to inform the next decision. On the DeepCAD test set, CAD-WAM outperforms the task-specific baselines in geometric accuracy and output validity, with larger gains on models requiring more operations, and produces more accurate geometry than general-purpose LLMs prompted with the same DSL. Ablations further show that next-state supervision reduces mean Chamfer distance by 13.2\% relative to an otherwise identical model trained only to predict actions. Code is available at https://github.com/Lzy-1037/CAD-WAM.
+**中文摘要**：从文本生成可编辑CAD模型需要选择与当前已构建几何相匹配的操作，一旦某步操作错误，后续步骤容易被破坏，因此可靠的多步生成很有挑战。现有基于大语言模型的方法主要学习预测命令，缺少对命令应产生的几何状态的显式监督。受世界-动作模型启发，本文提出CAD-WAM，将几何条件化的动作生成与下一状态预测耦合起来。作者把完整的建模操作定义为CAD领域特定语言中的动作，并用预训练变分自编码器把中间实体的表面点云编码为紧凑隐状态；主干大语言模型根据目标描述和当前几何状态生成下一动作，同时同一主干上的辅助头预测下一状态，以在训练时提供几何监督。训练数据由DeepCAD参数化CAD模型构造逐步轨迹，并为每条轨迹配备专家级文本描述。推理时，每个生成动作由CAD内核执行，得到的新实体再被编码以指导下一步决策。在DeepCAD测试集上，CAD-WAM在几何精度和输出有效性上优于任务专用基线，在需要更多操作的模型上提升更大，并且比使用相同DSL提示的通用大语言模型产生更准确的几何；消融表明，相比仅训练动作预测的相同模型，下一状态监督使平均Chamfer距离相对降低13.2%。代码见https://github.com/Lzy-1037/CAD-WAM。
 
-## 5. Beyond LLM Wrappers: Context Engineering and the Three-Engine Architecture for Reliable Financial AI
+## 5. 超越LLM封装：面向可靠金融AI的上下文工程与三引擎架构
 
+- **英文标题**：Beyond LLM Wrappers: Context Engineering and the Three-Engine Architecture for Reliable Financial AI
 - **作者**：Pradeep Kumar GS、Ravi Tanniru
 - **分类**：cs.AI
 - **发布时间**：2026-10-29 02:50:00 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.39230v1) · [PDF](https://arxiv.org/pdf/2610.39230v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.39230v1) · [PDF](https://arxiv.org/pdf/2610.39230v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：金融 AI 系统需要处理涉及付款、收款、现金流和合规等承载决策的问题，同时保证数值准确、可追溯和可审计。LLM 虽然能实现自然语言交互，但无法独立保证可复现的计算或基于证据的推荐。
-- **核心创新**：提出一种生产级三引擎架构：金融知识图谱（承载企业关系、时间上下文与溯源信息）、确定性优化引擎（负责金融计算与决策）、多智能体 LLM 层（负责意图理解、任务编排、解释与声明验证）；并提出“上下文工程”协调层，从 ERP 系统、工具和租户中筛选、排序、组合和验证查询相关的上下文。
-- **方法概览**：基于约 11 个月内 15 个部署的观察，对比单智能体管道与图支持的多智能体验证方案，考察幻觉率、ERP 数据质量、租户特定模式等实现挑战，以及可复用映射、图谱模板和验证策略对部署时间的影响。
-- **结果与结论**：单智能体管道的幻觉率约为 7-9%（不同查询类型在 5-10% 之间），包括虚构发票和无依据的金融声明；图支持的多智能体验证将观察到的幻觉率降至 1% 以下，但这些发现是观察性的而非因果性的。ERP 数据质量和租户特定模式仍是主要实施挑战；可复用资产与部署时间从约六周缩短到两周相吻合。
-- **一句话 takeaway**：金融上下文工程超越了以文本为中心的检索增强生成，需要结构化关系、时间有效性、精确数值证据、访问控制以及与源记录和求解器输出的验证。论文同时指出了评估、可复现性、隐私、上下文质量和跨租户泛化等方面的研究挑战。
+- **研究背景**：金融AI需要处理付款、收款、现金流和合规等高风险问题，因此必须同时满足数值准确、决策可追踪和结果可审计的要求。仅依赖大语言模型容易产生虚构发票、无依据论断和不可复现计算，难以满足生产级金融场景的要求。
+- **核心创新**：论文提出将金融知识图谱、确定性优化引擎和多智能体LLM层结合的三引擎架构，并以上下文工程统一选择、排序、组合和验证查询所需信息。该设计超越文本检索增强生成，显式纳入结构化关系、时间有效性、精确数值证据、访问控制和来源验证。
+- **方法概览**：作者在约11个月内观察和分析了15次生产部署，对比单智能体LLM管道与由知识图谱支持的多智能体验证流程。研究还考察了ERP集成、租户模式适配，以及可复用映射、图谱模板和验证策略对实施过程的影响。
+- **结果与结论**：单智能体管道的观察幻觉率约为7%—9%，不同查询类型为5%—10%，包括虚构发票和无依据金融论断；图谱支持的多智能体验证将观察到的幻觉率降至1%以下。可复用资产与部署周期由约6周缩短至2周同时出现，但幻觉下降及效率提升均为观察性关联，不能证明因果关系；ERP数据质量和租户特定模式仍是主要挑战。
+- **一句话 takeaway**：可靠的金融AI不能只是把LLM封装在应用外层，而应通过知识图谱、确定性求解器和多智能体验证协同工作，将答案约束在可审计证据与精确计算之上。未来研究和落地需要重点解决评估、可复现性、隐私、上下文质量和跨租户泛化问题。
 
-**摘要**：Financial AI systems must support decision-bearing questions involving payments, collections, cash flow, and compliance while ensuring numerical accuracy, traceability, and auditability. Large language models (LLMs) enable natural language interaction but cannot independently guarantee reproducible calculations or evidence-grounded recommendations. We present a production-grounded architecture integrating three components: a financial knowledge graph for enterprise relationships, temporal context, and provenance; a deterministic optimization engine for financial calculations and decisions; and a multi-agent LLM layer for intent interpretation, task orchestration, explanation, and claim validation. A coordination layer, termed context engineering, selects, ranks, composes, and validates query-specific context across ERP systems, tools, and tenants. Based on observations from 15 deployments over approximately 11 months, single-agent pipelines exhibited hallucination rates of about 7-9% (5-10% across query types), including invented invoices and unsupported financial claims. Graph-backed multi-agent validation reduced observed rates to below 1%, although these findings are observational rather than causal. ERP data quality and tenant-specific schemas remained major implementation challenges. Reusable mappings, graph templates, and validation policies coincided with a reduction in deployment time from roughly six to two weeks. We argue that financial context engineering extends beyond text-centric retrieval-augmented generation by requiring structured relationships, temporal validity, exact numerical evidence, access controls, and validation against source records and solver outputs. We outline research challenges in evaluation, reproducibility, privacy, context quality, and cross-tenant generalization.
+**中文摘要**：金融AI系统必须回答涉及付款、收款、现金流和合规等承担决策后果的问题，并确保数值准确性、可追溯性和可审计性。大语言模型虽然支持自然语言交互，但无法独立保证可复现的计算结果或有证据支撑的推荐。本文提出一种面向生产环境的架构，集成三个组件：用于表示企业关系、时间上下文和数据来源的金融知识图谱；用于金融计算和决策的确定性优化引擎；以及负责意图理解、任务编排、解释和论断验证的多智能体大语言模型层。被称为上下文工程的协调层会从ERP系统、工具和租户中选择、排序、组合并验证特定查询所需的上下文。基于约11个月内15次部署的观察，单智能体管道的幻觉率约为7%—9%（不同查询类型为5%—10%），包括虚构发票和缺乏依据的金融论断。由图谱支持的多智能体验证将观察到的幻觉率降至1%以下，但这些发现属于观察性结果，而非因果结论。ERP数据质量和租户特定模式仍是主要实施挑战。可复用的映射、图谱模板和验证策略与部署周期从约6周缩短至2周同时出现。作者认为，金融上下文工程超越了以文本为中心的检索增强生成，因为它还要求结构化关系、时间有效性、精确数值证据、访问控制，以及与源记录和求解器输出进行验证。文中还概述了评估、可复现性、隐私、上下文质量和跨租户泛化方面的研究挑战。
 
-## 6. CoSTA: Co-Evolving Self-Play Timeline Agents for Complex Temporal Knowledge Graph Question Answering
+## 6. CoSTA：面向复杂时间知识图谱问答的共演化自博弈时间线智能体
 
+- **英文标题**：CoSTA: Co-Evolving Self-Play Timeline Agents for Complex Temporal Knowledge Graph Question Answering
 - **作者**：Haikun Liu、Zhichao Yan、Shaoru Guo、Jiawei Gu、Victor Gutierrez Basulto、Jiapu Wang、Ru Li
 - **分类**：cs.CL
 - **发布时间**：2026-10-28 08:26:14 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.38450v1) · [PDF](https://arxiv.org/pdf/2610.38450v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.38450v1) · [PDF](https://arxiv.org/pdf/2610.38450v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：复杂时间知识图谱问答需要在多个事实间利用时间戳或有效区间进行约束与联合推理。现有单智能体方法容易在同一上下文中混杂不同事件历史，造成证据交错并被干扰项误导。
-- **核心创新**：CoSTA 将事实组织为可导航时间线，把调查任务委派给 worker，并由 coordinator 汇总带原始时间戳的观察结果，从而分离事件级证据。该方法通过角色条件蒸馏初始化共享策略，并使用最终答案奖励进行共演自博弈来联合优化协调者与工作者。
-- **方法概览**：CoSTA 以自博弈方式让 coordinator 负责问题分解与证据综合，worker 在各自时间线上下文中执行子任务调查。训练采用最终答案奖励驱动，使问题分解、子任务调查与证据合成形成相互适应的闭环。
-- **结果与结论**：摘要未提供具体数值指标，但说明 CoSTA 在三个基准上取得总体最先进性能，在复杂多事实问题上提升尤其明显，且紧凑变体优于被评估的闭源 LLM 智能体。
-- **一句话 takeaway**：该工作表明把复杂时序推理拆分到多个独立时间线上下文，再学习协调与合成，可缓解证据交错和干扰项问题。其价值在于以协同自博弈改进多事实时序问答，但摘要未给出可复核的定量结果或消融细节。
+- **研究背景**：复杂 TKGQA 的关键难点在于时间约束与多区间联合决定答案，单智能体单一上下文容易混杂不同事件证据并被干扰项带偏。
+- **核心创新**：CoSTA 将事实组织为可导航时间线，用 worker 分头调查、coordinator 综合带时间戳观测，并以角色条件蒸馏初始化共享策略。其核心是通过最终答案奖励对两类角色做共演化自博弈联合优化，以学习协作。
+- **方法概览**：方法将问题分解、子任务调查与证据综合组织到多智能体流程中：worker 在时间线内检索与验证事实，coordinator 汇总原始时间戳观测形成答案。训练上先用角色条件蒸馏获得共享策略，再让两个角色在自博弈中共同进化。
+- **结果与结论**：摘要报告 CoSTA 在三个基准上总体达到 state-of-the-art，并在复杂多事实问题上增益显著；紧凑变体也超过所评测的闭源 LLM 智能体，但未给出具体数值指标。
+- **一句话 takeaway**：该工作说明把复杂时间问题拆成事件特定时间线调查，并由协调器显式综合带时间证据，比单上下文推理更稳健。其关键启示是：多智能体 TKGQA 的协作不能手工预设，而应以最终答案为信号联合优化分解、调查与综合策略。
 
-**摘要**：Complex Temporal Knowledge Graph Question Answering (TKGQA) involves more than retrieving facts: the timestamp or validity interval of one fact can constrain the search for another, while multiple intervals may jointly determine the answer. Existing single-agent TKGQA methods typically investigate these facts within a single reasoning context, where evidence from different event histories can become interleaved and distractors can misdirect subsequent retrieval. Distributing investigations across agents can separate event-specific evidence into distinct contexts, but effective collaboration must still be learned because question decomposition, subtask investigation, and evidence synthesis are interdependent. To address these limitations, we propose \textbf{Co}-Evolving \textbf{S}elf-Play \textbf{T}imeline \textbf{A}gents (CoSTA), which organizes facts into navigable timelines, delegates investigations to workers, and uses a coordinator to synthesize their original timestamped observations. CoSTA initializes a shared policy through role-conditioned distillation and jointly optimizes both roles through co-evolving self-play with final-answer rewards. Across three benchmarks, CoSTA achieves state-of-the-art overall performance, with particularly strong gains on complex multi-fact questions, while its compact variants outperform the evaluated closed-source LLM agents.
+**中文摘要**：复杂时间知识图谱问答（TKGQA）不只是检索事实：一个事实的时间戳或有效区间可能约束另一个事实的搜索，且多个区间可能共同决定答案。现有单智能体方法通常在单一推理上下文中考察这些事实，容易使不同事件历史的证据相互交织，并被干扰信息误导后续检索。将调查任务分配到多个智能体可把事件特定证据分到不同上下文，但问题分解、子任务调查与证据综合相互依赖，因此仍须学习有效协作。为此，本文提出共演化自博弈时间线智能体 CoSTA：将事实组织为可导航时间线，把调查委托给 worker，并由 coordinator 综合其原始的带时间戳观测。CoSTA 通过角色条件蒸馏初始化共享策略，并使用最终答案奖励对两种角色进行共演化自博弈联合优化。在三个基准上，CoSTA 总体达到最先进性能，在复杂多事实问题上提升尤为明显；其紧凑变体也优于所评测的闭源 LLM 智能体。
 
-## 7. What Does an Ontology Catch? Curated, LLM-Generated and Data-Derived Ontologies as Checkers of LLM Agents over Knowledge Graphs
+## 7. 本体到底能捕捉什么？人工策划、LLM生成与数据推导的本体作为知识图谱上LLM智能体检查器的比较研究
 
+- **英文标题**：What Does an Ontology Catch? Curated, LLM-Generated and Data-Derived Ontologies as Checkers of LLM Agents over Knowledge Graphs
 - **作者**：Michal Orzechowski、Rund Tawfiq、Tomasz Kosciolek
 - **分类**：cs.AI, cs.DB
 - **发布时间**：2026-10-27 18:27:45 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.37809v1) · [PDF](https://arxiv.org/pdf/2610.37809v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.37809v1) · [PDF](https://arxiv.org/pdf/2610.37809v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：LLM agents that answer questions over Web knowledge graphs are increasingly wrapped in checks derived from the graph's ontology, on the assumption that a formal schema makes a reliable judge. Yet a checker can be wrong as well: it can miss errors, and it can flag correct answers and push the agent into "fixing" them. Whether a curated ontology is worth its cost as such a judge, and how it compares with an ontology an LLM writes or a schema mined from the data, is unknown. We make the checker itself the object of study. Across curated, LLM-generated and data-derived ontologies, used as prompt context, as a checker, or both, and across open-weight and proprietary agents on public graphs and a private graph of nearly $10^{9}$ triples, we account for what ontology-derived checks catch and what they wrongly flag. We show how each source trades caught errors against false alarms, how a curated schema used as published can contradict its own data, which errors structural checks miss, and whether combining sources or giving the agent the checker's specific feedback pays off. On UniProt, the curated ontology flags more correct answers than either an ontology derived from the data or one an LLM derives from a summary of the data with masked identifiers. On real agent answers, its flags are only marginally more precise than random flags.
+### 快速理解
 
-## 8. Clearing the FoG: Training KG Agents to Retrieve the Evidence Behind Their Answers
+- **研究背景**：LLM智能体在知识图谱上回答问题时，越来越多地依赖图的本体作为检查机制，人们默认形式化模式是可靠的评判者，但检查器本身也会漏判或误报，甚至可能诱导智能体篡改正确答案。
+- **核心创新**：本文将检查器本身作为研究对象，首次系统比较人工策划、LLM生成和数据推导三类本体作为提示上下文、检查器或二者兼用的效果，并覆盖开源与闭源智能体、公开图谱及近10亿三元组的私有图谱。
+- **方法概览**：在跨本体来源（人工策划、LLM生成、数据推导）与跨用途（提示上下文、检查器、两者结合）的设置下评估本体派生检查，对开源和闭源LLM智能体在公开知识图谱和私有大规模图谱上的回答进行错误捕获与误报分析。
+- **结果与结论**：每种本体来源在捕获错误与误报之间存在不同的权衡；人工策划模式按原样使用时可能与其自身数据矛盾，且结构性检查会漏掉某些错误；在UniProt上，人工策划本体误标的正确答案多于数据推导本体和LLM从掩码标识符摘要推导的本体，其标记在真实智能体回答上的精确率仅略高于随机标记。
+- **一句话 takeaway**：形式化本体作为LLM智能体检查器并不可靠：人工策划的本体成本高昂却可能自相矛盾且误报严重，其检查精确率接近随机水平，因此不应盲目信任本体派生检查，需要谨慎权衡本体来源、成本与误报风险。
 
+**中文摘要**：越来越多面向Web知识图谱回答问题的LLM智能体被包裹在源自图本体的检查机制之中，其假设是形式化模式可以成为可靠的评判者。然而检查器本身也可能出错：它可能漏掉错误，也可能把正确答案标记为错误，从而迫使智能体去“修正”本来正确的答案。人工策划的本体作为评判者是否物有所值？它与LLM生成的本体、或从数据中挖掘出的模式相比表现如何？目前尚无定论。本文将检查器本身作为研究对象，跨越人工策划、LLM生成和数据推导三类本体，分别将其用作提示上下文、用作检查器或两者兼用，并在开源与闭源智能体、公开知识图谱以及一个包含近10亿三元组的私有知识图谱上进行系统评估，量化本体派生检查能捕捉到哪些错误、又错误地标记了哪些正确内容。研究揭示了每种来源如何在“捕获错误”与“误报”之间进行权衡，展示了按原样使用的人工策划模式如何与其自身数据相矛盾，指出了哪些错误是结构性检查无法发现的，并检验了组合多种来源或为智能体提供检查器具体反馈是否带来收益。在UniProt上，人工策划的本体被标记的正确答案数量多于数据推导的本体，也多于LLM从掩码标识符的数据摘要中推导出的本体；在真实智能体回答上，其标记的精确率仅略高于随机标记。
+
+## 8. 清除FoG：训练知识图谱智能体检索答案背后的证据
+
+- **英文标题**：Clearing the FoG: Training KG Agents to Retrieve the Evidence Behind Their Answers
 - **作者**：Zongyuan Sun、Shuai Zhao、Yingjun Du、Ke Shu、Ziyue Zhu、Haoran Luo
 - **分类**：cs.AI
 - **发布时间**：2026-10-27 15:20:37 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.37405v1) · [PDF](https://arxiv.org/pdf/2610.37405v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.37405v1) · [PDF](https://arxiv.org/pdf/2610.37405v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：LLM智能体使用知识图谱（KG）时有双重角色：既作为答案来源补充事实，也作为证据来源提供可追溯的支持三元组。但现有KG智能体仅把KG当作答案来源：训练数据只有答案没有证据，训练奖励只检查答案而不检查检索到的证据，导致智能体常常在不检索支持三元组的情况下就给出正确答案。
-- **核心创新**：作者提出FoG框架，训练KG智能体检索答案背后的证据，包含三个组件：证据接地合成（递归地将显式实体隐藏在可验证的子问题之后，使每个问题天然携带支持三元组）、KG交互智能体（记录KG返回的三元组），以及证据覆盖过程奖励ECPR（将每个支持三元组归功于首次检索到它的回合）。
-- **方法概览**：FoG通过证据接地合成为训练数据构造带支持三元组的问题，智能体在多轮交互中检索并记录KG三元组，ECPR按覆盖的支持证据给予过程奖励，从而激励智能体主动检索证据而非仅猜测答案。
-- **结果与结论**：在三个KGQA基准上的实验表明，FoG使3B–4B规模的开源智能体在答案准确率和证据覆盖率上显著超越规模大得多的基线模型，并实现了零样本跨KG迁移。
-- **一句话 takeaway**：正确回答不等于有据可依；通过在训练数据和过程奖励中显式引入证据监督，可以让小型KG智能体在准确性和可审计性上同时超越更大模型，为构建可追溯、可信的KG问答智能体提供了有效范式。
+- **研究背景**：LLM 可能给出正确答案，但正确性不等于可审计性，答案需要 KG 三元组作为可追溯证据。现有 KG 智能体训练和评测通常只关注最终答案，忽视了支撑证据是否被真实检索，导致“答对但没证据”的问题。
+- **核心创新**：FoG 将 KG 从单纯答案来源扩展为证据来源，通过构造带证据的训练样本和证据覆盖奖励显式约束检索行为。其核心是证据落地合成、可记录 KG 交互轨迹的 agent，以及 ECPR 过程奖励。
+- **方法概览**：证据落地合成递归隐藏显式实体，把问题转化为可由 KG 验证的子问题链，使每个训练问题天然携带支撑三元组。KG 交互 agent 在执行中记录返回三元组，ECPR 将每个支撑三元组分配给首次检索到它的对话轮次以形成细粒度过程监督。
+- **结果与结论**：在三个 KGQA 基准上，FoG 让 3B–4B 开源智能体在答案准确率和证据覆盖率上超过显著更大的基线，并表现出零样本跨 KG 迁移能力。
+- **一句话 takeaway**：关键启示是：KG 智能体不仅要“会答”，还要能交出支撑证据；把证据合成进数据、把证据覆盖写进奖励，可同时提升正确性与可审计性。该方法也说明较小开源模型经过证据导向训练，可能在 KGQA 上挑战更大模型。
 
-**摘要**：Large language models (LLMs) can answer many factual questions correctly, but a correct answer is not necessarily a supported one. For an LLM agent, a knowledge graph (KG) plays two roles: as a source of answers, it supplies facts that the model lacks; as a source of evidence, it supplies the supporting triples that make an answer traceable and auditable. However, existing KG agents treat the KG only as a source of answers: their training data carries answers but not evidence, and their training rewards check the answer but not the retrieved evidence, so agents often answer correctly without retrieving the supporting triples. We propose FoG, a framework that trains KG agents to retrieve the evidence behind their answers. FoG consists of evidence-grounded synthesis, a KG interaction agent, and an evidence-coverage process reward (ECPR): the synthesis recursively hides explicit entities behind verifiable sub-questions, so that every question carries its supporting triples by construction; the agent records the triples returned by the KG; and ECPR credits each supporting triple to the turn that first retrieves it. Experiments on three KGQA benchmarks demonstrate that FoG enables 3B--4B open-source agents to outperform substantially larger baselines in answer accuracy and evidence coverage, with zero-shot cross-KG transfer.
+**中文摘要**：大型语言模型（LLM）能正确回答许多事实性问题，但答案正确并不等于答案有证据支撑。对 LLM 智能体而言，知识图谱（KG）具有双重角色：作为答案来源，它提供模型缺少的事实；作为证据来源，它提供使答案可追溯、可审计的支撑三元组。然而，现有 KG 智能体只把 KG 当作答案来源：训练数据带有答案却没有证据，训练奖励只检查答案而不检查检索到的证据，因此智能体常常在检索不到支撑三元组的情况下仍给出正确答案。本文提出 FoG，一个训练 KG 智能体检索答案背后证据的框架。FoG 包含证据落地合成、KG 交互智能体和证据覆盖过程奖励（ECPR）：合成过程递归地把显式实体隐藏在可验证子问题之后，使每个问题在构造上就携带其支撑三元组；智能体记录 KG 返回的三元组；ECPR 将每个支撑三元组归功于首次检索到它的那一轮。在三个 KGQA 基准上的实验表明，FoG 使 3B–4B 开源智能体在答案准确率和证据覆盖率上显著超过规模更大的基线，并实现零样本跨 KG 迁移。
 
-## 9. Grounding LLM Agents in Business Processes: Process-Aware Knowledge Graphs for Reliable Multi-Step Service Invocation
+## 9. 将LLM智能体落地于业务流程：基于流程感知知识图谱的可靠多步服务调用
 
+- **英文标题**：Grounding LLM Agents in Business Processes: Process-Aware Knowledge Graphs for Reliable Multi-Step Service Invocation
 - **作者**：Saiful Khan、Afrah Farea
 - **分类**：cs.AI, cs.SE
 - **发布时间**：2026-10-27 13:45:29 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.37242v1) · [PDF](https://arxiv.org/pdf/2610.37242v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.37242v1) · [PDF](https://arxiv.org/pdf/2610.37242v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：大语言模型（LLM）智能体在调用企业API时，需要正确选择端点、遵循流程顺序、使用合法的负载键和预定义编码值，但现有检索增强的服务发现方法将各端点独立处理，忽略了流程与模式约束。
-- **核心创新**：该工作将OData元数据与BPMN参考流程整合到类型化属性图中，构建流程感知的知识图谱，以显式表达端点间的流程顺序和模式约束。
-- **方法概览**：采用混合检索器：先用稠密嵌入识别候选端点，再沿流程边检索后续端点，从而为LLM智能体提供类型化的上下文（包括合法键和编码值列表）。
-- **结果与结论**：在42个企业服务的流程链基准上，对于查询与下游实体词汇重叠度低的情形，Recall@3提升5.7个百分点（n=74），且在不同嵌入模型和截断值下增益一致；在无流程层的OpenAPI服务上无提升，说明收益源自流程结构。LLM智能体在81个多步查询上任务完成率达38.7%，远高于基于分块基线的10.3%；提供完整类型化上下文后，无效调用率降至3%（3/101次），且不再出现虚构编码值（仅提供编码表时仍有46%的写操作含无效键）。
-- **一句话 takeaway**：在检索阶段向智能体暴露流程顺序和模式约束，可显著提升其调用企业API的可靠性，尤其有助于处理低词汇重叠的多步服务编排场景。
+- **研究背景**：LLM智能体调用企业API时需要同时满足端点选择、流程顺序、负载键有效性和编码值合法性等多项约束，但现有检索增强的服务发现方法将各端点独立处理，忽略了流程与模式约束。
+- **核心创新**：将OData元数据与BPMN参考流程集成到统一的类型化属性知识图谱中，提出结合稠密嵌入检索与沿流程边扩展的混合检索器，使检索结果天然携带流程顺序和模式约束。
+- **方法概览**：在包含42个企业服务及流程链真值的数据集上评估检索性能，并在81个多步查询上评估LLM智能体，另通过探测实验对比不同上下文条件（编码列表、完整类型化上下文）对写入调用合法性的影响。
+- **结果与结论**：低词汇重叠查询的Recall@3提升5.7个百分点（n=74），且对不同嵌入模型和截断值均稳定；多步任务完成率达38.7%（基线为10.3%）；提供完整类型化上下文后无效调用降至3%，且完全消除虚构编码；无流程层的OpenAPI服务上无提升，证实收益来自流程结构。
+- **一句话 takeaway**：在检索阶段显式暴露业务流程与模式约束，能显著提升LLM智能体多步API调用的可靠性与任务完成率，尤其是在查询与目标服务词汇重叠度低的场景下。
 
-**摘要**：Large language model (LLM) agents that call enterprise APIs must select the correct endpoints, follow process order, use valid payload keys, and choose coded values from predefined lists. However, current retrieval-augmented service discovery treats endpoints independently and therefore misses process and schema constraints. We address this limitation by integrating Open Data Protocol (OData) metadata and Business Process Model and Notation (BPMN) reference processes in a typed property graph. A hybrid retriever identifies candidate endpoints using dense embeddings and follows process edges to retrieve subsequent endpoints. We evaluate the method on 42 enterprise services with process-chain ground truth. For queries with low lexical overlap between the query and downstream entities, it improves Recall@3 by 5.7 points (n=74), with consistent gains across embedding models and cut-offs. It matches dense retrieval on other queries and provides no improvement on OpenAPI services without a process layer, indicating that the gains arise from process structure. We also evaluate an LLM agent on 81 multi-step queries. It completes 38.7% of tasks, compared with 10.3% for a chunk-based baseline. In an elicitation probe, providing valid code lists eliminates invented codes but leaves invalid keys in 46% of write runs. Full typed context reduces invalid calls to 3% (3 of 101 runs), with no invented codes. These results show that exposing process and schema constraints during retrieval improves the reliability of agent-driven API calls.
+**中文摘要**：调用企业API的大语言模型（LLM）智能体必须选择正确的端点、遵循流程顺序、使用有效的负载键并从预定义列表中选择编码值。然而，当前的检索增强式服务发现将各端点独立处理，因而忽略了流程约束和模式约束。本文通过将OData元数据和BPMN参考流程集成到一个类型化属性图中来解决这一局限。混合检索器利用稠密嵌入识别候选端点，并沿流程边检索后续端点。作者在42个企业服务及流程链真值上评估了该方法。对于查询与下游实体之间词汇重叠度低的查询，Recall@3提升了5.7个百分点（n=74），并且在不同嵌入模型和截断值下均有稳定提升；在其他查询上该方法与稠密检索持平；对没有流程层的OpenAPI服务则没有改进，说明收益来源于流程结构。作者还在81个多步查询上评估了LLM智能体：任务完成率为38.7%，而基于文本块的基线仅为10.3%。在一项探测实验中，提供有效的编码列表可以消除虚构编码，但在46%的写入运行中仍存在无效键；提供完整的类型化上下文则将无效调用降至3%（101次运行中的3次），且不存在虚构编码。这些结果表明，在检索过程中暴露流程约束和模式约束可以提高智能体驱动API调用的可靠性。
 
-## 10. Evolve on Graph: Self-Evolving Knowledge Graph Reasoning without Question Annotations
+## 10. 图上自进化：无需问答标注的自进化知识图谱推理
 
+- **英文标题**：Evolve on Graph: Self-Evolving Knowledge Graph Reasoning without Question Annotations
 - **作者**：Zongyuan Sun、Shuai Zhao、Ke Shu、Ziyue Zhu、Shangyang Wu、Yuanlin Lin、Tao Wang、Shiyue Li、Yingjun Du、Anh Tuan Luu、Haoran Luo
 - **分类**：cs.AI
 - **发布时间**：2026-10-26 15:23:04 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.35598v1) · [PDF](https://arxiv.org/pdf/2610.35598v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.35598v1) · [PDF](https://arxiv.org/pdf/2610.35598v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Knowledge graphs (KGs) provide reliable external knowledge for multi-hop factual reasoning with large language models (LLMs), yet most KGs in real-world domains such as finance and industry lack question--answer (QA) annotations. Without such annotations, existing methods struggle to improve LLM graph reasoning: training-free agents cannot improve their exploration through interaction; reinforcement learning (RL) agents depend on QA data annotated by humans or synthesized by closed-source models; and training data is typically built offline, so its topology mix is fixed and cannot follow the agent's ability. We propose Evolve on Graph (EoG), a framework that lets an LLM self-evolve its graph reasoning without any QA annotations. Through Graph Self-Play, a single LLM alternates between a Proposer that poses questions and a Solver that answers them. To make questions verifiable, Symbolically Verifiable Topology Synthesis (SVTS) samples reasoning topologies on the KG and executes the corresponding first-order logic queries, yielding topology skeletons with correct and complete answer sets; guided by a skeleton, the Proposer explores the graph to pose a multi-hop question. To let task topologies follow the Solver, a Boundary-Aware Graph Curriculum rewards the Proposer by the Solver's score variance, keeping questions at the Solver's capability boundary so that complex topologies enter training as the Solver improves. On six benchmarks over Freebase, Wikidata, and an industrial KG, EoG consistently outperforms prompting-, retrieval-, and agent-based methods, showing that LLM graph reasoning can improve through self-play without QA annotations. Our code is available at https://github.com/Szy5/EoG
+### 快速理解
 
-## 11. PatentAgentBench: Benchmarking LLM Agents with Professional Patent Task Suites
+- **研究背景**：现实领域（如金融、工业）中的大多数知识图谱缺乏问答标注，导致免训练方法无法通过交互改进、强化学习方法依赖人工或闭源模型合成的标注数据，且离线构建的训练数据拓扑固定，无法跟随智能体能力演进。
+- **核心创新**：提出EoG框架，首次实现LLM在无任何QA标注下的自进化图推理；核心创新包括基于一阶逻辑执行生成可验证拓扑骨架的SVTS，以及依据Solver得分方差、将问题维持在能力边界的边界感知图谱课程。
+- **方法概览**：通过图自博弈让单一LLM交替扮演出题的Proposer和答题的Solver；SVTS在KG上采样推理拓扑并执行对应一阶逻辑查询以产出带完整正确答案集的拓扑骨架，引导Proposer提出可验证的多跳问题；课程机制按Solver得分方差奖励Proposer，使复杂拓扑随Solver能力提升逐步加入训练。
+- **结果与结论**：在Freebase、Wikidata和一个工业知识图谱上的六个基准测试中，EoG一致优于基于提示、检索和智能体的方法，证明LLM图推理可通过无QA标注的自博弈得到提升。
+- **一句话 takeaway**：无需人工标注即可让LLM自我进化知识图谱推理能力，关键在于用符号逻辑生成可验证的自博弈问题，并以能力边界驱动的课程动态调控训练拓扑难度。
 
+**中文摘要**：知识图谱（KG）为大语言模型（LLM）的多跳事实推理提供了可靠的外部知识，但金融、工业等现实领域中的大多数知识图谱缺乏问答（QA）标注。没有此类标注时，现有方法难以提升LLM的图推理能力：免训练智能体无法通过交互改进其探索；强化学习（RL）智能体依赖人工标注或由闭源模型合成的QA数据；且训练数据通常离线构建，其拓扑组合固定，无法跟随智能体能力提升。本文提出Evolve on Graph（EoG）框架，使LLM能够在没有任何QA标注的情况下自我进化其图推理能力。通过图自博弈（Graph Self-Play），单个LLM在提出问题的Proposer和回答问题的Solver之间交替扮演角色。为使问题可验证，符号可验证拓扑合成（SVTS）在KG上采样推理拓扑并执行相应的一阶逻辑查询，生成具有正确完整答案集的拓扑骨架；在骨架引导下，Proposer探索图谱并提出多跳问题。为使任务拓扑跟随Solver，边界感知图谱课程（Boundary-Aware Graph Curriculum）根据Solver的得分方差奖励Proposer，使问题始终保持在Solver的能力边界上，从而让复杂拓扑随Solver进步逐步进入训练。在Freebase、Wikidata和一个工业知识图谱上的六个基准测试中，EoG一致优于基于提示、检索和智能体的方法，表明LLM的图推理能力可以在没有QA标注的情况下通过自博弈得到提升。代码已开源。
+
+## 11. PatentAgentBench：基于专业专利任务套件对大语言模型智能体进行基准评测
+
+- **英文标题**：PatentAgentBench: Benchmarking LLM Agents with Professional Patent Task Suites
 - **作者**：Yijie Hu、Wei Li、Junjie Zhou、Zhiqi Jiang、Yi Jin、Licong Xu、Xinkai Sun、Kai Duan、Lisha Zhang
 - **分类**：cs.AI
 - **发布时间**：2026-10-26 08:44:25 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.35031v1) · [PDF](https://arxiv.org/pdf/2610.35031v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.35031v1) · [PDF](https://arxiv.org/pdf/2610.35031v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：专利实践同时涉及技术、法律与语言工作，对技术创新关键但复杂；LLM 与 agentic 系统是否能可靠完成专利工作仍存疑。现有专利基准任务覆盖有限，并常通过提供参考材料或候选文档来简化证据获取。
-- **核心创新**：PatentAgentBench 包含 510 个实例和八个任务套件，覆盖新颖性检索、FTO、外观设计 FTO、无效检索、权利要求对照表、专利撰写、审查意见答复与专利翻译。其数据来自真实专利记录与专业材料，结合任务特定指标、专家评审标注与评分 rubric，且检索类任务不提供候选池，要求 agent 自行搜索并比较专利集合。
-- **方法概览**：作者在七个 LLM 与四种 agent harness 上开展评测，检索类任务考察无候选池下的专利搜索与比对，撰写与答复任务则基于技术交底书或审查意见评估产出质量。摘要未提供明确实验结果，仅给出定性结论：当前系统在新颖性识别、风险评估以及理解专利从业者意图方面仍表现困难。
-- **结果与结论**：摘要未提供明确实验结果，未报告量化分数、排名或显著性差异；只说明七个 LLM 在四类 agent 框架下仍难以可靠完成关键专利工作流。
-- **一句话 takeaway**：该基准更接近真实专利业务流程，尤其强调自主证据获取而非给定候选材料。其价值在于暴露 agent 在法律—技术交叉任务中的真实短板，可作为后续评测、训练与可靠性改进的基础。
+- **研究背景**：专利工作融合技术、法律与语言多重挑战，而现有基准仅覆盖有限任务，并通过提供参考资料或候选文档简化了证据获取，无法真实反映专利工作的难度。
+- **核心创新**：构建了包含510个实例、涵盖八类专业专利任务套件（新颖性检索、FTO检索、外观设计FTO、无效检索、权利要求对照表、专利撰写、审查意见答复、专利翻译）的基准，采用任务特定指标与专家审核标注相结合的评估方式。
+- **方法概览**：基准基于真实专利记录与专业材料整理而成，检索类任务不提供候选文档池，要求智能体自主搜索和比对专利集合；撰写与答复类任务基于技术交底书和审查意见通知书评估输出质量，并在七个LLM与四类智能体框架上进行评测。
+- **结果与结论**：评测发现当前LLM智能体在识别新颖性、评估风险以及理解专利代理人意图方面仍存在明显困难，尚不能可靠地完成完整专利工作流程。
+- **一句话 takeaway**：PatentAgentBench为评估LLM智能体在真实专业专利任务中的能力提供了更严格、更贴近实践的标准，揭示了当前系统在专业推理与意图理解上的短板。
 
-**摘要**：Patent practice lies at the intersection of technical, legal, and linguistic work, making it challenging yet crucial to technological innovation. Recently, rapid advances in large language models (LLMs) and agentic systems have demonstrated the potential to complete realistic business workflows and even patent works. This raises a question: can current AI systems perform patent work reliably? Existing benchmarks cover a limited range of patent tasks and simplify evidence acquisition by providing reference materials or candidate documents. In this paper, we introduce PatentAgentBench, a benchmark comprising 510 instances across eight task suites: novelty search, freedom-to-operate (FTO) search, design FTO, invalidity search, claim charting, patent drafting, office-action response, and patent translation. Curated from real patent records and professional materials, the benchmark combines task-specific metrics with expert-reviewed annotations and rubrics. Retrieval tasks such novelty search, FTO, etc., require agents to search and compare patent collections without a supplied candidate pool. The drafting and OAR tasks assess the quality of agents' work given technical disclosure and office action notice. We evaluate seven LLMs across four agent harnesses on PatentAgentBench, finding that current systems still struggle to identify novelty, assess risk, and understand practitioner intent throughout patent workflows.
+**中文摘要**：专利实践处于技术、法律与语言工作的交叉点，具有挑战性且对技术创新至关重要。近年来，大语言模型（LLM）与智能体系统快速发展，已展现出完成真实业务流程乃至专利工作的潜力。这引出一个问题：当前AI系统能否可靠地完成专利工作？现有基准所覆盖的专利任务范围有限，且通过提供参考资料或候选文档简化了证据获取过程。本文提出PatentAgentBench基准，包含510个实例，涵盖八类任务套件：新颖性检索、自由实施（FTO）检索、外观设计FTO、无效检索、权利要求对照表制作、专利撰写、审查意见通知书答复以及专利翻译。该基准基于真实专利记录和专业材料构建，结合任务特定指标与专家审核的标注及评分细则。新颖性检索、FTO等检索类任务要求智能体在不提供候选文档池的情况下自行搜索并比对专利集合；撰写类和审查意见答复类任务则评估智能体在给定技术交底书和审查意见通知书时的工作质量。我们在PatentAgentBench上评估了七个LLM在四类智能体框架下的表现，发现当前系统在整个专利工作流程中仍难以识别新颖性、评估风险以及理解专利代理人的意图。
 
-## 12. AskGLP1: A Knowledge Graph LLM Agent for Exploring GLP-1 Experience from Online Patient Narratives
+## 12. 该研究论文
 
+- **英文标题**：AskGLP1: A Knowledge Graph LLM Agent for Exploring GLP-1 Experience from Online Patient Narratives
 - **作者**：Zhaoqian Xue、Anay Somani、Siddhartha Singh、Junting Mu、Zhongyin Wang、Haozheng Liu、Ayesha Khatun、Yeaeun Kwon、Renkai Ma、Siyuan Ma、Zhe He、Danxia Yu、Lingyao Li
 - **分类**：cs.CL, cs.AI, cs.SI
 - **发布时间**：2026-10-26 07:59:20 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.34987v1) · [PDF](https://arxiv.org/pdf/2610.34987v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.34987v1) · [PDF](https://arxiv.org/pdf/2610.34987v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：GLP-1 药物在体重管理中日益普及，大量患者在 Reddit、WebMD 等平台分享用药动机与体验，但这些叙述非结构化且与正式药物警戒流程脱节。摘要指出需要将这些真实世界患者声音转化为可查询、可核验的知识资源。
-- **核心创新**：AskGLP1 将在线患者叙述构建为知识图谱，并由 LLM 代理在 MedDRA 术语约束下回答问题，把非正式患者报告桥接到药物警戒分析。其价值在于同时保留经验叙述的丰富性与证据可追溯性，并能识别数据源和药物特异性差异。
-- **方法概览**：系统使用 LLM 辅助流程，从约 850 万条 Reddit 帖子中筛查并提炼 163,135 条用药体验，并结合 2,506 条 WebMD 评论，构建包含 385,790 条“药物-副作用”和“药物-用药目的”关系的知识图谱。代理问答围绕图谱证据生成回答，并进行证据可核验与拒绝医疗建议方面的评估。
-- **结果与结论**：在线叙述与 FAERS 共享最常见胃肠道症状，但更突出疲劳、厌食等日常负担；FAERS 则更常包含注射部位反应以及胰腺炎等严重诊断。跨药比较显示替尔泊肽报告的恶心/呕吐少于司美格鲁肽，Wegovy 比 Ozempic、Zepbound 比 Mounjaro 报告更多疲劳；评估还表明代理能给出可验证证据并拒绝医疗建议请求。
-- **一句话 takeaway**：该工作揭示了 FAERS 所捕获信号与患者在线自述之间的缺口，强调药物警戒应纳入患者中心视角。AskGLP1 证明知识图谱与 LLM 代理可用于把大规模患者叙述转化为可审计、可比较的安全监测证据。
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
-**摘要**：GLP-1 medications are increasingly used for weight management, and many people share their experiences online. These narratives show why people take the drugs and what they experience, but they remain unstructured and disconnected from formal pharmacovigilance. We therefore present AskGLP1, a system that transforms online patient narratives into a knowledge graph (KG) and answers questions about medication experiences. Through an LLM-assisted pipeline grounded in the MedDRA terminology, AskGLP1 screens nearly 8.5 million Reddit posts for medication experiences and distills 163,135 of them, with 2,506 WebMD reviews, into a KG of 385,790 drug-side-effect and drug-purpose relations. We find that GLP-1 experiences are source- and drug-specific. Online narratives share the most common gastrointestinal symptoms with FAERS, but they foreground everyday burdens such as fatigue and food aversion, whereas FAERS reports more often include injection-site reactions and selected serious diagnoses such as pancreatitis. We further find that posts report less nausea and vomiting for tirzepatide than for semaglutide, more fatigue for Wegovy than Ozempic and for Zepbound than Mounjaro. Evaluations show that the agent answers with verifiable evidence and declines requests for medical advice. Our findings reveal gaps between what FAERS captures and what people report online, and they call for patient-centered approaches to pharmacovigilance. Code, prompts, and evaluation questions are available at https://github.com/ZhaoqianXue/AskGLP1.
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
 
-## 13. Recovering Business Rules as Cascade Lookups for Enterprise Field Prediction
+## 13. 将业务规则恢复为级联查找以实现企业字段预测
 
+- **英文标题**：Recovering Business Rules as Cascade Lookups for Enterprise Field Prediction
 - **作者**：Changxu Duan
 - **分类**：cs.LG, cs.AI, cs.DB, cs.IR
 - **发布时间**：2026-10-25 12:33:59 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.34258v1) · [PDF](https://arxiv.org/pdf/2610.34258v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.34258v1) · [PDF](https://arxiv.org/pdf/2610.34258v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：企业销售订单系统依赖人工维护的配置规则来决定付款条件、发货点、销售归属等字段；当规则不完整或过时，操作员只能手工录入，错误会蔓延到计费、物流和报表环节。
-- **核心创新**：本文提出一种由知识图谱引导的工作流：LLM 智能体在离线阶段提出候选业务键（如客户与单据类型的列组合），通过 SQL 剖析验证，并将证据编译为确定性的级联查找表；推理时仅需透明的键值查找，无需模型服务。
-- **方法概览**：LLM 仅用于离线规则发现，负责提出业务键候选；候选键经 SQL 剖析验证后编译为级联查找规则；实验在企业销售订单预测及公开关系型基准上进行，并包含漂移分析以将残差错误转化为配置维护的诊断信息。
-- **结果与结论**：实验表明，当字段遵循稳定业务规则时级联查找最有效；而当预测依赖时间或邻域模式时，学习的图模型仍是更优选择；漂移分析可将残差错误转化为配置维护诊断。
-- **一句话 takeaway**：缺失或过时的业务规则可以从历史交易中恢复为透明、确定性的级联查找，而非依赖不透明统计模型；这为业务字段预测提供了一种无需模型部署、可解释且便于维护的替代方案。
+- **研究背景**：企业销售订单系统中，付款条件、发货点等字段由人工维护的业务规则决定，规则缺失或过时会迫使操作员手工录入，导致错误传导至开票、物流和报表。传统做法是把此类预测作为统计学习问题处理，但学到的模式不透明且难维护。
+- **核心创新**：提出知识图谱引导的工作流，让 LLM 智能体在离线阶段提出候选业务键、用 SQL 分析验证，再将证据编译为确定性的级联查找，实现可解释、无需模型服务的规则恢复。此外，漂移分析将残差错误转化为配置维护的诊断信号。
+- **方法概览**：LLM 智能体提出候选业务键（列组合），通过 SQL 数据画像验证其有效性，筛选出的规则被编译为确定性级联查找；LLM 仅参与离线规则发现，推理时只需透明的键值查找。在企业销售订单数据及公开关系基准数据集上进行实验，并开展漂移分析。
+- **结果与结论**：实验表明，当目标字段遵循稳定的业务规则时，级联查找最有效；而当预测依赖时间动态或邻域模式时，学习式图模型更为可取。摘要未给出各方法的具体定量指标。
+- **一句话 takeaway**：缺失或过时的业务规则可以从历史交易中恢复为可审计的确定性查找规则，而非依赖不透明模型；级联查找与学习式图模型适用于不同特征类型，二者选择取决于字段是否遵循稳定业务规则。
 
-**摘要**：Enterprise sales-order systems rely on manually maintained configuration rules to determine fields such as payment terms, shipping points, and sales ownership. When these rules are incomplete or stale, operators must enter values by hand, and downstream errors spread into billing, logistics, and reporting. This paper studies whether missing or outdated rules can be recovered from historical transactions instead of being relearned as opaque statistical patterns. We introduce a knowledge-graph-guided workflow in which an LLM agent proposes candidate business keys, meaning column combinations such as customer and document type, validates them through SQL profiling, and compiles the resulting evidence into deterministic cascade lookups. The LLM is used only during offline rule discovery. At inference time, prediction is a transparent key lookup with no model-serving requirement. Experiments on enterprise sales-order prediction and public relational benchmarks show that cascades are most effective when fields follow stable business rules, while learned graph models remain preferable when prediction depends on temporal or neighborhood patterns. Drift analysis further turns residual errors into diagnostics for configuration maintenance. Code and data: https://github.com/Fireblossom/CascadER.
+**中文摘要**：企业销售订单系统依赖人工维护的配置规则来确定付款条件、发货点和销售归属等字段。当这些规则不完整或过时，操作员只能手动录入，进而把错误传播到开票、物流和报表环节。本文研究能否从历史交易中恢复缺失或过时的规则，而不是把它们重新学习为不透明的统计模式。我们提出一种由知识图谱引导的工作流程：LLM 智能体提出候选业务键（如客户与单据类型等列组合），通过 SQL 分析验证，并将所得证据编译为确定性的级联查找。LLM 仅用于离线规则发现，推理时预测是一个透明键查找，无需模型服务。在企业销售订单预测和公开关系基准数据集上的实验表明，当字段遵循稳定的业务规则时，级联查找最为有效；而当预测依赖时间或邻域模式时，学习式图模型仍是更优选择。漂移分析进一步将残差转化为配置维护的诊断依据。代码与数据：https://github.com/Fireblossom/CascadER。
 
-## 14. GEMS-RAG: Graph-grounded Engineering Multimodal Standards Retrieval-Augmented Generation
+## 14. GEMS-RAG：基于图的工程多模态标准检索增强生成
 
+- **英文标题**：GEMS-RAG: Graph-grounded Engineering Multimodal Standards Retrieval-Augmented Generation
 - **作者**：Abdul Hannan Azad、Irvin Wang、Jiwan Jiang、Chenchen Kuai、Bofeng Cao、Keshu Wu、Yuzhou Wang、Xiaopeng Li、Yang Zhou
 - **分类**：cs.AI, cs.LG
 - **发布时间**：2026-10-23 20:41:44 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.33277v1) · [PDF](https://arxiv.org/pdf/2610.33277v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.33277v1) · [PDF](https://arxiv.org/pdf/2610.33277v1)
 - **匹配方向**：LLM + 知识图谱、LLM + CAD 二维图纸
 
 ### 快速理解
 
-- **研究背景**：工程标准通常具有层级化、多模态且高度关联的特点，包含条文、图表、交叉引用和规范性规则，这对大语言模型和现有以非结构化文本检索为主的 RAG 方法构成挑战。许多问题需要同时对文本条款、视觉规范和文档结构进行联合推理，单纯文本检索难以胜任。
-- **核心创新**：GEMS-RAG 提出图接地的工程多模态标准 RAG 框架，将层级解析、细粒度视觉实体抽取、多模态知识图谱构建和图接地混合检索结合起来。其关键创新是不再把图视为整体图像，而是拆解为有意义的视觉实体，并将其关联到文本条款、工程概念和监管规则。
-- **方法概览**：在推理阶段，GEMS-RAG 融合稠密检索、稀疏检索和视觉检索，并通过图谱扩展在文本、图表和文档结构之间定位相关证据。作者在 MUTCD 这一包含规范条文、技术图纸和标准化交通控制设备的大型工程标准上进行评估。
-- **结果与结论**：摘要显示，图接地多模态检索在检索效果和问答性能上优于文本 RAG、多模态 RAG 和图基线方法，但摘要未提供具体指标数值。
-- **一句话 takeaway**：GEMS-RAG 的价值不仅限于 MUTCD，还可推广到工程规范、技术手册、监管文件和科学标准等安全关键场景。其核心启示是：对工程标准问答而言，结构化图谱与多模态证据的联合建模优于仅依赖文本块检索。
+- **研究背景**：工程标准具有层级化、多模态的特点，条款、图、表、交叉引用和规范性规则之间联系紧密，使LLM难以有效利用。现有RAG方法多基于非结构化文本检索，无法联合推理文本条款、视觉规范和文档结构。
+- **核心创新**：提出基于图的多模态RAG框架GEMS-RAG，将图分解为细粒度视觉实体并与文本条款、工程概念和法规规则关联，而非将图视为整体图像。通过多模态知识图谱与混合检索结合，实现对跨文本、图和文档结构的联合推理。
+- **方法概览**：框架包含层级解析、细粒度视觉实体抽取、多模态知识图谱构建和基于图的混合检索四个核心组件。推理时将稠密、稀疏和视觉检索与图扩展相结合，在文本、图和文档结构中定位相关证据。
+- **结果与结论**：摘要未提供明确实验结果（如具体的检索指标、问答准确率数值或对比基线的定量提升幅度），仅定性说明在MUTCD数据集上，基于图的多模态检索在检索效果和问答性能上优于仅文本、多模态和基于图的RAG基线。
+- **一句话 takeaway**：GEMS-RAG展示了将工程标准解析为图结构化的多模态知识表示对提升检索与问答的有效性，可推广至工程规范、技术手册、法规文件和科学标准等安全关键领域的推理任务。
 
-**摘要**：Engineering standards are challenging knowledge sources for large language models (LLMs) because they are hierarchical, multimodal, and densely connected through figures, tables, cross-references, and normative rules. Existing retrieval-augmented generation (RAG) methods often rely on unstructured text retrieval and struggle with questions requiring joint reasoning over textual provisions, visual specifications, and document structure. We propose GEMS-RAG (Graph-grounded Engineering Multimodal Standards Retrieval-Augmented Generation), a framework for grounded reasoning over engineering standards. GEMS-RAG combines hierarchical parsing, fine-grained visual entity extraction, multimodal knowledge graph construction, and graph-grounded hybrid retrieval. Instead of treating figures as monolithic images, it decomposes them into meaningful visual entities linked to textual provisions, engineering concepts, and regulatory rules. During inference, dense, sparse, and visual retrieval are combined with graph expansion to identify relevant evidence across text, figures, and document structure. We evaluate GEMS-RAG on the Manual on Uniform Traffic Control Devices (MUTCD), a large engineering standard containing egulations, technical drawings, and standardized traffic-control devices. Results show that graph-grounded multimodal retrieval improves retrieval effectiveness and question-answering performance over text-only, multimodal, and graph-based RAG baselines. Beyond MUTCD, GEMS-RAG offers a general framework for reasoning over engineering codes, technical manuals, regulatory documents, and scientific standards in safety-critical applications.
+**中文摘要**：工程标准对大型语言模型（LLM）而言是极具挑战性的知识来源，因为它们具有层级结构、多模态特性，并通过图表、交叉引用和规范性规则紧密关联。现有的检索增强生成（RAG）方法通常依赖非结构化文本检索，在面对需要联合推理文本条款、视觉规范和文档结构的问题时表现吃力。本文提出GEMS-RAG（基于图的工程多模态标准检索增强生成），一个面向工程标准可落地推理的框架。该框架结合了层级解析、细粒度视觉实体抽取、多模态知识图谱构建以及基于图的混合检索。与将图视为单一整体图像不同，GEMS-RAG将图分解为有意义的视觉实体，并将其与文本条款、工程概念和法规规则关联起来。在推理阶段，系统融合稠密检索、稀疏检索和视觉检索，并通过图扩展在文本、图和文档结构中定位相关证据。作者在《统一交通控制设施手册》（MUTCD）上评估了GEMS-RAG，该手册是包含法规、技术图纸和标准化交通控制设施的大型工程标准。结果表明，基于图的多模态检索在检索效果和问答性能上均优于仅文本、多模态和基于图的RAG基线方法。除MUTCD外，GEMS-RAG还为安全关键应用中的工程规范、技术手册、法规文件和科学标准推理提供了一个通用框架。
 
-## 15. Ontology-Guided Knowledge Graph Construction from Structured Metadata and Climate Science Publications
+## 15. 该研究论文
 
+- **英文标题**：Ontology-Guided Knowledge Graph Construction from Structured Metadata and Climate Science Publications
 - **作者**：Aayush Acharya、Qi Zhang、Eduard Dragut、Longin Jan Latecki
 - **分类**：cs.CL, cs.AI
 - **发布时间**：2026-10-23 14:46:13 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.32725v1) · [PDF](https://arxiv.org/pdf/2610.32725v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.32725v1) · [PDF](https://arxiv.org/pdf/2610.32725v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：科学文献增长远超人工整理速度，导致从文本中提取结构化知识成为瓶颈，尤其在气候科学等知识密集领域。
-- **核心创新**：提出本体引导的 agentic 知识图谱构建框架，通过专门 agent 负责文档理解、信息抽取、本体一致性和实体链接。核心约束是强制 schema 一致性并要求三元组附带文本证据，使结果语义一致且可追溯。
-- **方法概览**：LLM 先从论文中抽取带明确文本证据的事实三元组，再经多阶段验证将其落地到本体并检查模式约束。随后在 1000 个三元组上评估与三名标注者的一致性，并将流程扩展到 2000 篇气候科学出版物。
-- **结果与结论**：Gemini-2.5-flash 与三名标注者的 Cohen's κ 为 0.640–0.700，接近人与人一致范围 0.616–0.689。构建的气候科学知识图谱含 133,990 个节点和 755,308 条关系；出版物贡献并经校验的 23,327 个三元组中 98.96% 被判定正确。
-- **一句话 takeaway**：本体约束加证据要求可在保持人工级一致性的同时规模化构建高质量、可溯源 KG，适用于气候科学等需要可信结构化知识的场景。代码与 KG 已开源。
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
-**摘要**：The rapid expansion of scientific literature far outpaces the speed of manual curation, creating a fundamental bottleneck in extracting structured knowledge from scientific texts. To address this, we introduce an agentic, ontology-guided framework for knowledge graph (KG) construction. Our framework utilizes specialized agents for document understanding, information extraction, ontology conformance, and entity linking. First, an LLM extracts factual knowledge in the form of triples with explicit textual evidence from research papers. Then the triplets undergo a multistage verification process to ground the triplets in the ontology. By enforcing schema constraints and requiring evidence in the form of text fragments, we ensure the data is both semantically consistent and traceable. In an agreement study over 1,000 extracted triplets, Gemini-2.5-flash achieves Cohen's $κ$ scores of 0.640--0.700 against three human annotators, matching the human--human agreement range of 0.616--0.689. We applied this framework to 2,000 scientific publications and construct a novel, ontology-grounded KG for climate science with 133,990 nodes and 755,308 relations; of the 23,327 triplets that the publications contribute after validation, 98.96\% are judged correct. The pipeline code and KG is publicly available https://github.com/aayushacharya/climatekg.
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
 
-## 16. A Topology-Guided GeoAI Agentic Framework for Urban Flood Screening
+## 16. 面向城市洪水筛查的拓扑引导式地理人工智能智能体框架
 
+- **英文标题**：A Topology-Guided GeoAI Agentic Framework for Urban Flood Screening
 - **作者**：Yutian Tao、Haoan Feng、Xin Xu、Leila De Floriani
 - **分类**：cs.AI
 - **发布时间**：2026-10-22 03:22:03 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.30660v1) · [PDF](https://arxiv.org/pdf/2610.30660v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.30660v1) · [PDF](https://arxiv.org/pdf/2610.30660v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：开放世界 GeoAI 智能体可把公开地理空间数据转化为可及的决策支持，但必须兼顾自主推理、可靠空间分析与人类监督。城市洪水初筛需要透明、可追溯且用户可控的第一遍筛查工具。
-- **核心创新**：提出一种拓扑引导的 GeoAI 智能体框架，将离散 Morse 理论与确定性空间计算结合，并把语言模型限定在记录化决策点：从预计算候选表选择持续性阈值、基于证据起草建议、再对照同一证据自审。
-- **方法概览**：确定性控制器根据地名、手绘区域或上传边界获取高程、降雨、土壤、土地覆盖、暴露与基础设施等公开图层，提取地形洼地生成候选流域，并用相对洪水优先级评分排序。
-- **结果与结论**：在马里兰 College Park 案例中，所选阈值将 278 个原始地形极小值压缩为 70 个流域；这些流域的最低点中有 77% 也被独立计算的 D8 流向模型识别为汇水点。另外四个研究区的 D8 一致性为 61% 至 83%。
-- **一句话 takeaway**：该框架通过开放数据、显式空间推理、可追溯证据与三个人工检查点，实现透明的一遍洪水筛查，同时让用户可修订阈值、因子权重与建议，保持重要结论可检查、可控。
+- **研究背景**：开放世界 GeoAI 智能体有望将公共地理空间数据转化为决策支持，但面临自主推理、空间分析可靠性与人工监督难以兼顾的挑战。城市洪水筛查需要可解释、可追溯的空间推断，以避免不透明的自动化决策。
+- **核心创新**：提出拓扑引导的智能体框架，将离散 Morse 理论提取地形洼地等确定性空间计算与语言模型在受限决策点的介入相结合，并设置三个“人在环”检查点，实现阈值、因子权重与建议的用户可控调整。
+- **方法概览**：确定性控制器检索公开 elevation、降雨、土壤、土地利用、暴露度和基础设施数据，用离散 Morse 理论提取地形洼地，以相对洪水优先级评分排序盆地；语言模型仅从预计算候选表中选择持续性阈值、基于计算证据草拟并审查建议；以 D8 径流模型结果作为交叉验证。
+- **结果与结论**：在 College Park 案例中，所选阈值将 278 个原始地形极小值合并为 70 个盆地，77% 盆地最低点与 D8 模型识别的汇点一致；其余四个研究区的一致性为 61%–83%。
+- **一句话 takeaway**：该框架证明了将开放数据、显式空间推理、可追溯证据与人工监督结合的可行性，可支撑透明的首轮洪水筛查，同时保持关键建议可审查、由用户控制。
 
-**摘要**：Open-world geographic artificial intelligence (GeoAI) agents can transform public geospatial data into accessible decision support for real-world challenges, but must balance autonomous reasoning with reliable spatial analysis and human oversight. We present a topology-guided GeoAI agentic framework for urban flood screening that takes a place name, drawn region, or uploaded boundary and returns ranked candidate basins with an interactive map and report. A deterministic controller retrieves public elevation, rainfall, soil, land-cover, exposure, and infrastructure layers, extracts terrain depressions with discrete Morse theory, and ranks basins with a relative flood-priority score. The language model acts only at recorded decision points: selecting a persistence threshold from a precomputed candidate table, drafting recommendations from computed evidence, and reviewing each recommendation against the same evidence. Three human-in-the-loop checkpoints let users revise the threshold, factor weights, or recommendation. In a College Park, Maryland case study, the selected threshold reduced 278 raw terrain minima to 70 basins, with 77% of these basins' lowest points also identified as sinks by a separately computed eight-direction (D8) flow-routing model. Across four further study areas, agreement ranged from 61% to 83%. By combining open data, explicit spatial reasoning, traceable evidence, and human oversight, the framework enables transparent first-pass flood screening while keeping consequential recommendations inspectable and user-controlled.
+**中文摘要**：开放世界地理人工智能（GeoAI）智能体可将公共地理空间数据转化为面向现实挑战的可获取决策支持，但必须在自主推理、可靠的空间分析和人工监督之间取得平衡。本文提出一种拓扑引导的 GeoAI 智能体框架，用于城市洪水筛查：用户输入地名、绘制区域或上传边界后，框架返回按优先级排序的候选汇水盆地，并附带交互式地图与报告。一个确定性控制器负责检索公开的 elevation、降雨、土壤、土地利用、暴露度和基础设施图层，利用离散 Morse 理论提取地形洼地，并通过相对洪水优先级评分对盆地排序。语言模型仅在留有记录的决策点发挥作用：从预先计算的候选表中选择持续性阈值、基于已计算的证据草拟建议，并针对相同证据对每条建议进行审查。三个“人在环”检查点允许用户修改阈值、因子权重或建议内容。在马里兰州 College Park 的案例研究中，所选阈值将 278 个原始地形极小值缩减为 70 个盆地，其中 77% 的盆地最低点也被独立计算的八方向（D8）径流模型识别为汇点。在另外四个研究区中，一致性范围为 61% 至 83%。该框架通过结合开放数据、显式空间推理、可追溯证据与人工监督，实现了透明的首轮洪水筛查，同时保证关键建议可审查、由用户掌控。
 
-## 17. Automated Materials Data and Knowledge Extraction using Machine Learning and Large Language Models
+## 17. 利用机器学习与大语言模型自动提取材料数据与知识
 
+- **英文标题**：Automated Materials Data and Knowledge Extraction using Machine Learning and Large Language Models
 - **作者**：Aravindan Kamatchi Sundaram、B. Pabitramohan Prusty、Rohit Batra
 - **分类**：cond-mat.mtrl-sci, cs.AI
 - **发布时间**：2026-10-21 15:38:05 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.29895v1) · [PDF](https://arxiv.org/pdf/2610.29895v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.29895v1) · [PDF](https://arxiv.org/pdf/2610.29895v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：材料科学文献中蕴含大量数据与知识，过去十年研究致力于用机器学习从文本、表格和图件中自动抽取材料信息，以支持材料数据库、知识图谱和后续发现。
-- **核心创新**：该综述系统梳理了从启发式规则、NLP、Transformer 编码器到 LLM 与智能体系统的技术演进，并强调跨文本/表格/图表多模态抽取以及问答、AI 协同科学家和闭环自主实验等新能力。
-- **方法概览**：作者采用综述方法，比较不同抽取范式的数据集构建、抽取准确率、计算成本、优势与局限，并给出构建更可靠、可扩展材料数据抽取流水线的实践建议。
-- **结果与结论**：摘要未提供明确实验结果；其结论性产出是批判性评估现有方法，并指出样本级结构-性质-加工-性能四面体抽取、可靠基准稀缺和非标准术语统一仍是关键挑战。
-- **一句话 takeaway**：该文的价值在于为材料文献知识工程提供路线图：优先发展可验证、多模态、与自治实验闭环耦合的抽取系统，同时补足基准与本体/术语治理。
+- **研究背景**：科学文献中蕴含大量材料数据与知识，但人工提取效率低下，因此亟需自动化的信息提取方法。过去十年，机器学习技术经历了从规则驱动到深度学习再到大语言模型的快速演进。
+- **核心创新**：本文系统梳理了材料数据与知识提取方法的完整技术谱系，从启发式规则、NLP 模型、Transformer 编码器到多模态 LLM 与智能体系统。同时综述了这些方法支撑的新型能力，如通用问答、AI 科研助手聊天机器人和与自动化实验室结合的闭环发现。
+- **方法概览**：采用文献综述方法，追踪提取技术的历史演进，从启发式规则流水线逐步过渡到自然语言处理模型、Transformer 编码器及大语言模型与智能体系统；对不同方法所生成的数据集、提取精度、计算成本及优缺点进行批判性比较。
+- **结果与结论**：综述表明，大语言模型和智能体系统已能从文本、表格和图表等多模态信息中提取材料数据，并支撑材料数据库、知识图谱、通用问答、AI 共同科学家及闭环自主发现等应用。文章同时指出关键开放挑战，包括样本级完整提取材料四元组信息、可靠基准数据集稀缺及非标准术语的统一等。摘要未提供定量实验结果。
+- **一句话 takeaway**：材料数据提取技术正从专用规则系统迈向多模态大语言模型，但样本级信息完整性、基准数据集建设与术语标准化仍是亟待解决的瓶颈。本文提供的实用指南对构建可靠、可扩展的提取流水线具有参考价值。
 
-**摘要**：Over the past decade, substantial efforts have been devoted to developing machine learning (ML) methods for extracting materials data and, where possible, materials knowledge directly from the scientific literature. This review traces the evolution of these methods from heuristic, rule-based pipelines through natural language processing (NLP) models and transformer-based encoders to, lastly, large language models (LLMs) and agentic systems capable of extracting materials information across multiple modalities, including text, tables, and figures. Beside construction of large, queryable materials databases and knowledge graphs that support downstream materials discovery, we discuss how these advances have enabled new capabilities, such as, generic question answering across materials science, AI co-scientists and chatbots for research assistance, and closed-loop optimization and discovery when integrated with autonomous laboratories. We critically assess the datasets generated using these approaches, their extraction accuracy and computational costs, and the respective strengths and limitations of different methodologies, and even provide practical guidelines for developing more reliable and scalable materials data extraction pipelines. Finally, we identify key open challenges, including the extraction of full materials structure-property-processing-performance tetrahedron at the sample level, the scarcity of reliable benchmark datasets for systematic evaluation, and the resolution of non-standard materials terminology across different document modalities.
+**中文摘要**：过去十年间，研究者们投入了大量精力开发机器学习方法，以直接从科学文献中提取材料数据乃至材料知识。本文回顾了这类方法的演进历程：从启发式、基于规则的流水线，到自然语言处理模型和基于 Transformer 的编码器，再到能够在文本、表格和图表等多种模态间提取材料信息的大语言模型（LLM）与智能体系统。除构建可供查询的大型材料数据库和知识图谱以支撑下游材料发现外，本文还讨论了这些进展所催生的新能力，例如材料科学领域的通用问答、充当 AI 共同科学家的研究辅助聊天机器人，以及与自动化实验室相结合实现闭环优化与发现。我们批判性地评估了基于这些方法生成的数据集、其提取准确性与计算成本、不同方法的优势与局限，并提供了开发更可靠、更可扩展的材料数据提取流水线的实用指南。最后，我们指出了关键的开放挑战，包括样本层面完整提取材料“结构—性能—工艺—服役”四面体信息、用于系统评估的可靠基准数据集稀缺，以及跨不同文档模态统一非标准材料术语等。
 
-## 18. GALA: Geometry-Aware Language Model for Controllable Object Arrangement
+## 18. GALA：面向可控物体布置的几何感知语言模型
 
+- **英文标题**：GALA: Geometry-Aware Language Model for Controllable Object Arrangement
 - **作者**：Chucheng Xiang、Runze Wang、Zhi Deng、Ruchao Bao、Yuanwei Zhang、Yuxuan Xie、Hanliu Wang、Liangzhen Fei、Wenzheng Wu、Cheng Wan、Peifeng Li、Zhongyuan Liu、Ligang Liu
 - **分类**：cs.GR, cs.AI, cs.CV
 - **发布时间**：2026-10-20 14:32:52 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.28280v1) · [PDF](https://arxiv.org/pdf/2610.28280v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.28280v1) · [PDF](https://arxiv.org/pdf/2610.28280v1)
 - **匹配方向**：LLM + CAD 三维模型、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：精细的物体摆放约束（如支撑、包含关系）推理是构建真实3D场景的关键，但现有方法依赖有向包围盒（OBB）等简化物体表示，无法感知详细几何细节，难以满足真实感场景创建的需求。
-- **核心创新**：GALA提出了一种具备显式点云感知能力的几何感知语言模型，用于可控物体摆放；同时整理并开源了一个覆盖多种房间类型与精细家具布局的多源场景数据集，为该任务提供基准支持。
-- **方法概览**：模型以场景上下文和摆放指令为条件，以自回归方式逐个预测目标物体的6D位姿；训练采用两阶段策略，第一阶段通过预训练任务对齐几何与文本模态，第二阶段针对摆放任务进行微调；作者还构建了plan-place-verify多阶段智能体流水线，将模型用于文本驱动的场景生成。
-- **结果与结论**：摘要称其在该基准上的实验中显著优于缺乏显式几何推理能力的基线方法，但未提供具体定量指标数据。
-- **一句话 takeaway**：该工作表明显式点云几何感知对精细摆放约束的推理至关重要，GALA及其开源数据集有望推动可控3D场景生成与文本驱动布置任务的发展。
+- **研究背景**：现有三维场景布置方法多依赖OBB等简化物体表示，无法感知物体细粒度几何，因而难以处理支撑、包含等精细放置约束。这一局限促使需要显式几何感知的可控物体放置方法。
+- **核心创新**：提出GALA，首个结合显式点云感知与语言指令的几何感知放置模型，以自回归方式逐物体预测6D位姿；同时构建并开源覆盖多种房间类型与细粒度家具布置的多来源场景数据集。
+- **方法概览**：模型在场景上下文与放置指令条件下自回归预测目标物体的6D位姿；训练采用两阶段策略，先通过预训练任务对齐几何与文本模态，再针对放置任务微调；下游应用采用'规划—放置—验证'多阶段智能体流程实现文本驱动场景生成。
+- **结果与结论**：在作者构建的基准数据集上，GALA显著优于缺乏显式几何推理能力的基线方法，但摘要未给出具体的定量指标数值。
+- **一句话 takeaway**：显式点云几何感知是提升语言驱动物体放置精细推理能力的关键，GALA为可控三维场景生成提供了有效范式，其开源数据集也有望推动社区后续研究。
 
-**摘要**：Reasoning about fine-grained placement constraints, such as support and containment, is essential for realistic 3D scene creation. It remains a significant challenge for existing methods that rely on simplified object representations like oriented bounding box (OBB), which are blind to the detailed geometry. To address this limitation, we introduce GALA, a geometry-aware language model with explicit point cloud perception for controllable object placement. Our model performs autoregressively by predicting the 6D pose of one target object at a time conditioned on the scene context and placement instruction. We utilize a two-stage training strategy: the first stage aligns geometric and textual modalities through pretraining tasks, and the second stage fine-tunes the model for placement. To facilitate this task, we also curate a multi-source scene dataset covering diverse room types and fine-grained furniture arrangements, which will be open-sourced for community benefit. Experiments on our benchmark show our model significantly outperforms baselines without explicit geometric reasoning. We further develop a multi-stage plan-place-verify agent pipeline that uses the model for text-driven scene generation. Project Page: https://xccelephant.github.io/paper/gala/
+**中文摘要**：对细粒度放置约束（如支撑与包含关系）进行推理，是实现逼真三维场景创建的关键。现有方法依赖定向包围盒（OBB）等简化的物体表示，无法感知物体细节几何，因此仍面临重大挑战。为克服这一局限，本文提出GALA，一种具备显式点云感知能力、用于可控物体放置的几何感知语言模型。该模型采用自回归方式，在场景上下文与放置指令的条件下逐次预测一个目标物体的6D位姿。训练采用两阶段策略：第一阶段通过预训练任务对齐几何与文本模态，第二阶段针对放置任务进行微调。为支撑该任务，作者还构建了一个多来源场景数据集，涵盖多样的房间类型与细粒度家具布置，并将开源以供社区使用。基准实验表明，该模型显著优于缺乏显式几何推理的基线方法。作者进一步开发了多阶段的'规划—放置—验证'智能体流程，利用该模型实现文本驱动的场景生成。项目页面：https://xccelephant.github.io/paper/gala/
 
-## 19. RANGER: Retrieval Agent for Navigating Graphs with Semantic Evaluation Rewards
+## 19. RANGER：基于语义评估奖励的图导航检索智能体
 
+- **英文标题**：RANGER: Retrieval Agent for Navigating Graphs with Semantic Evaluation Rewards
 - **作者**：Artem Mikhaylov、Pavel Konoplev、Nikolay Efanov、Artyom Sorokin、Evgeny Burnaev
 - **分类**：cs.LG
 - **发布时间**：2026-10-20 10:53:41 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.28010v1) · [PDF](https://arxiv.org/pdf/2610.28010v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.28010v1) · [PDF](https://arxiv.org/pdf/2610.28010v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：大语言模型在多跳知识图谱问答等复杂序列决策任务中虽有强语义理解能力，但难以精确执行多步导航；强化学习代理擅长学习导航策略，却受制于难以设计具有语义意义的奖励函数。
-- **核心创新**：提出RANGER混合框架，让LLM在训练过程中作为“导师”，基于代理遍历路径的语义相关性生成稠密奖励信号，从而将LLM深度融入强化学习训练循环。
-- **方法概览**：强化学习代理采用基于Transformer的策略，使用Group Relative Policy Optimization（GRPO）进行训练，在知识图谱中导航检索相关信息；LLM评估路径与查询信息需求的语义匹配程度并生成奖励，整体集成到完整的问答流水线中。
-- **结果与结论**：在开放问答数据集上的实验表明，该方法优于使用经典图搜索的检索增强基线以及使用启发式奖励训练的RL代理基线，NLP指标和LLM-as-a-Judge评分均有显著提升。
-- **一句话 takeaway**：研究表明，将LLM深度整合进强化学习训练循环，能够产生更有效、语义对齐更好的检索策略，为复杂推理任务提供了有前景的技术方向。
+- **研究背景**：大语言模型在知识图谱多跳问答中具备语义推理能力，但缺乏精确的多步导航能力；强化学习智能体虽能学习导航策略，却难以设计语义上有意义的奖励函数。
+- **核心创新**：提出混合架构，让LLM在训练期间作为RL智能体的导师，基于对智能体路径的语义相关性评估生成稠密奖励信号，实现语义理解与图导航学习的深度结合。
+- **方法概览**：RL智能体采用基于Transformer的策略，通过分组相对策略优化（GRPO）进行训练；LLM评估智能体在知识图谱中遍历路径的语义相关性并产生奖励，使智能体行为与查询的信息需求对齐；整体方法被集成到完整问答流水线中并在开放域问答数据集上评估。
+- **结果与结论**：RANGER在NLP指标和LLM-as-a-Judge评分上均显著优于两类基线：采用经典图搜索的检索增强系统，以及使用启发式奖励训练的RL智能体。
+- **一句话 takeaway**：将LLM深度嵌入强化学习训练循环、提供语义化奖励信号，是提升复杂推理任务中检索策略有效性与语义对齐度的可行途径。
 
-**摘要**：The integration of Large Language Models and Reinforcement Learning offers a promising direction for complex sequential decision-making tasks, such as multi-hop question answering over knowledge graphs. While LLMs provide strong semantic understanding and reasoning capabilities, they often struggle with precise, multi-step navigation in structured environments. Conversely, RL agents excel at learning navigation policies but are hindered by the difficulty of designing semantically meaningful reward functions. This paper introduces a novel hybrid approach in which an LLM serves as a mentor to an RL agent during training by providing dense, semantically informed reward signals. The RL agent, built on a Transformer-based policy and trained with Group Relative Policy Optimization, learns to navigate a knowledge graph to retrieve relevant information. The LLM evaluates the semantic relevance of the agent's traversed paths, generating reward signals that align the agent's behavior with the information needs expressed in a query. We integrate this Retrieval Agent for Navigating Graphs with Semantic Evaluation Rewards (RANGER) into a complete question-answering pipeline and evaluate it on the open question answering datasets. Experimental results show that the proposed approach outperforms both a baseline retrieval-augmented system with classical graph search and one using an RL agent trained with heuristic rewards, achieving a significant increase in NLP metrics and LLM-as-a-Judge scores. Our findings demonstrate that deep integration of LLMs into the RL training loop yields more effective and semantically aligned retrieval policies for complex reasoning tasks.
+**中文摘要**：大语言模型与强化学习的结合为复杂序贯决策任务（如知识图谱上的多跳问答）提供了有前景的方向。LLM具备强大的语义理解和推理能力，但难以在结构化环境中进行精确的多步导航；而强化学习智能体擅长学习导航策略，却受制于设计具有语义意义的奖励函数的困难。本文提出了一种新颖的混合方法：在训练过程中让LLM充当强化学习智能体的“导师”，提供稠密的、基于语义的奖励信号。该RL智能体基于Transformer策略，采用分组相对策略优化（Group Relative Policy Optimization）进行训练，学习在知识图谱中导航以检索相关信息；LLM则评估智能体所走路径的语义相关性，生成与查询中信息需求对齐的奖励信号。研究者将该方法（RANGER：基于语义评估奖励的图导航检索智能体）整合到完整的问答流水线中，并在开放域问答数据集上进行了评估。实验结果表明，该方法优于两类基线系统——使用经典图搜索的检索增强系统和使用启发式奖励训练的RL智能体，在NLP指标和LLM-as-a-Judge评分上均取得显著提升。研究结论表明，将LLM深度融入强化学习训练循环，能够为复杂推理任务产生更有效且语义对齐的检索策略。
 
-## 20. Autonomous intelligence for mining productivity: a multi-agent AI approach to operational value creation
+## 20. 面向矿业生产力的自主智能：一种创造运营价值的多智能体AI方法
 
+- **英文标题**：Autonomous intelligence for mining productivity: a multi-agent AI approach to operational value creation
 - **作者**：N Guerin、A Dehoux、M Nakhla
 - **分类**：cs.AI, cs.MA
 - **发布时间**：2026-10-19 13:24:44 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.26369v1) · [PDF](https://arxiv.org/pdf/2610.26369v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.26369v1) · [PDF](https://arxiv.org/pdf/2610.26369v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：综合远程运营中心（IROC）正成为矿业、油气等资本密集型行业工业4.0的架构前沿，但目前缺乏面向矿业IROC的集成智能体架构，也缺少兼顾实时性、健康安全环境、监管可审计性和决策成本的评估框架。
-- **核心创新**：论文提出EI2ROC三层多智能体架构，以大型语言模型为编排器，结合专用监控与产能预测智能体，通过类似模型上下文协议的工具接口通信；同时提出涵盖六个正交维度的智能体评估批判性综述，并针对工业智能体AI构建包含场景库、测试框架、指标和人工校准协议的多维基准框架。
-- **方法概览**：作者首先综合行业需求及类似行业中可量化的收益证据，随后设计EI2ROC架构，并明确区分当前原型已实现组件、参考设计组件和未来工作，最后报告来自运营现场的初步成本与延迟观察。
-- **结果与结论**：摘要仅提及来自实际运营现场的初步成本与延迟观察，但未给出具体数值或明确的实验结果，无法评估性能优劣。
-- **一句话 takeaway**：EI2ROC与配套基准框架共同构成可跨资本密集型行业迁移的方法论蓝图，其价值主张在于将智能体架构与安全关键约束及工业级评估标准结合，填补当前基准测试的工业盲区。
+- **研究背景**：矿业IROC需要整合实时控制、数字孪生、预测分析和人工决策，以适应高资本投入与安全关键型运营环境。现有研究缺乏统一的智能体架构和面向工业约束的综合评价体系，限制了自主智能系统的实际部署。
+- **核心创新**：论文提出EI2ROC三层多智能体架构，将大语言模型编排器与专业监测、生产产能预测智能体结合，并通过模型上下文协议式工具接口通信。其配套评价方法同时关注实时性、健康—安全—环境、监管可审计性和单位决策成本，弥补了现有智能体基准测试的工业空白。
+- **方法概览**：作者首先综合矿业需求及相近行业的量化收益，随后设计三层EI2ROC架构，并对智能体评价方法沿六个正交维度进行批判性分析。在此基础上，构建包含场景库、测试工具平台、指标体系和人工校准协议的工业智能体多维基准框架。
+- **结果与结论**：论文形成了可区分已实现原型、参考设计和未来工作的EI2ROC方法框架，并报告了来自实际运营现场的初步成本与延迟观察。摘要未提供具体实验数值或严谨的定量性能结果，因此其有效性仍需更系统的基准验证。
+- **一句话 takeaway**：该研究表明，大语言模型编排的多智能体系统有望成为矿业IROC实现自主运营价值的核心架构。实际落地的关键不只是智能体协同能力，还包括安全约束、实时响应、监管审计和决策成本的可测量性与可验证性。
 
-**摘要**：Integrated Remote Operation Centres (IROCs) are emerging as the architectural frontier of Industry 4.0 for capital-intensive sectors such as mining, oil and gas, and energy. Yet two intertwined gaps constrain their evolution towards full autonomy. First, no integrated agentic architecture has been proposed for mining IROCs that orchestrates Supervisory Control and Data Acquisition systems, digital twins, predictive analytics and human-machine interfaces under safety-critical constraints. Second, no evaluation framework jointly addresses the real-time, Health-Safety-Environment, regulatory-auditability and cost-per-decision requirements that govern industrial agentic deployments. This paper makes four contributions. It synthesises industry needs and quantified gains documented in analogous industries that motivate an agentic approach to mining IROCs. It introduces EI2ROC, a three-tier multi-agent architecture combining a Large Language Model orchestrator with specialised monitoring and production-capacityprediction agents communicating through a Model Context Protocol-style tool interface. It provides a critical review of agentic evaluation along six orthogonal dimensions and identifies the industrial blind spot of current benchmarks. Finally, it proposes a multi-dimensional benchmarking framework for industrial agentic AI comprising scenario library, harness, metrics and humancalibration protocol. The paper states explicitly which components are implemented in the current prototype, which belong to the proposed reference design and which remain future work, and reports preliminary cost and latency observations from an operating site. Together, EI2ROC and the benchmarking framework constitute a methodological blueprint transferable across CAPEX intensive industries.
+**中文摘要**：综合远程运营中心（IROC）正在成为矿业、油气与能源等资本密集型行业工业4.0架构的前沿方向，但其全面自主化仍受到两大制约：一是现有研究尚未提出能够统筹监控与数据采集系统、数字孪生、预测分析和人在回路界面的矿业IROC智能体架构；二是现有评价体系未能同时覆盖实时性、健康—安全—环境、监管可审计性及单位决策成本等工业部署要求。本文提出三层多智能体架构EI2ROC，以大语言模型作为编排智能体，由专门的状态监测与生产产能预测智能体协作，并通过模型上下文协议式工具接口进行通信。文章系统梳理了相近行业对智能体方法的需求与量化收益，沿六个正交维度评述智能体评价方法，指出当前基准测试对工业场景的覆盖不足，并提出由场景库、测试平台、指标体系与人工校准协议组成的多维工业智能体基准框架。论文明确区分原型已实现组件、参考设计及未来工作，并报告了来自运营现场的初步成本与延迟观察结果，为资本密集型行业的自主智能部署提供了可迁移的方法蓝图。
 
-## 21. Decision4Rec: A Jev-Inspired Framework of Decision Models on Knowledge and Active Graphs for Multi-Agent Recommender Systems
+## 21. 该研究论文
 
+- **英文标题**：Decision4Rec: A Jev-Inspired Framework of Decision Models on Knowledge and Active Graphs for Multi-Agent Recommender Systems
 - **作者**：Marco Polignano、Het Darshan Mehta、Pasquale Lops、Ernesto William De Luca、Giovanni Semeraro
 - **分类**：cs.AI, cs.CL, cs.IR
 - **发布时间**：2026-10-19 08:56:56 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.26035v1) · [PDF](https://arxiv.org/pdf/2610.26035v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.26035v1) · [PDF](https://arxiv.org/pdf/2610.26035v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Decision models, such as the commercial Jev, are language models that return one probability for each option of a question instead of generating text. We present Decision4Rec, an open and modular framework that makes decision models useful for recommendation. A knowledge graph writes the logs of each recommendation scenario as short statements on a defined scale, such as "sold: top 10%". A pool of agents, proposes candidates, and a residual ranker keeps the best 30. A decision model, trained once on real choices of three scenarios, reads them through one interface of typed questions, and a fusion step combines its answers with the score of the ranker. Any model with this interface can be used, and we run the commercial Jev, the released open Kev and Kev models trained by us on recommendation requests. The framework with a trained 4B decision model is 25 to 36% above the best trained baseline in NDCG@10 in three sparse Amazon catalogues, one of them never used to train the decision model, and almost tie with baselines on the dense Steam dataset. Most of the gain comes from the pool, and with a trained recommender it comes from what the agents know about its candidates rather than from new candidates. The 27B decision model adds to the pool 5 to 6% above the 0.8B model in three of four domains. A trained 0.8B open model beats the released Jev in eleven of fifteen settings and is never worse. On MovieLens-1M, a dense domain never seen in training, the gain is 5 to 7%. Code, configurations and trained models are available at https://github.com/marcopoli/decision4rec and https://huggingface.co/m-polignano.
+### 快速理解
 
-## 22. Outcome-Anchored Credit Reallocation for Agentic Knowledge Graph Question Answering
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 22. 面向智能体式知识图谱问答的结果锚定信用再分配方法
+
+- **英文标题**：Outcome-Anchored Credit Reallocation for Agentic Knowledge Graph Question Answering
 - **作者**：Mingyuan Li、Yucheng Li、Xiaxia Wang、Gong Cheng
 - **分类**：cs.AI, cs.CL, cs.LG
 - **发布时间**：2026-10-18 16:36:50 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.25384v1) · [PDF](https://arxiv.org/pdf/2610.25384v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.25384v1) · [PDF](https://arxiv.org/pdf/2610.25384v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：智能体式知识图谱问答需要 LLM 通过多轮交互在 KG 上求解复杂问题；基于结果监督的强化学习虽能用最终答案给出可验证奖励，但会把同一 rollout 的结局优势均匀分配给所有生成 token，忽略了不同 KG 操作对搜索过程和最终答案的影响差异。
-- **核心创新**：本文提出 Outcome-Anchored Credit Reallocation（OACR），用仅在训练时使用的 KG 状态结局模型估计相邻 KG 搜索状态间的结局奖励变化，并转化为操作信用，再得到 token 级权重。该权重以乘性方式重新分配 token 更新幅度，同时保持每个生成 token 上结局优势符号不变。
-- **方法概览**：OACR 通过训练专用的 KG 状态结局模型比较相邻搜索状态，估计结局奖励变化并生成操作信用，再映射为 token-wise 权重用于强化学习更新；方法在三个 KGQA 基准上与现有方法对比，并考察推理时 LLM 调用次数与 token 消耗。
-- **结果与结论**：摘要称 OACR 在三个基准上整体优于现有 KGQA 方法，同时使用更少的推理时 LLM 调用和 token；但摘要未提供具体实验数值或显著性细节。
-- **一句话 takeaway**：关键启示是：agentic KGQA 的信用分配不应把最终结局奖励平均摊到全部 token，而应锚定到 KG 搜索状态的结局变化；OACR 以较低推理成本改进了有效性与效率。
+- **研究背景**：智能体式 KGQA 需要 LLM 通过多轮 KG 交互解答复杂问题，常用基于结果奖励的强化学习进行训练，但其将 rollout 的结果级优势均匀分配给所有生成 token，忽略了不同 KG 操作对搜索过程和最终答案的差异性贡献。
+- **核心创新**：提出结果锚定信用再分配方法 OACR，通过仅训练期使用的 KG 状态结果模型估计相邻搜索状态间的结果奖励变化，并将其转化为操作信用与 token 级乘性权重。该方法在重新分配 token 更新幅度的同时保留结果级优势符号，实现了细粒度的信用分配。
+- **方法概览**：训练一个仅用于训练阶段的 KG 状态结果模型，预测相邻 KG 搜索状态的结果奖励变化；将该变化转换为操作信用，再推导 token 级乘性权重，用以加权策略更新。该方法与基于结果监督的强化学习框架结合，仅修改信用分配而不改变奖励来源。
+- **结果与结论**：在三个基准数据集上，OACR 取得优于现有 KGQA 方法的整体性能，同时显著减少推理时的 LLM 调用次数和 token 消耗；摘要未提供各数据集的具体数值结果。
+- **一句话 takeaway**：均匀分配结果级优势会导致轨迹与操作不匹配，基于 KG 状态的结果模型可将结果奖励细粒度地再分配到操作和 token 层面，从而提升智能体式 KGQA 的效率与性能。
 
-**摘要**：Agentic knowledge graph question answering (KGQA) requires large language models (LLMs) to solve complex questions through multi-turn interactions with a knowledge graph (KG). Outcome-supervised reinforcement learning derives verifiable outcome rewards from final answers but uniformly assigns each rollout's outcome-level advantage to all policy-generated tokens, creating a trajectory-to-operation mismatch since KG operations within a rollout can have varying effects on the search process and final answer. To address this, we propose Outcome-Anchored Credit Reallocation (OACR), which employs a training-only KG-state outcome model to estimate outcome-reward changes between adjacent KG search states and converts them into operation credit, from which token-wise weights are derived. These multiplicative weights reallocate token-level update magnitudes while preserving the sign of the outcome-level advantage at every generated token. Across three benchmarks, OACR achieves stronger overall performance than existing KGQA methods while using fewer inference-time LLM calls and tokens.
+**中文摘要**：智能体式知识图谱问答（KGQA）要求大语言模型（LLM）通过与知识图谱（KG）的多轮交互来解答复杂问题。基于结果监督的强化学习虽能从最终答案获得可验证的结果奖励，但会将每次 rollout 的结果级优势均匀分配给策略生成的所有 token，从而产生轨迹与操作之间的不匹配，因为同一次 rollout 中不同的 KG 操作对搜索过程和最终答案的影响各不相同。为此，本文提出结果锚定信用再分配方法（OACR），该方法利用一个仅用于训练的 KG 状态结果模型，估计相邻 KG 搜索状态之间的结果奖励变化，并将其转化为操作信用，进而推导出 token 级权重。这些乘性权重在重新分配 token 级更新幅度的同时，保留了每个生成 token 上结果级优势的符号。在三个基准数据集上，OACR 相比现有 KGQA 方法取得了更优的整体性能，同时减少了推理阶段的 LLM 调用次数和 token 消耗。
 
-## 23. Bridging Concepts: Multi-Agent Reasoning over Scientific Concept Graphs for High-Impact Research Prediction
+## 23. 桥接概念：基于科学概念图的多智能体推理用于高影响力研究预测
 
+- **英文标题**：Bridging Concepts: Multi-Agent Reasoning over Scientific Concept Graphs for High-Impact Research Prediction
 - **作者**：Donggyu Yoon、Minsung Hwang、Juneha Baek、Donghyuk Shin、Joyce Jiyoung Whang
 - **分类**：cs.AI, cs.IR, cs.LG
 - **发布时间**：2026-10-18 13:56:40 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.25281v1) · [PDF](https://arxiv.org/pdf/2610.25281v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.25281v1) · [PDF](https://arxiv.org/pdf/2610.25281v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：研究社区中的新主题往往在原本不相关的概念被首次结合研究时涌现。作者构建了科学概念图（SCGs），其节点是由 LLM 从论文文本中抽取的细粒度研究概念，边表示概念在论文中的共现关系，并研究预测高影响概念对的任务，即发现当前尚未连接但未来连接后会产生高影响的概念对。
-- **核心创新**：提出了 MiroGraph，一种基于科学概念图的多智能体推理框架，将特征设计、特征计算与分类器构建解耦给不同的 LLM 智能体协作完成。同时构建了来自 CIKM、KDD 和 SIGIR 会议论文的新基准数据集，涵盖多种预测设置，包括对训练时未见过的涌现概念进行影响预测。
-- **方法概览**：框架包含一个特征设计智能体，从结构、语义和趋势三个视角为给定概念对设计预测特征；随后三个 LLM 智能体从概念对的封闭子图中计算实际特征值；最后分类器设计智能体利用这些特征值构建分类器，预测最终的影响标签。
-- **结果与结论**：MiroGraph 在多种影响预测和时间链路预测方法上均取得更优性能，但摘要未给出具体的量化实验指标。
-- **一句话 takeaway**：该工作表明将 LLM 多智能体推理与科学概念图结合，可以有效预测潜在的高影响概念组合，为科研方向发现提供了新的方法路径和基准资源。
+- **研究背景**：新研究课题常由原本不相关的概念首次结合而产生，因此预测哪些概念对组合将产生高影响力具有重要的研究价值。现有研究缺乏针对这一任务的系统性数据与方法，为此作者构建了基于真实会议论文的科学概念图与基准数据集。
+- **核心创新**：提出科学概念图（SCGs），用LLM从论文文本中抽取细粒度概念并以共现关系建边，形式化了高影响力概念对预测任务。提出多智能体框架MiroGraph，将特征设计、特征计算与分类器设计分配给不同LLM智能体协作完成。
+- **方法概览**：MiroGraph包含特征设计智能体（从结构、语义、趋势三视角设计特征）、三个LLM智能体（从概念对的封闭子图中计算特征值）以及分类器设计智能体（基于特征值构建分类器预测影响力标签）。实验基于从CIKM、KDD、SIGIR论文构建的基准，覆盖多种预测设置，包括对训练时未见的新兴概念的影响力预测。
+- **结果与结论**：MiroGraph在多种影响力预测和时间链路预测方法上均取得最优表现。
+- **一句话 takeaway**：将多智能体LLM推理与科学概念图结构相结合，可以有效预测未来高影响力的新兴概念组合，为科研方向发现提供了新范式；该方法对训练时未见的新概念也具备预测能力。
 
-**摘要**：Within a research community, new topics often emerge when previously unconnected concepts are first studied together. We construct scientific concept graphs (SCGs)--domain knowledge graphs whose nodes are fine-grained research concepts extracted from paper text by LLMs and whose edges capture their co-occurrence in papers--and study the task of forecasting high-impact concept pairs, i.e., discovering concept pairs that are currently unconnected but will have high impact when connected. To this end, we introduce new benchmark datasets constructed from CIKM, KDD, and SIGIR conference papers, with varied prediction settings, including impact forecasting for emerging concepts unseen during training. We propose MiroGraph, a Multi-agent reasoning framework with scientific concept Graphs, in which a feature designer agent designs predictive features for a given concept pair from structural, semantic, and trend perspectives, and then three LLM agents compute the actual feature values from the enclosing subgraph of the concept pair. Using these feature values, a classifier designer agent constructs a classifier that predicts the final impact labels. MiroGraph outperforms various impact forecasting and temporal link prediction methods.
+**中文摘要**：在学术社区中，新课题往往诞生于此前互不关联的概念被首次联合研究之时。本文构建科学概念图（SCGs）——一种领域知识图谱，其节点由大语言模型从论文文本中提取的细粒度研究概念构成，边表示概念在论文中的共现关系，并研究高影响力概念对预测任务，即发现当前尚未连接、但连接后将产生高影响力的概念对。为此，作者基于CIKM、KDD和SIGIR会议论文构建了新基准数据集，涵盖多种预测场景，包括对在训练阶段未出现的新兴概念进行影响力预测。本文提出MiroGraph——一种基于科学概念图的多智能体推理框架：特征设计智能体从结构、语义和趋势三个视角为给定概念对设计预测特征，随后三个LLM智能体从概念对的封闭子图中计算实际特征值；分类器设计智能体利用这些特征值构建分类器，最终预测影响力标签。MiroGraph在多种影响力预测和时间链路预测方法中表现最优。
 
-## 24. Dialogue Generation for Conversational Recommendation Using User Search Interactions and Knowledge Graphs
+## 24. 利用用户搜索交互与知识图谱进行会话推荐的对话生成
 
+- **英文标题**：Dialogue Generation for Conversational Recommendation Using User Search Interactions and Knowledge Graphs
 - **作者**：Minsung Hwang、Donggyu Yoon、Gowoon Hwang、Kwanghee Jang、Joyce Jiyoung Whang
 - **分类**：cs.AI, cs.CL, cs.LG
 - **发布时间**：2026-10-18 11:11:22 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.25182v1) · [PDF](https://arxiv.org/pdf/2610.25182v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.25182v1) · [PDF](https://arxiv.org/pdf/2610.25182v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：大规模对话推荐数据集通常依赖人工构建对话或标注，成本高昂。本文旨在利用用户真实的搜索与点击行为自动生成有依据的对话推荐数据。
-- **核心创新**：提出SearCl框架，将用户交互分割为查询会话，并以搜索查询后选中的内容作为推荐目标，无需人工标注即可构建对话推荐数据集。
-- **方法概览**：通过可配置的概率状态机控制对话流程，由分别扮演寻求者与推荐者的两个LLM智能体按轮次级约束生成话语；推荐者还利用由内容元数据构建的知识图谱（包含内容属性与关系）来支撑推荐。
-- **结果与结论**：使用SearCl从搜索与点击交互数据中生成了3,538段对话，覆盖1,731个不同的目标内容项；在LLM-as-a-judge评估协议下，生成对话的质量得分高于现有基准数据集的对话。
-- **一句话 takeaway**：SearCl证明了无需人工标注即可实现可控的、知识驱动的对话推荐数据集构建，为对话推荐研究提供了可扩展的数据生成方案。
+- **研究背景**：现有大规模会话推荐数据集多需要人工撰写对话或人工标注，成本高、扩展性受限。SearCl 试图从真实用户搜索与点击行为中自动产生带推荐目标的对话，以降低标注依赖。
+- **核心创新**：核心创新是将用户搜索—点击交互自动转化为会话推荐流程，并用可配置概率状态机约束对话状态与轮次推进。该方法还通过内容项元数据构建知识图谱，为推荐者代理提供属性与关系依据，实现知识 grounded 的自动生成。
+- **方法概览**：方法将交互记录分段为查询会话，以查询后选中的内容确定推荐目标，再由概率状态机决定对话走向。两个 LLM 代理分别模拟 seeker 与 recommender，按照状态机给出的轮次级约束生成话语；推荐者可访问由目标内容元数据构成的知识图谱。
+- **结果与结论**：基于该方法生成了 3,538 段对话，覆盖 1,731 个唯一目标内容项；在 LLM-as-a-judge 评估下，其对话质量得分高于已有基准对话。摘要未给出更细粒度的人工指标或下游推荐性能结果。
+- **一句话 takeaway**：SearCl 表明会话推荐对话可通过搜索点击行为、状态机控制与双 LLM 代理协同自动生成，无需人工标注。其价值在于可控、可扩展且能引入内容知识图谱，为构建知识增强的会话推荐数据集提供了新路径。
 
-**摘要**：Large-scale conversational recommendation datasets typically require manual dialogue construction or annotation. We propose SearCl, which automatically generates conversational recommendation dialogues grounded in user search and click behaviors. SearCl segments user interactions into query sessions and derives each recommendation target from content selected after a search query. A configurable probabilistic state machine controls the dialogue flow, while two LLM agents acting as the seeker and recommender generate utterances according to turn-level constraints. To support recommendation, the recommender is provided with knowledge graphs constructed from metadata about the content items used in each dialogue, capturing their attributes and relationships. Using SearCl, we generate 3,538 dialogues from content search and click interaction data, covering 1,731 unique target items. Under an LLM-as-a-judge protocol, the resulting dialogues achieve higher quality scores than dialogues from existing benchmarks. These results demonstrate that SearCl enables controllable and knowledge-grounded dataset construction without human annotations.
+**中文摘要**：大规模会话推荐数据集通常依赖人工构造对话或人工标注。本文提出 SearCl，可基于用户搜索与点击行为自动生成有依据的会话推荐对话。SearCl 将用户交互切分为查询会话，并把搜索查询之后选中的内容作为每次推荐目标；一个可配置的概率状态机控制对话流程，同时由两个大语言模型代理分别扮演需求者与推荐者，按轮次级约束生成话语。为支撑推荐，系统还基于每个对话所用内容项的元数据构建知识图谱，刻画其属性与关系。研究使用 SearCl 从内容搜索和点击交互数据中生成 3,538 段对话，覆盖 1,731 个不同目标内容项；在 LLM-as-a-judge 评测协议下，生成对话质量得分高于现有基准中的对话。结果表明，SearCl 能够在无需人工标注的情况下实现可控且基于知识的会话推荐数据集构建。
 
-## 25. Librarian Agents: Training LLMs to Curate Long-Context Workspaces that Anticipate Future Queries
+## 25. 图书馆员智能体：训练大语言模型构建能预判未来查询的长上下文工作区
 
+- **英文标题**：Librarian Agents: Training LLMs to Curate Long-Context Workspaces that Anticipate Future Queries
 - **作者**：Anikait Singh、Teresa Zhang、Yoonho Lee、Roshen Sanjay Nair、Aviral Kumar、Chelsea Finn
 - **分类**：cs.LG, cs.AI, cs.CL
 - **发布时间**：2026-10-15 17:35:17 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.22273v1) · [PDF](https://arxiv.org/pdf/2610.22273v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.22273v1) · [PDF](https://arxiv.org/pdf/2610.22273v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：LLM在长文档上下文推理中仍面临困难：标准检索方法是反应式的，在推理时成为瓶颈，而知识图谱等预计算结构依赖僵化启发式规则，效果有限。现有智能体善于在已有文件系统中完成即时任务，却很少被训练来构建可供未来复用的工作区。
-- **核心创新**：作者提出Librarian Agents框架，让构建智能体将原始文档主动重组为由合成文件和参考链接构成的层次化文件系统工作区，以服务下游回答智能体。其核心思想是预期式定向整理：在推理前主动重组非结构化语料，以高效应对多样化未来查询。
-- **方法概览**：将工作区构建建模为马尔可夫决策过程，通过强化学习优化构建策略，直接以最大化下游回答准确率为目标进行训练，构建出的文件系统工作区供下游回答智能体使用。
-- **结果与结论**：Librarian Agents在BrowseComp-Plus上比最强的检索和预计算基线高出33个百分点；前期构建成本可在重复查询中摊销；并在BRIGHT上对未见领域实现零样本泛化，平均准确率提升31个百分点。
-- **一句话 takeaway**：让智能体学习预先整理可复用的工作区，是克服反应式检索瓶颈的有效途径；通过强化学习直接优化下游任务表现，可以构建出超越检索和启发式预计算方法的长上下文工作区。
+- **研究背景**：大语言模型处理长文档上下文仍面临挑战：标准检索方法是被动的，推理时进行复杂跨文档推理会造成瓶颈；知识图谱等预计算结构依赖僵化启发式规则，效果有限。现代智能体框架（如 Claude Code）中的不对称性提示了新方向：智能体擅长在已有文件系统中导航完成任务，却很少被训练构建可复用的工作区。
+- **核心创新**：提出前瞻性的定向整理（anticipatory directed curation）概念，让智能体在推理前主动重组非结构化语料以服务于多样化的未来查询。构建者智能体将原始文档转化为层级文件系统（含合成文件与参考链接），并将其构建过程形式化为马尔可夫决策过程，通过强化学习直接优化下游回答准确率。
+- **方法概览**：构建者智能体将原始语料转化为层级化的合成文件与参考链接工作区，供下游回答智能体使用。将工作区构建形式化为马尔可夫决策过程，用强化学习优化构建者策略，以直接最大化下游回答准确率。在 BrowseComp-Plus 和 BRIGHT 上与检索及预计算类基线对比，并测试零样本跨领域泛化。
+- **结果与结论**：在 BrowseComp-Plus 上比最强的检索和预计算基线高出 33 个百分点；前期构建成本可在重复查询中摊销；在 BRIGHT 上对未见领域实现零样本泛化，平均准确率提升 31 个百分点。
+- **一句话 takeaway**：让智能体像“图书馆员”一样主动构建面向未来的结构化工作区，比被动检索或僵化预计算结构更高效，且强化学习直接优化下游任务表现能带来显著收益；该方法成本可随查询次数摊销，并具备良好的跨领域零样本泛化能力。
 
-**摘要**：Reasoning over long document contexts remains a challenge for large language models (LLMs). Standard retrieval methods are inherently reactive, bottlenecking agents with complex, cross-document reasoning at inference time, while precomputed structures like knowledge graphs often fall short because they rely on rigid heuristics. Instead, can we allow agents to perform anticipatory directed curation: learning to proactively reorganize unstructured corpora prior to inference to efficiently serve diverse future queries. We build on a key asymmetry in modern agentic harnesses (e.g., Claude Code): while LLM agents are adept at navigating existing filesystems to solve an immediate task, they are rarely trained to construct reusable workspaces for future use. To instantiate this capability, we introduce Librarian Agents, a framework in which a builder agent transforms raw documents into a hierarchical filesystem of synthetic files and reference links, which forms a workspace tailored for a downstream answering agent. We formulate workspace construction as a Markov decision process and optimize the builder policy via reinforcement learning to directly maximize downstream answering accuracy. Empirically, Librarian Agents outperforms the strongest retrieval and precomputation baselines by 33 percentage points on BrowseComp-Plus, amortizes upfront construction costs across repeated queries, and generalizes zero-shot to unseen domains on BRIGHT with a 31-point average accuracy improvement.
+**中文摘要**：大语言模型对长文档上下文进行推理仍然是一项挑战。标准的检索方法本质上是被动响应式的，会使需要在推理时进行复杂跨文档推理的智能体成为瓶颈；而知识图谱等预计算结构由于依赖僵化的启发式规则，往往效果不佳。本文提出能否让智能体执行前瞻性的定向整理：学习在推理之前主动重组非结构化语料，从而高效服务于多样化的未来查询。本文基于现代智能体框架（如 Claude Code）中的一个关键不对称性：虽然大语言模型智能体擅长在现有文件系统中导航以完成即时任务，但很少被训练去构建可供未来复用的工作区。为实现这一能力，本文提出“图书馆员智能体”（Librarian Agents）框架，其中一个构建者智能体将原始文档转化为由合成文件和参考链接组成的层级文件系统，形成一个为下游回答智能体量身定制的工作区。本文将工作区构建形式化为马尔可夫决策过程，并通过强化学习直接优化构建者策略，以最大化下游回答准确率。实验表明，图书馆员智能体在 BrowseComp-Plus 上比最强的检索和预计算基线高出 33 个百分点，前期构建成本可在重复查询中摊销，并在 BRIGHT 上对未见领域实现零样本泛化，平均准确率提升 31 个百分点。
 
-## 26. DeciCAD: Harness-Grounded Learning of Action Policies for CAD Agents
+## 26. DeciCAD：基于智能体框架约束的动作策略学习
 
+- **英文标题**：DeciCAD: Harness-Grounded Learning of Action Policies for CAD Agents
 - **作者**：Yufeng Peng、Yixin Zhang、Ziyi Liu、Zhikun Xu、Jiarong Yang、Sijie Wang、Wenjie Feng、Qiyu Kang
 - **分类**：cs.AI, cs.CL, cs.LG, cs.RO
 - **发布时间**：2026-10-15 12:11:43 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.21755v1) · [PDF](https://arxiv.org/pdf/2610.21755v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.21755v1) · [PDF](https://arxiv.org/pdf/2610.21755v1)
 - **匹配方向**：LLM + CAD、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：大语言模型智能体依赖 agent harness 定义的闭环动作空间执行任务，而 CAD 具有持久状态、几何约束和长程操作等特点。该研究考察 harness 所诱导的决策空间如何影响 CAD 智能体的执行与策略学习。
-- **核心创新**：论文提出领域原生的 DeciCAD harness，提供语义化 CAD 动作、面向决策的观察、环境反馈和状态转移机制。其学习流水线从交互轨迹中提取因果决策监督，并结合监督微调与几何感知在线强化学习优化策略。
-- **方法概览**：研究在四个 CAD 基准上，将 DeciCAD 与通用编程 harness 比较，并在相同监督条件下评估 SFT 策略及后续在线 RL 的增益。实验重点考察 F1、交并比、几何可用性和输出 token 数量。
-- **结果与结论**：DeciCAD 在四个基准上取得最佳 F1 和 IoU，并比通用编程 harness 减少 45%–88% 的模型输出 token。匹配监督下，SFT 将 F1 从 0.6883 提升至 0.7437；在线 RL 进一步将几何可用性从 66.5% 提高到 73.5%，并将 F1 提升至 0.7880。
-- **一句话 takeaway**：结果表明，harness 设计的决策空间不仅直接影响 CAD 智能体的执行效率，也显著影响监督微调和强化学习的效果。面向领域语义与状态结构的原生 harness 是提升专业智能体能力的重要基础。
+- **研究背景**：大语言模型智能体的决策空间由其所依托的智能体框架定义，但框架如何塑造智能体行为与策略学习尚未被充分研究。CAD 是具有持久状态、几何约束和长程操作序列的专业领域，是考察这一问题的理想场景。
+- **核心创新**：提出领域原生的 DeciCAD 框架，暴露语义化 CAD 动作、决策导向观测、环境反馈和持久状态转移。配套学习流水线能从交互轨迹中提取因果决策监督，并结合 SFT 与基于几何的在线 RL 迭代改进策略。
+- **方法概览**：首先构建 DeciCAD 智能体框架作为闭环决策环境，然后从交互轨迹中挖掘因果决策信号用于监督微调，最后采用以几何目标为导向的在线强化学习进一步优化动作策略，并在四个 CAD 基准上与通用编程框架对比。
+- **结果与结论**：DeciCAD 在四个基准上取得最优 F1 和 IoU，模型输出 token 较通用编程框架减少 45%–88%。同等监督下 SFT 策略 F1 从 0.6883 升至 0.7437，在线 RL 进一步将几何可用率从 66.5% 提升至 73.5%、F1 提升至 0.7880。
+- **一句话 takeaway**：智能体框架所定义的决策空间对 CAD 场景中的执行效率与策略学习效果具有决定性影响，领域原生框架显著优于通用编程式框架。为专业领域构建贴合任务语义的智能体框架是提升智能体能力的关键途径。
 
-**摘要**：Large Language Model agents operate through closed-loop action policies whose decision space is defined by an agent harness. We investigate how this operating space shapes agent behavior and policy learning in computer-aided design (CAD), a professional domain characterized by persistent state, geometric constraints, and long-horizon procedures. We instantiate this perspective in DeciCAD, a domain-native harness that exposes semantic CAD actions, decision-oriented observations, environment feedback, and persistent state transitions. Building on this harness, we develop a learning pipeline that extracts causal decision supervision from interaction trajectories and improves the policy through supervised fine-tuning (SFT) and geometry-grounded online reinforcement learning (RL). Across four CAD benchmarks, DeciCAD achieves the best F1 and intersection over union (IoU) while reducing model-output tokens by 45--88% relative to a general-purpose coding harness. Under matched supervision, its SFT policy improves F1 from 0.6883 to 0.7437 and outperforms the coding policy; subsequent online RL further raises geometry availability from 66.5% to 73.5% and F1 to 0.7880. These results demonstrate that the decision space induced by a harness materially affects both agent execution and policy learning in CAD.
+**中文摘要**：大语言模型智能体通过闭环动作策略运作，其决策空间由智能体框架（harness）定义。本文研究在计算机辅助设计（CAD）这一具有持久状态、几何约束和长程流程的专业领域中，操作空间如何影响智能体行为与策略学习。作者构建了领域原生的 DeciCAD 框架，提供语义化的 CAD 动作、面向决策的观测、环境反馈和持久状态转移；并在此基础上开发学习流水线，从交互轨迹中提取因果决策监督，通过监督微调（SFT）和基于几何的在线强化学习（RL）改进策略。在四个 CAD 基准上，DeciCAD 取得了最优的 F1 和交并比（IoU），同时相对于通用编程框架将模型输出 token 减少 45%–88%。在相同监督条件下，其 SFT 策略将 F1 从 0.6883 提升至 0.7437 并超过编程策略；随后的在线 RL 进一步将几何可用率从 66.5% 提高到 73.5%，F1 提升至 0.7880。结果表明，框架所诱导的决策空间会实质性地影响 CAD 场景中的智能体执行与策略学习。
 
-## 27. BlenderWorld: Benchmarking Visual Agents for 3D Creation from Real-World References
+## 27. BlenderWorld：基于真实世界参考的3D创作视觉智能体基准测试
 
+- **英文标题**：BlenderWorld: Benchmarking Visual Agents for 3D Creation from Real-World References
 - **作者**：Xinyu Fang、Yuchi Wang、Weihao Yu、Rongyao Fang、Zhaohai Li、Zhixun Li、Tiancheng Gu、Xilin Wei、Yuhang Zang、Hongsheng Li、Dahua Lin、Guofeng Zhang、Shuai Bai、Zhibo Yang、Dayiheng Liu
 - **分类**：cs.CV
 - **发布时间**：2026-10-14 12:46:54 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.23986v1) · [PDF](https://arxiv.org/pdf/2610.23986v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.23986v1) · [PDF](https://arxiv.org/pdf/2610.23986v1)
 - **匹配方向**：LLM + CAD 三维模型、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：多模态大语言模型（MLLM）正被用作自主智能体，通过编写代码或直接操作软件来创建和编辑3D模型，实际工作流程要求模型从多样化参考中推断物体形状、材质、空间布局和光照。然而，现有基准测试对这类真实场景下的开放式3D创作请求覆盖有限，缺乏系统评估。
-- **核心创新**：作者提出BlenderWorld，这是首个专门评估前沿模型在真实感3D创作任务上表现的综合基准，包含223个任务，涵盖建筑、产品、自然环境和科学可视化四大领域，输入形式包括文本、图像、视频和结构化规格。
-- **方法概览**：研究者建立了统一的评估协议：将提交的Blender项目从多个视角渲染，对照2,651条任务特定的二元评分细则以及整体视觉质量分数进行综合评判，并测试了13个前沿模型。
-- **结果与结论**：基准测试结果显示，GPT-6-Astra以79.9的综合融合得分领先，其次是Opus-5（73.0）和GPT-5.6-Sol（67.7）。
-- **一句话 takeaway**：当前模型虽能解析宽泛指令，但在细粒度3D空间一致性和Blender中的精确结构还原方面仍存在显著瓶颈，表明面向未来的原生3D智能体还有很大改进空间。
+- **研究背景**：多模态大语言模型已能作为自主智能体通过代码或软件操作创建和编辑3D模型，但现有基准对真实世界场景下开放式3D创作请求的覆盖有限。
+- **核心创新**：提出首个面向真实3D创作任务的综合基准BlenderWorld，包含223项跨建筑、产品、自然环境和科学可视化的任务，支持文本、图像、视频和结构化规格等多种输入，并建立了统一的多视角渲染加二元评分细则与整体视觉质量相结合的评估协议。
+- **方法概览**：构建涵盖四大领域的223项3D创作任务，对模型提交的Blender项目从多个视角进行渲染，依据2651条任务特定的二元评分细则和整体视觉质量分数进行综合评估，并对13个前沿模型进行基准测试。
+- **结果与结论**：GPT-6-Astra以79.9的最高综合融合分领先，其次是Opus-5（73.0）和GPT-5.6-Sol（67.7）；模型虽能解析宽泛指令，但在细粒度3D空间连贯性和精确结构再现方面仍存在明显短板。
+- **一句话 takeaway**：BlenderWorld揭示了当前前沿模型在3D创作中的关键瓶颈：细粒度空间连贯性与结构精确再现能力不足，为开发真正原生3D能力的智能体指明了改进方向。
 
-**摘要**：Recent advances in multimodal large language models (MLLMs) have enabled them to act as autonomous agents, creating and editing 3D models via code or direct software manipulation. In practical workflows, these models must infer object shapes, materials, spatial layouts, and lighting from diverse references while strictly following instructions to reconstruct, modify, or design 3D content. However, existing benchmarks provide limited coverage of such open-ended requests across real-world scenarios. To bridge this gap, we introduce BlenderWorld, the first comprehensive benchmark dedicated to evaluating frontier models on realistic 3D creation tasks. BlenderWorld comprises 223 tasks spanning architecture, products, natural environments, and scientific visualization, driven by text, image, video, and structured specification inputs. To rigorously assess these complex deliverables, we establish a unified evaluation protocol: we render the submitted Blender projects from multiple viewpoints and evaluate them against 2,651 task-specific binary rubrics alongside holistic visual quality scores. Benchmarking thirteen frontier models reveals that GPT-6-Astra achieves the highest overall fused score of 79.9, followed by Opus-5 (73.0) and GPT-5.6-Sol (67.7). Ultimately, our findings reveal a critical bottleneck: while current models can parse broad instructions, they still profoundly struggle with fine-grained 3D spatial coherence and accurate structural reproduction in Blender, leaving substantial headroom for future 3D-native agentics.
+**中文摘要**：近期多模态大语言模型（MLLMs）的进展使其能够作为自主智能体，通过代码或直接操作软件来创建和编辑3D模型。在实际工作流程中，这些模型必须从多样的参考信息中推断物体的形状、材质、空间布局和光照，并严格遵循指令来重建、修改或设计3D内容。然而，现有基准对此类开放式请求在真实世界场景中的覆盖有限。为弥补这一空白，研究者提出了BlenderWorld——首个专门评估前沿模型在真实3D创作任务上表现的综合基准。BlenderWorld包含223项任务，涵盖建筑、产品、自然环境和科学可视化四大领域，由文本、图像、视频和结构化规格说明等多种输入驱动。为严格评估这些复杂的交付成果，研究建立了一套统一的评估协议：从多个视角渲染提交的Blender项目，并依据2651条任务特定的二元评分细则以及整体视觉质量分数进行综合评定。对13个前沿模型的基准测试表明，GPT-6-Astra以79.9的最高综合融合分领先，其次是Opus-5（73.0）和GPT-5.6-Sol（67.7）。研究最终揭示了一个关键瓶颈：尽管当前模型能够解析宽泛的指令，但它们在Blender中的细粒度3D空间连贯性和精确结构再现方面仍存在严重困难，为未来原生3D智能体的发展留下了巨大空间。
 
-## 28. Knowledge Graphs as Files: An Agent Harness Where Tool Creation and Tool Use Co-Evolve
+## 28. 以文件为知识图谱：工具创建与工具使用协同演化的智能体框架
 
+- **英文标题**：Knowledge Graphs as Files: An Agent Harness Where Tool Creation and Tool Use Co-Evolve
 - **作者**：Yuyang Bai、Yu Wang、Yu Zhang
 - **分类**：cs.CL, cs.AI, cs.IR
 - **发布时间**：2026-10-13 16:00:50 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.18616v2) · [PDF](https://arxiv.org/pdf/2610.18616v2)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.18616v2) · [PDF](https://arxiv.org/pdf/2610.18616v2)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：文本密集型知识图谱检索需要沿关系追踪并核对文本证据，但预定义图接口会限制智能体能访问的证据范围，即使智能体编写代码组合工具或处理返回子图也难以突破。
-- **核心创新**：提出直接知识图交互（DKGI），让语言模型智能体基于完整的节点与边文件直接创建图访问工具，使工具创建与工具使用协同演化，而非受限于固定接口。
-- **方法概览**：智能体编写 Python 代码沿关系遍历、合并节点集并挑选文本证据，执行反馈与 shell 搜索、文件查看交错进行；执行结果用于指导工具的创建与修订，动态决定下一步采集何种证据。
-- **结果与结论**：在三个领域基准数据集上，无需训练的 DKGI 在每个图上至少以 6.7 Hit@1 超过最强已发表基线；消融实验显示多轮编程优于仅 shell 访问和预定义图工具，轨迹分析表明智能体会修改代码扩展搜索或修复错误。
-- **一句话 takeaway**：允许工具创建与工具使用在图搜索过程中协同演化，能显著提升智能体访问和利用文本证据的能力，为训练-free 的图检索智能体提供了更灵活有效的方案。
+- **研究背景**：在文本密集知识图谱上搜索需要沿关系导航并核对文本证据，但预定义图接口会限制可访问证据的形态与范围。即便智能体能写代码组合工具或处理子图，仍受接口 schema、返回粒度和批量处理能力约束。
+- **核心创新**：DKGI 将知识图谱暴露为完整节点/边文件，允许智能体直接创建图访问工具，而不是固定一套预定义工具。其核心创新是让“造工具”和“用工具”在同一循环中协同演化：代码执行反馈驱动工具修订，修订后的工具又改变下一步证据获取。
+- **方法概览**：智能体编写 Python 代码完成关系跟随、节点集合并与文本证据选择，并交替使用 shell 搜索与文件检查；框架支持批量处理大节点集、只把筛选文本返回给模型，通过执行错误与中间结果进行多轮改写。实验在三个领域基准上免训练运行，并与 shell-only、预定义图工具及更强基线对比。
+- **结果与结论**：免训练的 DKGI 在每张图上都比最强已发表基线至少高 6.7 个 Hit@1；消融表明多轮编程优于仅 shell 访问和预定义图工具，轨迹显示智能体通过扩展搜索或修复错误来迭代代码。
+- **一句话 takeaway**：对文本丰富知识图谱而言，直接以文件为接口并允许工具创建与使用共同演进，能显著提升证据获取的灵活性与检索效果。结论支持“最小固定接口 + 可演化代码工具”的图搜索范式，且代码与数据已公开。
 
-**摘要**：Searching text-rich knowledge graphs requires following relations while examining textual evidence. Predefined graph interfaces constrain what evidence agents can access, even when they write code to combine tool calls or process retrieved subgraphs. We propose direct knowledge graph interaction (DKGI), a harness in which language model agents create graph access tools directly over complete node and edge files. The agent writes Python code to follow relations, combine node sets, and select textual evidence, interleaving execution with shell search and file inspection. This lets agents process large node sets in bulk while returning selected text for the model to assess. Execution feedback guides tool creation and revision, while the evolving tools determine what evidence the agent gathers next. On benchmark datasets spanning three domains, training-free DKGI exceeds the strongest published baseline by at least 6.7 Hit@1 points on every graph, even with a minimal harness. Controlled ablations show the benefits of multi-turn programming over shell-only access and predefined graph tools, while trajectories show agents revising code to extend searches or address errors. These findings highlight the value of allowing tool creation and tool use to co-evolve during graph search. Our code and data are available at https://github.com/leopoldwhite/DKGI.
+**中文摘要**：检索文本密集的知识图谱需要同时沿关系路径遍历并核查文本证据；预定义图接口会限制智能体能够访问的证据范围，即使智能体能编写代码组合工具调用或处理检索到的子图也如此。本文提出直接知识图谱交互（DKGI）框架，让语言模型智能体直接基于完整的节点文件与边文件创建图访问工具。智能体编写 Python 代码来跟随关系、组合节点集合并选择文本证据，并把代码执行与 shell 搜索、文件检查交替进行；这使智能体能够批量处理大规模节点集，同时只返回选定文本供模型判断。执行反馈会指导工具的创建与修订，而不断演化的工具又决定智能体下一步收集何种证据。在覆盖三个领域的基准数据集上，无需训练的 DKGI 即使使用极简框架，也在每张图上比最强已发表基线至少高出 6.7 个 Hit@1 点。受控消融显示多轮编程优于仅 shell 访问和预定义图工具；轨迹分析还表明智能体会修改代码以扩展搜索或修复错误。这些结果说明，在图搜索中让工具创建与工具使用协同演化具有重要价值。代码与数据已开源：https://github.com/leopoldwhite/DKGI。
 
-## 29. SLS-Bench: A Benchmark for Incident Log Summarization with Synthetic Observability Data
+## 29. SLS-Bench：基于合成可观测性数据的事故日志摘要基准
 
+- **英文标题**：SLS-Bench: A Benchmark for Incident Log Summarization with Synthetic Observability Data
 - **作者**：Valerii Iakovlev、Markus Spanring、Martin Flechl
 - **分类**：cs.AI
 - **发布时间**：2026-10-12 08:46:35 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.16412v1) · [PDF](https://arxiv.org/pdf/2610.16412v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.16412v1) · [PDF](https://arxiv.org/pdf/2610.16412v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：随着IT系统日益复杂，智能体驱动的自动化事件响应变得至关重要，其中将海量日志流总结为可读报告是关键能力。然而，由于真实数据收集成本高昂且复杂，现有基准对从大规模日志流进行端到端摘要的评测仍不充分。
-- **核心创新**：作者提出了SLS-Bench——一个面向事件日志摘要的基准，包含90个基于真实事件报告构建的任务，每个任务配有合成日志流和参考摘要。其核心创新在于一条将事件报告转化为结构化事件模型的数据生成流水线，该流水线结合叙事 grounding、显式事件建模、生成器-验证器循环以及与真实日志流的统计对比，生成逼真且可控的可观测性数据。
-- **方法概览**：该流水线先将真实事件报告转换为结构化事件模型，再据此引导合成日志和参考摘要的生成，并通过生成器-验证器循环和统计对比保证数据的真实性与可控性。随后用该基准对14个大语言模型进行评测。
-- **结果与结论**：评测表明，前沿模型虽能生成有用的摘要，但需付出高昂的成本和延迟代价；开源权重模型则明显落后。
-- **一句话 takeaway**：SLS-Bench为日志分析智能体的系统性评测提供了框架，同时也为未来合成可观测性基准的建设提供了可扩展的蓝图。
+- **研究背景**：复杂 IT 系统需要自动化事故响应智能体，其中关键能力是把大规模日志流压缩成人可读摘要。现有基准对从大型日志流到最终摘要的端到端评估不足，主要瓶颈是真实事故日志收集成本高、构建复杂。
+- **核心创新**：提出 SLS-Bench，用 90 个 grounded 于真实事故报告的任务填补端到端事故日志摘要评估空白。配套生成流水线结合叙事接地、结构化事故模型、生成器-验证器循环和真实日志统计对齐，兼顾真实性与可控性。
+- **方法概览**：作者先将真实事故报告转成结构化事故模型，再用模型引导合成日志流和参考摘要生成。通过生成器-验证器迭代与真实日志统计比较控制质量，形成可扩展的合成可观测数据构建方法。
+- **结果与结论**：摘要报告了在 SLS-Bench 上对 14 个 LLM 的评估：前沿模型能产出有用摘要，但伴随较高成本与延迟；开放权重模型表现明显落后。摘要未提供更细粒度的指标数值、排名或显著性结果。
+- **一句话 takeaway**：SLS-Bench 为日志分析/事故响应智能体提供了系统化评测框架，也示范了如何低成本构建可控的合成可观测性基准。其结论提示：有用摘要并不等于高效部署，成本、延迟与开放模型能力仍是落地瓶颈。
 
-**摘要**：As IT systems grow in complexity, automated agent-driven incident response becomes increasingly critical. A key capability for these agents is summarizing large log streams into human-readable reports. Further progress requires meaningfully evaluating this function, yet existing benchmarks leave end-to-end summarization from large log streams underexplored due to the prohibitive cost and complexity of collecting real-world data. We introduce SLS-Bench, a benchmark for incident log summarization featuring 90 tasks grounded in real-world incident reports, each with a synthetic log stream and a reference summary. To construct SLS-Bench, we developed a data generation pipeline that converts incident reports into structured incident models, which guide the generation of synthetic logs and reference summaries. This pipeline combines narrative grounding, explicit incident modeling, generator-verifier loops, and statistical comparisons with real-world log streams to produce realistic and controllable observability data. Our evaluation of 14 LLMs on SLS-Bench shows that while frontier models can produce useful summaries, they do so at substantial cost and latency, and open-weight models lag significantly. SLS-Bench provides a framework for systematic evaluation of log analysis agents and a scalable blueprint for future synthetic observability benchmarks.
+**中文摘要**：随着 IT 系统日益复杂，由智能体驱动的自动化事故响应变得愈发关键，而将大规模日志流总结为可读报告是这些智能体的一项重要能力。要推动该能力进步，需要有效评估“从大型日志流进行端到端摘要”的任务，但现有基准因真实数据收集成本高昂且复杂，对这一方向探索不足。本文提出 SLS-Bench，一个面向事故日志摘要的基准，包含 90 个以真实事故报告为基础的任务，每个任务配有合成日志流和参考摘要。为构建 SLS-Bench，作者开发了数据生成流水线，将事故报告转化为结构化事故模型，并据此指导合成日志与参考摘要的生成；该流水线融合叙事接地、显式事故建模、生成器-验证器循环，以及与真实日志流的统计比较，从而生成真实且可控的可观测性数据。对 14 个大语言模型的评估显示，前沿模型虽能生成有用摘要，但成本和延迟较高，开放权重模型明显落后。SLS-Bench 为日志分析智能体的系统评估提供了框架，也为未来合成可观测性基准提供了可扩展蓝图。
 
-## 30. Unravel: Recovering an Interactive 3D Scene from a Single Image
+## 30. Unravel：从单张图像恢复可交互的3D场景
 
+- **英文标题**：Unravel: Recovering an Interactive 3D Scene from a Single Image
 - **作者**：Hui Shan、Keyang Luo、Binjia Zhou、Ming Li、Kai Li、Xin Wang、Zhenyang Li、Zesong Yang、Weikai Chen、Runze Zhang、Xin Wang、Yanwei Fu、Zhen Chen、Xiangru Huang
 - **分类**：cs.CV, cs.AI
 - **发布时间**：2026-10-12 04:08:17 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.16146v1) · [PDF](https://arxiv.org/pdf/2610.16146v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.16146v1) · [PDF](https://arxiv.org/pdf/2610.16146v1)
 - **匹配方向**：LLM + CAD 三维模型、LLM + Agent
 
 ### 快速理解
 
-- **研究背景**：现有方法难以从单张图片生成可交互的3D场景：要么输出一个整体纠缠的几何体，无法移动任何物体；要么一次性前向预测所有物体，一旦某个物体预测错误便无法检测和修复。
-- **核心创新**：Unravel是一个免训练的框架，采用“先拆解、再重建”的全新范式，将图像逐层剥离，使每个物体都能作为独立可移动资产进行重建。它把观测到的点云视为物体尺寸的下界（物体只能长大、不能缩小），并通过物理沉降和智能审计保证场景物理合理性。
-- **方法概览**：首先由视觉语言模型规划哪些物体当前完整可见，用图像编辑工具移除该物体并修复被遮挡区域，每次编辑都经过验证后才纳入重建；随后按移除的反序重建场景，使支撑物先于被支撑物放置；最后通过物理沉降消除悬浮与穿插，并由agent审计修正残余摆放错误。
-- **结果与结论**：在多种室内场景上的大量实验表明，Unravel能比现有方法恢复出更多物体、摆放更忠实、场景物理合理性更高；摘要未提供具体定量实验数据。
-- **一句话 takeaway**：将场景分解为“逐层剥离—验证—反序重建”的迭代过程，并配合点云下界约束、物理沉降和智能审计，是一种有效且免训练的从单图恢复可交互3D场景的新思路。
+- **研究背景**：从单张图像重建可交互的3D场景是计算机视觉的难题。现有方法要么生成无法分离移动物体的纠缠几何，要么一次性前馈预测所有物体，错误无法检测和修复。
+- **核心创新**：提出免训练的“先拆解、再重组”范式：智能体逐层剥离图像，以点云为主要模态恢复空间关系；将观测点视为物体尺寸下界，并用物理沉降与智能体审计保证场景合理性。
+- **方法概览**：视觉-语言模型规划完全可见的物体，图像编辑器将其移除并修复遮挡区域，每次编辑经验证后才纳入重建；随后按移除逆序重建场景，并进行物理沉降和智能体审计纠错。
+- **结果与结论**：在多样化室内场景上的大量实验表明，Unravel能比现有方法恢复更多物体、更忠实地放置物体，并生成物理上更合理的场景（摘要未提供具体定量指标）。
+- **一句话 takeaway**：将场景重建转化为迭代的“剥离-验证-重组”过程，可避免单步预测的累积错误，是提升单图3D场景重建完整性与物理合理性的有效思路。
 
-**摘要**：We present Unravel, a training-free framework that turns a single image into an interactive 3D scene, where every object is an independent and movable asset. Existing generators either produce one entangled geometry in which no object can be moved, or predict all objects in one feed-forward pass, where a wrong guess cannot be detected or repaired. Unravel instead takes a different approach: it first takes the scene apart, and then puts it back together. Starting from the input image, an agentic harness that iteratively peels the image layer by layer, and adopts point cloud as major modality for spatial relationship recovery. Specifically, a vision-language model plans which objects are fully visible, an image editor removes them and restores the occluded regions. Every edit is verified before being incorporated into the reconstruction. This process gradually turns occluded parts of the scene into direct observation, allowing objects to be reconstructed when they are best exposed rather than hallucinated from the original image alone. The scene is then rebuilt in reverse removal order, so that the supporting objects are naturally placed before the objects they support. Since a single-view image only reveals part of an object, we treat the observed points as a lower bound on its size: an asset may grow to cover its points, but can not shrink away from them. Finally, we physically settle the reconstructed scene to remove floating objects and interpenetrations, followed by an agentic audit that corrects remaining placement errors. Extensive experiments on diverse indoor scenes show that Unravel recovers more objects, places them more faithfully, and produces scenes that are more physically-plausible than existing methods.
+**中文摘要**：我们提出了Unravel，一个无需训练的框架，能够将单张图像转化为可交互的3D场景，其中每个物体都是独立且可移动的资产。现有的生成方法要么产生一个物体无法移动的纠缠几何体，要么通过单次前馈预测所有物体，其中错误的预测无法被检测或修复。Unravel采用了一种不同的方法：先将场景拆解，再重新组装。从输入图像出发，一个智能体框架逐层剥离图像，并以点云作为恢复空间关系的主要模态。具体而言，视觉-语言模型规划哪些物体是完全可见的，图像编辑器将其移除并修复被遮挡的区域。每次编辑在被纳入重建之前都会经过验证。该过程逐步将场景中被遮挡的部分转化为直接观测，使物体能够在暴露最充分时进行重建，而不是仅凭原始图像进行臆测。随后场景按照与移除顺序相反的顺序重建，从而自然地先放置支撑物，再放置被支撑的物体。由于单视图图像只能显示物体的部分，我们将观测到的点视为其尺寸的下界：资产可以增长以覆盖这些点，但不能缩小而脱离它们。最后，我们对重建的场景进行物理沉降以消除悬浮物体和相互穿插，再由智能体审计修正剩余的放置错误。在多样化室内场景上的大量实验表明，与现有方法相比，Unravel能够恢复更多物体、更忠实地放置它们，并生成物理上更合理的场景。
 
-## 31. SEEK: Agentic Knowledge Graph Retrieval for Secure Code Generation
+## 31. SEEK：面向安全代码生成的智能体知识图谱检索框架
 
+- **英文标题**：SEEK: Agentic Knowledge Graph Retrieval for Secure Code Generation
 - **作者**：Varun Gadey、Markus Tohn、Lichao Wu、Ahmad-Reza Sadeghi、Alexandra Dmitrienko
 - **分类**：cs.CR, cs.LG
 - **发布时间**：2026-10-10 14:37:22 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.14968v1) · [PDF](https://arxiv.org/pdf/2610.14968v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.14968v1) · [PDF](https://arxiv.org/pdf/2610.14968v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Large Language Models (LLMs) can generate functionally correct code while introducing exploitable security weaknesses, particularly when developers specify functionality without explicit security requirements. Recent state-of-the-art approaches mitigate this problem using external security knowledge, but largely rely on flat similarity-based retrieval over independent artifacts, making it difficult to infer the relevant vulnerability space and retrieve targeted knowledge when direct matches are unavailable. We propose SEEK, an agentic Graph RAG framework for secure code generation that constructs a security knowledge graph using the Common Weakness Enumeration (CWE) taxonomy as its structural backbone and injects it with curated real-world CVE vulnerability-fix instances. At inference time, a Planner Agent predicts potential CWE weaknesses associated with the developer query, which guide Graph Scoping to restrict retrieval to relevant regions of the CWE taxonomy before deterministic multi-faceted candidate ranking. A Selection Agent subsequently validates the predicted weaknesses and retrieved candidates prior to code generation. Across five open-source LLMs, we evaluate SEEK in an out-of-distribution setting on CodeGuard+ and CyberSecEval, spanning C, C++, and Python. SEEK achieves the highest SecurePass@1 of 77.45% on CodeGuard+ and the highest aggregate ICD pass rate of 79.45% on CyberSecEval, surpassing prior approaches. Moreover, SEEK achieves 85.2% SecurePass@1 across 13 unseen CWE types with no directly linked vulnerability-fix instances, demonstrating strong generalizability, while maintaining acceptable inference latency costs.
+### 快速理解
 
-## 32. Iterate on an LLM, Serve on an SLM
+- **研究背景**：LLM 生成功能正确但含可利用安全漏洞的代码是一个突出问题，尤其是在开发者只给出功能描述而缺乏明确安全需求时。现有基于外部安全知识的方法多采用对独立工件的扁平相似度检索，难以推断相关漏洞空间，且在无直接匹配时检索效果差。
+- **核心创新**：提出以 CWE 分类体系为结构骨干、注入真实 CVE 漏洞修复实例的安全知识图谱，并结合智能体化 Graph RAG 流程：规划智能体预测潜在 CWE 弱点，图范围限定聚焦相关区域，多维度确定性排序检索候选，选择智能体在生成前验证弱点与候选。
+- **方法概览**：构建基于 CWE 骨干的安全知识图谱并注入整理的 CVE 漏洞修复实例；推理时由 Planner Agent 预测查询相关的 CWE 弱点，经 Graph Scoping 限定检索范围后执行确定性多面候选排序，再由 Selection Agent 验证预测与候选，最后驱动 LLM 生成代码；在 CodeGuard+ 和 CyberSecEval 上以分布外设置对五个开源 LLM 在 C、C++、Python 上评估。
+- **结果与结论**：SEEK 在 CodeGuard+ 上取得最高 SecurePass@1 77.45%，在 CyberSecEval 上取得最高 ICD 综合通过率 79.45%，均超过已有方法；在 13 类无直接关联漏洞修复实例的未见 CWE 类型上达到 85.2% 的 SecurePass@1，且推理延迟开销可接受。
+- **一句话 takeaway**：将结构化 CWE 知识图谱与智能体驱动的检索验证相结合，可显著提升 LLM 安全代码生成的效果与泛化能力，即使对训练/检索中未覆盖的 CWE 类型依然有效，为构建实用的安全代码生成系统提供了可扩展的技术路线。
 
+**中文摘要**：大型语言模型（LLM）在生成功能正确的代码时可能引入可被利用的安全漏洞，尤其是当开发者仅描述功能而未明确安全需求时。现有的最优方法虽利用外部安全知识进行缓解，但大多依赖于对独立工件进行扁平的相似度检索，难以推断相关的漏洞空间，且在缺乏直接匹配时难以检索到针对性知识。本文提出 SEEK，一种用于安全代码生成的智能体 Graph RAG 框架：以通用缺陷枚举（CWE）分类体系为结构骨干构建安全知识图谱，并注入经过整理的真实世界 CVE 漏洞修复实例。推理时，规划智能体（Planner Agent）预测与开发者查询相关的潜在 CWE 弱点，指导图范围限定（Graph Scoping）将检索限制在 CWE 分类体系的相关区域，随后进行确定性的多维度候选排序；选择智能体（Selection Agent）在代码生成前对预测的弱点和检索到的候选进行验证。研究在 CodeGuard+ 和 CyberSecEval 上以分布外（OOD）设置对五个开源 LLM 进行评估，涵盖 C、C++ 和 Python。SEEK 在 CodeGuard+ 上取得最高的 SecurePass@1（77.45%），在 CyberSecEval 上取得最高的 ICD 综合通过率（79.45%），均超过以往方法。此外，SEEK 在 13 类无直接关联漏洞修复实例的未见 CWE 类型上达到 85.2% 的 SecurePass@1，展现出很强的泛化能力，同时保持了可接受的推理延迟开销。
+
+## 32. 该研究论文
+
+- **英文标题**：Iterate on an LLM, Serve on an SLM
 - **作者**：Keegan Wang
 - **分类**：cs.AI, cs.MA
 - **发布时间**：2026-10-10 04:51:24 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.14576v1) · [PDF](https://arxiv.org/pdf/2610.14576v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.14576v1) · [PDF](https://arxiv.org/pdf/2610.14576v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
-**摘要**：As frontier LLMs gain more capabilities, the cost to run them also goes up. At the same time, small language models (SLMs) also gain more capabilities but have largely been able to keep their cost stable, offering 5-40 times cheaper inference for the narrow, repetitive subtasks that agents decompose work into. However, the standing limiting factor is getting the correct behavior out of a small model in a fast, efficient, and economical way. Unfortunately, in most cases, zero-shot small models fail narrow production tasks. Furthermore, retraining one every time the behavior changes is too slow to iterate on. We propose doing both in sequence. First, develop the desired behavior in prompt space, on a frontier model, with immediate feedback from live traffic. Then, once the behavior converges, distill the recorded production behavior (not synthetic imitations of it) into an SLM through supervised fine-tuning (SFT). We show a proper use case of this method through a scheduling agent for home-care agencies that fans out a single yes/no safety decision per caregiver-shift pair on GPT-5.4-nano. A LoRA-tuned Qwen3-8B trained on 11.6k recorded production decisions reaches 0.913 agreement, while the teacher (GPT-5.4-nano), re-run on its own recorded prompts, agrees with itself only 72.7% of the time, pointing to the fact that the SLM may also be more consistent. Furthermore, when the two disagreed, a blinded professional scheduler sided with the student 48-29. Finally, we find that the SLM has approximately 2.5 times lower median latency and is a fraction of the cost. We believe this lifecycle of quick building, live feedback, and cheap inference is a blueprint for others building similar systems.
+### 快速理解
 
-## 33. SUDO: From Scientific Publications to Global Scholarly Discourse
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 33. SUDO：从科学出版物到全球学术话语
+
+- **英文标题**：SUDO: From Scientific Publications to Global Scholarly Discourse
 - **作者**：Nipun D. Pathirage、Henrique Santos、Deborah L. McGuinness
 - **分类**：cs.CL, cs.AI, cs.DL
 - **发布时间**：2026-10-08 14:09:15 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.33018v1) · [PDF](https://arxiv.org/pdf/2610.33018v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.33018v1) · [PDF](https://arxiv.org/pdf/2610.33018v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Scholarly Knowledge Graphs (SKGs) support literature search, scientific discovery, and agent-assisted research. Yet, most approaches to SKG construction pre-specify the knowledge unit to be represented, typically named scholarly entities or contribution-level statements, and retain only the publication content expressible through that unit. This choice produces two dominant yet distinct paradigms: concept-centric SKGs that preserve entities and local relations, and statement-centric SKGs that capture high-level discourse in sentences. In both cases, the graph reflects a chosen extraction target rather than how a paper constructs and communicates knowledge. We introduce SUDO, the Scholarly Upper Discourse Ontology, which defines how knowledge elements are organized and related to form a paper's research narrative, namely its scholarly discourse. Using linguistic principles that generalize across fields and tasks, SUDO enables each publication's scholarly discourse to be constructed from the bottom up as a coherent, source-grounded representation. Applied consistently across papers, the same structure connects their research narratives into a global scholarly discourse without discarding local context or provenance. We demonstrate SUDO's capabilities across a comprehensive suite of scholarly knowledge-modeling use cases and performance improvements on a downstream Large Language Model (LLM)-based scientific QA task.
+### 快速理解
 
-## 34. FloorSAV: Elucidating Spatial Audio-Visual Context with 2D Floormap for AV-LLMs
+- **研究背景**：学术知识图谱（SKG）对文献检索、科学发现和智能体辅助研究至关重要，但现有方法通常预先规定知识单元，导致图谱只反映抽取目标而非论文构建和传播知识的方式。由此形成了概念中心与陈述中心两种割裂的范式，分别保留实体关系和高层句子论述。
+- **核心创新**：提出 SUDO（学术上层话语本体），从语言学原则出发定义知识要素的组织与关联方式，从而刻画论文的学术话语结构。与以往方法不同，SUDO 以论文自身构建知识的方式为建模对象，支持自底向上构建连贯、可溯源的表示。
+- **方法概览**：SUDO 运用可跨领域和任务泛化的语言学原则，将每篇论文的知识要素组织成其研究叙事，并保持局部上下文与出处信息。将该结构一致地应用于多篇论文，即可将各论文的研究叙事连接为全局学术话语；研究者还在一套全面的学术知识建模用例及基于 LLM 的科学问答任务上进行了评估。
+- **结果与结论**：SUDO 在一套综合的学术知识建模用例套件上展示了其能力，并在一个基于大语言模型（LLM）的科学问答下游任务上取得了性能提升。
+- **一句话 takeaway**：与其预设抽取目标，不如以论文构建知识的方式（即学术话语）为建模对象，才能生成既保真又有出处的学术图谱。SUDO 提供了一种可跨领域泛化的统一本体，能将单篇论文的话语连接成全球学术话语，并带来下游问答任务的性能收益。
 
+**中文摘要**：学术知识图谱（SKG）支持文献检索、科学发现与智能体辅助研究。然而，现有的大多数 SKG 构建方法都会预先规定要表示的知识单元（通常是命名学术实体或贡献级陈述），仅保留能通过该单元表达的出版物内容。这种做法产生了两种主导但各自独立的范式：以概念为中心的 SKG 保留实体及其局部关系，以陈述为中心的 SKG 则用句子捕捉高层论述。在这两种情况下，图谱反映的都是所选的抽取目标，而非论文如何构建与传达知识。我们提出 SUDO（Scholarly Upper Discourse Ontology，学术上层话语本体），它定义了知识要素如何被组织与关联以构成论文的研究叙事，即其学术话语。SUDO 采用可跨领域与任务泛化的语言学原则，使每篇论文的学术话语能够从底层构建为连贯且可溯源到原文的表示。将该结构一致地应用于多篇论文，即可把各论文的研究叙事连接成全球学术话语，同时不丢失局部上下文与出处信息。我们在一套全面的学术知识建模用例中展示了 SUDO 的能力，并在一个基于大语言模型（LLM）的科学问答下游任务上取得了性能提升。
+
+## 34. FloorSAV：利用2D楼层平面图阐明AV-LLM的空间视听上下文
+
+- **英文标题**：FloorSAV: Elucidating Spatial Audio-Visual Context with 2D Floormap for AV-LLMs
 - **作者**：Kyeong-Rae Kim、Sungnyun Kim、Tae-Hyun Oh
 - **分类**：cs.CV, cs.LG
 - **发布时间**：2026-10-08 06:15:36 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.11310v1) · [PDF](https://arxiv.org/pdf/2610.11310v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.11310v1) · [PDF](https://arxiv.org/pdf/2610.11310v1)
 - **匹配方向**：LLM + CAD 三维模型、LLM + Agent
 
-**摘要**：While 3D spatial reasoning in dynamic egocentric environments is crucial for embodied intelligence, audio-visual large language models (AV-LLMs) lack explicit mechanisms to process and internalize global geometry directly from raw sensory streams. Existing approaches either require costly fine-tuning or underutilize the model's cross-modal reasoning capacities. In this paper, we propose FloorSAV, a novel framework that explicitly grounds spatial audio-visual context by rendering a dynamic 2D floormap. By integrating 3D point clouds, camera trajectories, spatial audio cues, and semantically grounded object landmarks, we inject this floormap into the AV-LLM as a synchronized stream with an egocentric video. AV-LLMs utilize their multi-modal capabilities to jointly reason over visual, auditory, and geometric cues in a single inference with floormap interpretation guidance. We further introduce SAVED-Bench (Spatial Audio-Visual Egocentric Benchmark with Dynamic Agents), constructing essential tasks of spatial capability in real-world scenarios: dynamic relativity, regional, and path reasoning QAs. FloorSAV improves AV-LLMs' spatial reasoning on various tasks from both SAVED-Bench and SAVVY-Bench. Studies with ground-truth floormaps demonstrate the substantial potential of FloorSAV with accurate spatial information.
+### 快速理解
 
-## 35. CircuitATLAS: Agentic reasoning over a systems neuroscience knowledge graph for target discovery in circuitopathies
+- **研究背景**：在动态第一视角环境中进行3D空间推理是具身智能的关键能力，但现有AV-LLM缺乏直接从原始视觉和音频流中处理全局几何结构的显式机制。已有方法要么依赖高成本的微调，要么未能充分发挥模型的跨模态推理潜力。
+- **核心创新**：提出FloorSAV框架，通过渲染动态2D楼层平面图显式锚定空间视听上下文，并将其作为与第一视角视频同步的流注入AV-LLM。同时引入SAVED-Bench基准，涵盖动态相对性、区域和路径推理等真实场景空间任务。
+- **方法概览**：整合3D点云、相机轨迹、空间音频线索和语义锚定的物体地标，生成动态2D楼层平面图；将平面图与第一视角视频同步输入AV-LLM，并配以平面图解读指导，使模型在单次推理中联合推理视觉、听觉和几何线索。
+- **结果与结论**：FloorSAV在SAVED-Bench和SAVVY-Bench的多种空间推理任务上均提升了AV-LLM的性能；使用真值楼层平面图的实验进一步表明，具备准确空间信息时FloorSAV具有显著潜力。
+- **一句话 takeaway**：2D楼层平面图是一种高效的空间信息载体，可在无需昂贵微调的情况下增强AV-LLM的3D空间推理能力；准确的几何信息对性能提升至关重要。
 
+**中文摘要**：动态第一视角环境中的3D空间推理对具身智能至关重要，但视听大语言模型（AV-LLM）缺乏直接从原始感官流中处理和内化全局几何结构的显式机制。现有方法要么需要代价高昂的微调，要么未能充分利用模型的跨模态推理能力。本文提出FloorSAV框架，通过渲染动态2D楼层平面图来显式地锚定空间视听上下文。该框架整合3D点云、相机轨迹、空间音频线索和语义锚定的物体地标，将楼层平面图作为与第一视角视频同步的流注入AV-LLM中。AV-LLM利用其多模态能力，在单次推理中结合平面图解读指导，对视觉、听觉和几何线索进行联合推理。作者还提出了SAVED-Bench（包含动态智能体的空间视听第一视角基准），构建了真实场景中空间能力的关键任务：动态相对性、区域和路径推理问答。FloorSAV在SAVED-Bench和SAVVY-Bench的多种任务上提升了AV-LLM的空间推理能力。使用真值楼层平面图的研究表明，FloorSAV在具备准确空间信息时具有巨大潜力。
+
+## 35. CircuitATLAS：基于系统神经科学知识图谱的代理式推理，用于环路病变靶点发现
+
+- **英文标题**：CircuitATLAS: Agentic reasoning over a systems neuroscience knowledge graph for target discovery in circuitopathies
 - **作者**：Gabriel Ocana-Santero、Marko Tvrdic
 - **分类**：q-bio.QM, cs.AI, q-bio.NC
 - **发布时间**：2026-10-07 08:19:27 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.09643v1) · [PDF](https://arxiv.org/pdf/2610.09643v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.09643v1) · [PDF](https://arxiv.org/pdf/2610.09643v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Drug discovery for neurological disease has traditionally centered on the molecules altered by disease. But the molecules that cause pathology are not necessarily the best points from which to reverse it. Here, we ask which otherwise unaltered molecular control points can be engaged to restore pathological neural circuits toward functional states. We present CircuitATLAS, a provenance-grounded systems-neuroscience knowledge graph and agentic framework for target discovery in circuitopathies. It structures literature-derived relationships across diseases, phenotypes, electrophysiology, circuits, brain regions, cell types and molecular effectors, while deliberately excluding direct disease-gene and disease-protein edges to reduce shortcut reasoning. The graph contains 3.83 million nodes and 7.66 million edges, including 5.31 million LLM-extracted relations, and incorporates structured datasets such as the Human Cell Atlas and new multimodal in vivo measurements. We then introduce an agentic workflow that reasons from measurable disease phenotypes through their circuit and cellular substrates to molecular interventions, therapeutic feasibility and clinical constraints. Finally, we introduce a human-governed in vivo lab-in-the-loop linking hypothesis generation to experimental iteration. Within this framework an agent nominated ATP1A3, the neuronal alpha3 Na+/K+-ATPase, as a control point on cortical excitability; interneuron-restricted expression of ATP1A3 abolished the beta- and gamma-band response to a focal 4-aminopyridine challenge in vivo, and the validated target was then carried into a structure-guided small-molecule campaign terminating in a defined assay to resolve the direction of modulation. CircuitATLAS thus provides a framework for discovering therapeutics based not only on what is molecularly disrupted in disease, but on what can be controlled to restore circuit function.
+### 快速理解
 
-## 36. Code Understanding is a Bottleneck for Coding Agents
+- **研究背景**：神经系统疾病的药物发现长期以被疾病改变的分子为中心，但致病分子未必是逆转病理的最佳干预点，真正的问题是什么样的分子控制点可被利用来恢复环路功能。
+- **核心创新**：构建了具有溯源依据的系统神经科学知识图谱 CircuitATLAS，刻意排除直接疾病—基因/蛋白边以避免捷径推理，并结合代理式推理工作流与人主导的在体实验室闭环。该图谱包含383万节点、766万条边（其中531万条为LLM抽取），并整合人类细胞图谱与新型多模态在体测量数据。
+- **方法概览**：从文献和结构化数据（如人类细胞 atlas、多模态在体测量）抽取并构建跨疾病、表型、电生理、环路、脑区、细胞类型与分子效应器的关系图谱。代理式工作流从可测量疾病表型出发，经环路和细胞基质推理至分子干预、治疗可行性与临床约束，并通过人主导的在体 lab-in-the-loop 进行实验迭代验证。
+- **结果与结论**：代理提名 ATP1A3（神经元 α3 Na+/K+-ATP 酶）为皮层兴奋性控制点；在中间神经元中限制性表达 ATP1A3 可在体消除对局灶性 4-氨基吡啶挑战的 β 和 γ 频段响应。该验证靶点随后进入基于结构的小分子研发流程，并以明确设计的实验确定调控方向。
+- **一句话 takeaway**：治疗发现应超越“疾病破坏了什么分子”，转向“哪些分子控制点可被操控以恢复环路功能”；CircuitATLAS 将知识图谱、代理式推理与在体验证闭环结合，为环路病变提供了可实验验证的靶点发现新范式。
 
+**中文摘要**：神经系统疾病的药物发现传统上聚焦于被疾病改变的分子，但导致病理的分子未必是逆转病理的最佳切入点。本文探讨：哪些本身未被改变、但可被干预的分子控制点，能够将病理性神经环路恢复至功能状态？作者提出了 CircuitATLAS——一个具有溯源依据的系统神经科学知识图谱及代理式（agentic）框架，用于环路病变（circuitopathies）的靶点发现。该图谱整合了文献衍生的疾病、表型、电生理、环路、脑区、细胞类型与分子效应器之间的关系，并刻意排除直接的疾病—基因和疾病—蛋白边，以减少捷径式推理。图谱包含383万个节点和766万条边，其中531万条为大语言模型抽取的关系，并纳入人类细胞图谱等结构化数据集及新的多模态在体测量数据。作者进一步构建了代理式工作流：从可测量的疾病表型出发，经由其环路与细胞基质推理至分子干预、治疗可行性与临床约束。最后，他们引入由人主导的在体实验室闭环（lab-in-the-loop），将假设生成与实验迭代相连接。在该框架下，代理提名 ATP1A3（神经元 α3 型 Na+/K+-ATP 酶）作为皮层兴奋性的控制点；在体实验中，将 ATP1A3 限制表达于中间神经元，可消除对局灶性 4-氨基吡啶挑战的 β 和 γ 频段响应；随后该已验证靶点被带入基于结构的小分子药物研发流程，并以一个明确设计的实验来确定调控方向。CircuitATLAS thus 提供了一个框架，使治疗发现不仅基于疾病中哪些分子被破坏，更基于哪些分子可以被操控以恢复环路功能。
+
+## 36. 代码理解是编码智能体的瓶颈
+
+- **英文标题**：Code Understanding is a Bottleneck for Coding Agents
 - **作者**：Nishant Balepur、Kiran Tomlinson、Tobias Schnabel
 - **分类**：cs.SE, cs.AI, cs.PL
 - **发布时间**：2026-10-07 06:29:42 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.10610v1) · [PDF](https://arxiv.org/pdf/2610.10610v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.10610v1) · [PDF](https://arxiv.org/pdf/2610.10610v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
-**摘要**：Repository benchmarks (e.g., SWE-bench) for coding agents often assume that lines of code edited can predict task difficulty, but such datasets' poor control over code and task types makes it hard to know which abilities truly drive agent errors. We present CABRA: a Coding Ability Blueprint for Rigorous Agent evaluation. CABRA builds tasks from scratch as call graph transformations and scales difficulty via a task size parameter on four axes: function traversal, search, runtime resolution, and instruction following. We run eight LLMs and six coding agents on 6,840 CABRA tasks to show: 1) LLM accuracy falls as task size~grows, but agents stay near-perfect by offloading work to tools (e.g., grep); 2) Larger CABRA tasks elicit more tool calls for reading and analysis, while a separate study on SWE-bench Verified shows these tool call counts predict agents' accuracy better than lines of code edited, suggesting task difficulty for agents can lie in understanding code to edit, not just in making edits; 3) Extending CABRA to an intense understanding task where models analyze divergent logic across two classes backs this finding, as agent accuracy finally falls. More broadly, we argue for synthetic evaluations like CABRA to unmask LLM weaknesses trivialized by tools (e.g., needle-in-a-haystack) and abilities beyond just editing (e.g., understanding) that coding agents still find difficult, pairing SWE-bench-style tasks with controlled diagnosis.
+### 快速理解
 
-## 37. Why VLMs Miss Small Objects, and When Zooming In Is Safe
+- **研究背景**：现有代码仓库基准（如 SWE-bench）假设被编辑代码行数可预测任务难度，但缺乏对代码与任务类型的严格控制，无法定位智能体出错的真正能力短板。因此需要可控的合成评测来拆解编码智能体的各项能力。
+- **核心创新**：提出 CABRA，一种从零构建的合成评测框架：任务以调用图变换形式生成，并通过任务规模参数在函数遍历、搜索、运行时解析和指令遵循四个维度上系统调节难度。该设计能将工具掩盖的模型弱点（如大海捞针检索）与纯理解能力分离诊断。
+- **方法概览**：在 6,840 个 CABRA 任务上评测 8 个 LLM 和 6 个编码智能体，观察准确率与工具调用随任务规模的变化；另在 SWE-bench Verified 上开展独立研究，比较工具调用次数与代码编辑行数对智能体准确率的预测力；最后将 CABRA 扩展为要求分析两个类中相互背离逻辑的高强度理解任务进行验证。
+- **结果与结论**：实验表明：任务规模增大时 LLM 准确率下降，但智能体借助 grep 等工具保持接近完美；更大任务引发更多阅读分析类工具调用，且 SWE-bench Verified 上工具调用次数比编辑行数更能预测准确率；在需要分析两个类背离逻辑的高强度理解任务中，智能体准确率终于下降，证实代码理解（而非编辑本身）才是智能体的瓶颈。
+- **一句话 takeaway**：编码智能体的难度核心在于理解待编辑的代码，而非执行编辑；工具可掩盖 LLM 的底层弱点。建议将 SWE-bench 式任务与 CABRA 这类受控合成诊断相结合，以全面评估智能体能力。
 
+**中文摘要**：面向编码智能体的代码仓库基准（如 SWE-bench）通常假设被编辑的代码行数可以预测任务难度，但此类数据集对代码和任务类型的控制不足，使人难以判断究竟是哪些能力真正导致了智能体出错。本文提出 CABRA：一种用于严格评测编码智能体的编码能力蓝图（Coding Ability Blueprint for Rigorous Agent evaluation）。CABRA 从零开始构建任务，将其设计为调用图（call graph）变换，并通过任务规模参数在四个维度上调整难度：函数遍历、搜索、运行时解析和指令遵循。我们在 6,840 个 CABRA 任务上运行了 8 个 LLM 和 6 个编码智能体，结果显示：1）随着任务规模增大，LLM 的准确率下降，但智能体通过将工作卸载给工具（如 grep）而保持接近完美的表现；2）规模更大的 CABRA 任务会引发更多用于阅读和分析的工具调用，而一项针对 SWE-bench Verified 的独立研究表明，这些工具调用次数比被编辑的代码行数更能预测智能体的准确率，说明对智能体而言，任务难度可能在于理解要编辑的代码，而不仅仅是进行修改；3）将 CABRA 扩展到一项高强度的理解任务——要求模型分析两个类中相互背离的逻辑——结果进一步支持了这一发现，此时智能体的准确率终于下降。更广泛地说，我们主张采用 CABRA 这类合成评测来揭示被工具掩盖的 LLM 弱点（如大海捞针式检索）以及超出编辑之外、编码智能体仍感困难的能力（如代码理解），从而将 SWE-bench 式任务与受控诊断相结合。
+
+## 37. 该研究论文
+
+- **英文标题**：Why VLMs Miss Small Objects, and When Zooming In Is Safe
 - **作者**：Junzhe Shi、Yuan Gan、Shida Jiang
 - **分类**：cs.CV
 - **发布时间**：2026-10-07 02:10:52 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.09313v3) · [PDF](https://arxiv.org/pdf/2610.09313v3)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.09313v3) · [PDF](https://arxiv.org/pdf/2610.09313v3)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
-**摘要**：Screenshots, documents, engineering drawings, shelves and maps hold many small objects of kinds that change from task to task, and vision-language models (VLMs) promise to find them from an instruction and an example. Yet they see each image through a fixed token budget and miss small objects, so every user, and every agent that calls a model, must choose whether to send an image whole, raise its resolution, split it, or zoom. We show that VLMs miss small objects for two reasons a caller can estimate before any call: an object gets too few visual tokens (S), and a call must search and report too much (L). Raising S by a factor a multiplies the tokens needed to see an image by a^2, while splitting at the same scale lowers L at a cost at most linear in the number of views. Under two monotonicity assumptions, splitting cannot lower expected recall if no view zooms out and views overlap by one object, and neither part can be dropped; every such split pays a minimum token cost, and a simple rule pays it up to an explicit factor. Better models need less S, but an image can be arbitrarily large while a call's budget is fixed, so splitting does not become obsolete, for zoom agents either. In about 187,000 requests to 12 VLMs, up to GPT-6.1, Claude Opus 5.5 and Gemini 4, on controlled images 24 of 40 predicted orderings hold significantly and none is violated; splits that never zoom out raised recall on average over models wherever S was below 1.5, and splits that zoom out lowered it in 19 of 21 model and data settings. The rule raised recall significantly in five of ten settings, by up to 0.28 (from 0.62 to 0.90), and precision and F1 in six, at a token cost known before any call.
+### 快速理解
 
-## 38. PrimitiveCAD: An LLM-Based Point-to-CAD Reconstruction with Primitive-Aware Tokenization and Operation Alignment
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 38. PrimitiveCAD：基于 LLM 的点云到 CAD 重建及基元感知 tokenization 与操作对齐
+
+- **英文标题**：PrimitiveCAD: An LLM-Based Point-to-CAD Reconstruction with Primitive-Aware Tokenization and Operation Alignment
 - **作者**：Jian Gao、Kailin Bi、Jiamin Xu、Jinlan Xu、Gang Xu
 - **分类**：cs.GR
 - **发布时间**：2026-10-06 17:13:46 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.08698v1) · [PDF](https://arxiv.org/pdf/2610.08698v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.08698v1) · [PDF](https://arxiv.org/pdf/2610.08698v1)
 - **匹配方向**：LLM + CAD、LLM + CAD 三维模型
 
-**摘要**：Large-model-based point-to-CAD generation holds immense potential for advancing industrial design and enhancing 3D modeling efficiency. However, most existing methods approach the problem as a general point-cloud encoding and token prediction task, neglecting the tokenization and supervision specifically for CAD-related primitives. As a result, these methods often struggle to accurately reconstruct the intricate primitive structures. To address this limitation, we propose PrimitiveCAD, a novel multi-stage paradigm for point-to-CAD reconstruction that enhances the geometric accuracy of generated CAD models while better preserving critical geometric features. First, we introduce a primitive-aware point cloud tokenization model, enabling the system to learn more robust geometric representations from CAD point clouds. Next, we perform supervised finetuning on a large language model (LLM) and introduce an operation alignment loss to align key CAD operation frequencies, thereby improving the preservation of global shape features. Finally, we incorporate reinforcement learning (RL) and introduce a feature-line alignment reward to further reduce stochasticity and enhance the fine-grained preservation of geometric features. Experiments on the DeepCAD and Fusion360 datasets show that our method achieves state-of-the-art performance in code validity, geometric accuracy, and geometric feature preservation.
+### 快速理解
 
-## 39. Wikidata Search Traces: A Dataset for Training Knowledge Graph Search Agents
+- **研究背景**：点云到 CAD 重建可利用大语言模型生成可编辑参数化建模代码，但主流方法把 CAD 序列当作普通 token 预测问题，缺少面向基元、操作频率和特征线的几何监督，导致复杂基元结构重建不准、关键特征易丢失。
+- **核心创新**：PrimitiveCAD 提出基元感知点云 tokenization，使表示学习更贴近 CAD 基元结构；同时设计操作对齐损失对齐关键建模操作频率，并以特征线对齐奖励强化关键几何特征。其多阶段范式将有监督微调与强化学习结合，兼顾全局形状与细线特征。
+- **方法概览**：方法分三阶段：先用基元感知 tokenizer 将 CAD 点云编码为更稳健的几何 token；再对 LLM 做监督微调，并用操作对齐损失约束关键 CAD 操作出现频率；最后引入 RL，以特征线对齐奖励降低生成随机性并提升细粒度特征保持。
+- **结果与结论**：在 DeepCAD 和 Fusion360 数据集上，PrimitiveCAD 在代码有效性、几何精度和几何特征保持方面取得 state-of-the-art 表现。
+- **一句话 takeaway**：关键启示是：面向 CAD 的结构先验应显式进入 tokenization、监督损失与 RL 奖励，而非仅依赖通用点云到序列建模。PrimitiveCAD 表明对齐基元、操作频率和特征线可同步提升可执行性、精度与工业特征保真度。
 
+**中文摘要**：基于大模型的点云到 CAD 生成对工业设计和 3D 建模效率提升具有重要意义，但现有方法多将其视为通用的点云编码与 token 预测任务，忽略了面向 CAD 基元的 tokenization 与监督，因而难以准确重建复杂的基元结构。为此，论文提出 PrimitiveCAD，一种多阶段点云到 CAD 重建范式，以提升生成 CAD 模型的几何精度并更好保留关键几何特征。该方法首先引入基元感知点云 tokenization 模型，从 CAD 点云中学习更鲁棒的几何表示；随后在大语言模型上进行有监督微调，并提出操作对齐损失以对齐关键 CAD 操作频率，从而改善全局形状特征保留；最后结合强化学习，引入特征线对齐奖励以降低随机性并增强几何特征的细粒度保留。在 DeepCAD 和 Fusion360 数据集上的实验表明，该方法在代码有效性、几何精度和几何特征保持方面达到最优性能。
+
+## 39. 该研究论文
+
+- **英文标题**：Wikidata Search Traces: A Dataset for Training Knowledge Graph Search Agents
 - **作者**：Mohamed Chenene、Carlos Rosas-Hinostroza、Anastasia Stasenko、Shani Evenstein Sigalov、Pierre-Carl Langlais
 - **分类**：cs.CL
 - **发布时间**：2026-10-05 16:29:22 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.06650v3) · [PDF](https://arxiv.org/pdf/2610.06650v3)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.06650v3) · [PDF](https://arxiv.org/pdf/2610.06650v3)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Wikidata is one of the largest open knowledge bases, yet answering a complex question over it still requires a SPARQL query that names the right entities and properties and chains their relations. Language models offer a natural-language alternative but answer largely from memory, which is least reliable for less prominent entities. We study agents that instead answer by exploring the graph, and argue that two obstacles limit them: the lack of training data recording how a solver explores, and interfaces that add large graph results directly to the model's context. We test three hypotheses: that the difficulty of graph search can be controlled through the structure of a question rather than only through obscure entities or wording; that much of the failure on long-horizon search comes from how retrieved evidence is managed rather than from the model itself; and that, in a suitable environment, open-weight models can match commercial closed ones. We construct multi-hop questions on a frozen Wikidata snapshot by replacing named entities with nested conditions, checking after each expansion that the target remains unique and that every new condition is necessary. We release 10,235 solving traces over single-entity and multi-hop questions, together with the recursive language model (RLM) harness that produced them, in which models batch graph calls, keep results in persistent Python state and interpret selected evidence through sub-calls. On 100 questions, the harness improves both models we ran under both interfaces compared with direct tool calling over the same functions: gpt-6-luna rises from 49 to 61 correct answers, doubling its multi-hop accuracy, and Qwen3.8-27B, an open-weight model served on a single GPU, from 60 to 74.
+### 快速理解
 
-## 40. templar: agentic induction and evolution of standardized radiology reporting templates from large-scale clinical corpora
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 40. TEMPLAR：从大规模临床语料库中智能体式归纳并演化标准化放射学报告模板
+
+- **英文标题**：templar: agentic induction and evolution of standardized radiology reporting templates from large-scale clinical corpora
 - **作者**：Xiaotian Hu、Mingxuan Liu、Zhonghan Wang、Xinfeng Zhang、Yiming Huang、Ziang Wang、Kasidit Anmahaepong、Yijin Li、Yifei Chen、Hongjia Yang、Zihan Li、Qiyuan Tian
 - **分类**：cs.MA, cs.CL
 - **发布时间**：2026-10-04 14:25:10 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.05247v1) · [PDF](https://arxiv.org/pdf/2610.05247v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.05247v1) · [PDF](https://arxiv.org/pdf/2610.05247v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Structured radiology reporting mitigates the heterogeneity of free-text reports, yet its benefits depend on high-quality reporting templates. In practice, such templates are conventionally built through labor-intensive expert consensus and therefore vary across institutions and lag behind evolving clinical practice. Large language models (LLMs) enable automated template induction, but existing approaches remain limited: single-LLM induction is constrained by context length, and the corpus-scale method ASTAR produces a static, closed-corpus template without external grounding or downstream adaptation. To address these limitations, we propose TEMPLAR, a TEMPLate-centric Agentic framework for inducing and evolving standardized Radiology reporting templates from large-scale clinical corpora. TEMPLAR treats the template as a persistent central state maintained alongside two provenance-aware knowledge graphs, namely an anatomical graph that constrains template construction and a diagnostic graph that supports finding-to-diagnosis reasoning. Three agents operate on this state. The Induction Agent derives canonical clinical slots from anatomy-constrained Span-Triple atoms via dual-view similarity clustering; the Evolution Agent then assembles these slots into a hierarchical template and revises it under consistency constraints, external clinical evidence, and downstream structuring feedback; and the Clinical Agent applies the evolved template to report structuring, reconstruction, and diagnostic reasoning. Across four datasets, TEMPLAR outperforms ASTAR, three medical LLMs, and six general-purpose LLMs in coverage, information fidelity, and diagnostic fidelity, while achieving the highest or tied-highest LLM-rated template quality. Its fidelity advantages over ASTAR persist under cross-dataset transfer, and cumulative ablations support complementary contributions of its key components.
+### 快速理解
 
-## 41. Large Language Models and Augmented Democracy
+- **研究背景**：结构化放射报告可减少自由文本报告之间的表述差异，但现有模板通常依赖专家人工构建，成本高且难以适应临床知识的持续更新。现有LLM自动归纳方法受上下文长度、外部证据和下游反馈能力限制，难以生成可演化且具临床依据的标准化模板。
+- **核心创新**：TEMPLAR将模板设计为持久核心状态，并结合解剖知识图与诊断知识图，实现模板构建约束、诊断推理和来源可追溯。该框架还通过多智能体协作引入外部临床证据与下游反馈，突破了静态、封闭语料库式模板归纳的局限。
+- **方法概览**：TEMPLAR由三个智能体组成：归纳智能体从受解剖约束的片段—三元组原子中提取临床槽位并聚类；演化智能体将槽位组织为层级模板，并基于一致性约束、外部证据和下游反馈进行修订；临床智能体执行报告结构化、重建和诊断推理。模板与解剖图、诊断图共同作为可追溯的核心状态被持续维护。
+- **结果与结论**：在四个数据集上，TEMPLAR在覆盖率、信息保真度和诊断保真度方面均优于ASTAR、三个医学LLM及六个通用LLM，并取得最高或并列最高的LLM评分模板质量。其相对ASTAR的保真度优势在跨数据集迁移中仍然保持，累积消融结果支持各关键组件具有互补贡献。
+- **一句话 takeaway**：TEMPLAR证明了将知识图谱、多智能体协作、外部临床证据和下游反馈整合到统一模板状态，可自动生成并持续改进高质量放射学报告模板。该框架有望降低模板构建成本，提高跨机构结构化报告的一致性和临床适应性。
 
+**中文摘要**：结构化放射学报告能够缓解自由文本报告的异质性，但其收益依赖于高质量报告模板。实践中，此类模板通常通过劳动密集型的专家共识构建，因此会因机构而异，并滞后于不断演进的临床实践。大语言模型（LLM）使自动化模板归纳成为可能，但现有方法仍存在局限：单LLM归纳受上下文长度限制，而语料库规模的ASTAR方法只能生成静态、封闭语料库模板，缺乏外部证据支持和下游适应能力。为此，我们提出TEMPLAR，这是一种以模板为中心的放射学报告模板智能体框架，可基于大规模临床语料库归纳并持续演化标准化模板。TEMPLAR将模板视为与两个来源可追溯知识图共同维护的持久核心状态：解剖图用于约束模板构建，诊断图用于支持从影像征象到诊断的推理。三个智能体围绕该状态运行：归纳智能体通过双视角相似度聚类，从受解剖约束的片段—三元组原子中推导规范化临床槽位；演化智能体将这些槽位组装为层级模板，并依据一致性约束、外部临床证据和下游结构化反馈进行修订；临床智能体则将演化后的模板用于报告结构化、重建和诊断推理。在四个数据集上，TEMPLAR在覆盖率、信息保真度和诊断保真度方面均优于ASTAR、三个医学LLM和六个通用LLM，并获得最高或并列最高的LLM评分模板质量。与ASTAR相比，其保真度优势在跨数据集迁移中仍然保持，累积消融实验也表明各关键组件具有互补贡献。
+
+## 41. 大语言模型与增强型民主
+
+- **英文标题**：Large Language Models and Augmented Democracy
 - **作者**：Jairo Gudiño-Rosero
 - **分类**：cs.CY, cs.CL, cs.CR
 - **发布时间**：2026-10-03 10:02:14 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.04412v1) · [PDF](https://arxiv.org/pdf/2610.04412v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.04412v1) · [PDF](https://arxiv.org/pdf/2610.04412v1)
 - **匹配方向**：LLM + 知识图谱、LLM + Agent
 
-**摘要**：Artificial intelligence enables computational agents to represent political preferences and take part in collective decision-making. In this thesis, I investigate the opportunities and challenges of digital twins (DTs) based on Large Language Models (LLMs) as intermediaries in augmented democracy, focusing on individual preference representation, collective representation of political organizations, and the vulnerability of those representations to attackers. First, using data from an online experiment in Brazil, I examine whether personalized DTs can predict citizens' preferences for unseen policy proposals. Second, I extend the DT framework from individuals to political organizations. Using Swiss parliamentary data, I build topic-specific knowledge graphs from lawmakers' legislative records and connect them to LLM-based lawmaker agents, which are organized into party-level DTs representing collective positions. Agentic deliberation among these agents tests whether aggregated party representations capture a broader range of intra-party perspectives than official party communications. Finally, I study the vulnerability and robustness of LLM-mediated deliberation against prompt-injection attacks that amplify viewpoints, suppress opinions, or redirect consensus. Using data from a 2023 deliberative experiment in the United Kingdom, I analyze how attack effectiveness varies with the distribution of opinions and rhetorical strategies, and evaluate a pipeline combining injection detection, structured opinion representations, and reinforcement learning to improve resistance. These findings characterize the opportunities and challenges of LLM-based digital twins in augmented democracy, stressing accurate preference representation, faithful aggregation, and robustness to strategic interaction.
+### 快速理解
 
-## 42. LEAP: Learning Efficient Action Proposals For LLM Agents
+- **研究背景**：大语言模型使数字孪生能够代理个人或组织参与政治表达与集体决策，但其偏好表示是否准确、组织立场聚合是否忠实，以及系统是否容易被操纵，仍缺乏系统研究。
+- **核心创新**：论文将大语言模型数字孪生从个体偏好预测扩展到政党级集体表示，并结合知识图谱、智能体审议与攻击防御流程，系统考察增强型民主中的表示、聚合与鲁棒性问题。
+- **方法概览**：研究使用巴西在线实验数据检验个体数字孪生的偏好预测能力；利用瑞士议会立法记录构建主题知识图谱和议员智能体，再聚合为政党数字孪生并进行智能体审议；基于2023年英国审议实验数据模拟提示注入攻击，评估攻击如何随意见分布和修辞策略变化，并测试结合注入检测、结构化意见表示和强化学习的防御管线。
+- **结果与结论**：摘要未提供明确实验结果；仅概括了研究设计，并总体强调大语言模型数字孪生需要在偏好表示准确性、集体立场忠实性和抗策略操纵鲁棒性之间取得平衡。
+- **一句话 takeaway**：该论文说明大语言模型数字孪生有望成为增强型民主中的政治中介，但落地前必须验证其能否忠实代表个人与组织偏好，并防范通过提示注入放大立场、压制异见或操纵共识的攻击。
 
+**中文摘要**：人工智能使计算智能体能够表达政治偏好并参与集体决策。本文研究基于大语言模型的数字孪生作为增强型民主中介的机会与挑战，重点包括个体偏好表示、政治组织的集体表示，以及这些表示面临攻击时的脆弱性。首先，作者利用巴西一项在线实验数据，检验个性化数字孪生能否预测公民对未见政策提案的偏好。其次，作者将数字孪生框架从个体扩展到政治组织：基于瑞士议会数据，从议员的立法记录构建特定主题知识图谱，并将其连接到基于大语言模型的议员智能体，再组织成表示政党集体立场的政党级数字孪生；这些智能体之间的协商式审议用于检验聚合后的政党表示是否比官方政党沟通涵盖更广泛的党内观点。最后，作者研究大语言模型中介审议对提示注入攻击的脆弱性与鲁棒性，这些攻击会放大某些观点、压制意见或转移共识；作者使用2023年英国一项审议实验数据，分析攻击有效性如何随意见分布和修辞策略变化，并评估一种结合注入检测、结构化意见表示和强化学习的防护流程。总体上，这些发现刻画了大语言模型数字孪生在增强型民主中的机会与挑战，强调准确的偏好表示、忠实的聚合以及对策略性交互的鲁棒性。
+
+## 42. 该研究论文
+
+- **英文标题**：LEAP: Learning Efficient Action Proposals For LLM Agents
 - **作者**：Zhen Xu、Qizheng Zhang、Gerry Wan、Shang Zhu、Ce Zhang
 - **分类**：cs.LG, cs.AI, cs.CL
 - **发布时间**：2026-10-02 01:44:03 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.02670v1) · [PDF](https://arxiv.org/pdf/2610.02670v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.02670v1) · [PDF](https://arxiv.org/pdf/2610.02670v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
-**摘要**：LLM agents are known to be slow in rollouts. An agent completes a task one step at a time. At each step, it reasons and then chooses an action to execute. The next step and action cannot start until the previous one has finished. Speculative decoding accelerates the rollouts at the reason phase by drafting and verifying the inference tokens. Recent works have also started to apply similar ideas at the action phase. These works use off-the-shelf models, usually large, to draft action proposals for target model to verify. Large drafters match the target more often but take longer to propose, while small off-the-shelf models are fast but rarely make the same decision as the target. We ask a more general question: what determines the end-to-end speedup of action speculation? To answer it, we develop a latency framework for the speculative round. The framework compares what a round gains with what it costs. The gain depends on how well the drafter predicts the target and on how many steps the task can take before it ends. The cost comes from drafting, from waiting for target verification and from executing tools. Guided by the framework, we introduce LEAP (Learning Efficient Action Proposals) which keeps the drafter small and makes it accurate by training it on the target actions sequences. With a small 0.6B model, LEAP agrees with the target on most decisions and makes agents up to 60% faster in end-to-end wall clock time, with no systematic change in task success. Across various datasets, target models and draft models, the framework accounts for most of the measured speedups. We also show the draft model can be online trained with no prior trace collection and match the performance of offline training, making LEAP practical to deploy in the real world.
+### 快速理解
 
-## 43. What Does a Token Cost? A Mixture-of-Agents Measurement of Sufficient Per-Token Compute
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 43. 一个token值多少算力？基于混合智能体架构的每token充足计算量度量
+
+- **英文标题**：What Does a Token Cost? A Mixture-of-Agents Measurement of Sufficient Per-Token Compute
 - **作者**：Zhixu Du、Weijia Han、Hai Helen Li、Yiran Chen
 - **分类**：cs.AI
 - **发布时间**：2026-10-01 21:11:41 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2610.02491v1) · [PDF](https://arxiv.org/pdf/2610.02491v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2610.02491v1) · [PDF](https://arxiv.org/pdf/2610.02491v1)
 - **匹配方向**：LLM + CAD 二维图纸、LLM + Agent
 
-**摘要**：Large language models spend the same amount of computation on every token they generate, regardless of how difficult each token is to produce. Methods such as speculative decoding and model routing are built on the premise that much of this computation is unnecessary, yet the computation an individual token actually requires has not been measured. We measure it through a Mixture-of-Agents (MoA) lens: a panel of fifteen language models of increasing capacity, drawn from three families, in which every agent attempts to reproduce a reference sequence token by token, conditioned on the correct preceding tokens. We define the inference cost of the smallest agent that succeeds as the token's sufficient compute, which upper-bounds what the token requires. On three core benchmarks, a 0.5B agent reproduces 92--95\% of reference tokens. Across Qwen, OLMo, and R1-distilled panels, the most expensive 10\% account for 64--80\% of estimated FLOPs. On all 500 MATH-500 problems, the MoA-derived map helps model routing reduce projected latency from 7.59 to 5.12 seconds while slightly improving accuracy, relative to the best confidence-routing baseline. The MoA-map helps drafting use 32.6\% fewer draft tokens and approximately 20\% lower projected latency than fixed-window drafting at similar accuracy. These comparisons reveal remaining allocation headroom, motivating controllers that exploit sufficient-compute structure.
+### 快速理解
 
-## 44. Dependable Agents Need Hard and Fuzzy Rules
+- **研究背景**：大语言模型对所有token一视同仁地消耗相同计算量，但投机解码和模型路由等方法的成功暗示大量计算被浪费，而单个token真正所需计算量一直缺乏直接度量。
+- **核心创新**：首次提出“充足计算量”概念，通过15个来自三个模型家族、能力递增的智能体组成MoA评审团，以能正确复现某token的最小智能体的推理成本作为该token计算需求的上界，从而量化每token的计算需求分布。
+- **方法概览**：让评审团中的每个智能体在已知正确前缀条件下逐token复现参考序列，将最小成功智能体的推理成本定义为该token的充足计算量，并在三个核心基准上统计token难度分布。
+- **结果与结论**：0.5B小模型可复现92–95%的参考token；最贵的10%的token占64–80%的估算FLOPs；MoA地图使MATH-500路由延迟从7.59秒降至5.12秒且准确率微升；投机解码草稿token减少32.6%、延迟降低约20%且准确率持平。
+- **一句话 takeaway**：token之间存在高度不均的计算需求，少量“昂贵”token主导总算力消耗，利用充足计算量结构进行自适应计算分配仍有显著优化空间。
 
+**中文摘要**：大语言模型对每个生成token投入相同的计算量，无论该token的生成难度如何。投机解码、模型路由等方法都建立在“大部分计算是多余的”这一假设之上，但单个token实际需要的计算量从未被度量过。本文通过混合智能体（MoA）视角来度量它：构建一个由三个模型家族共15个能力递增的语言模型组成的评审团，每个智能体在已知正确前缀的条件下逐token尝试复现参考序列，并将能够成功复现该token的最小智能体的推理成本定义为该token的“充足计算量”，作为其上界。在三个核心基准上，一个0.5B的小模型即可复现92–95%的参考token。在Qwen、OLMo和R1蒸馏版评审团中，最贵的10%的token占据了64–80%的估算FLOPs。在MATH-500全部500道题上，MoA导出的计算量地图帮助模型路由将预计延迟从7.59秒降至5.12秒，同时相比最优的置信度路由基线还略有提升准确率。该地图还使投机解码的草稿token减少32.6%，预计延迟降低约20%，且准确率相当。这些对比揭示了计算分配上仍存在的优化空间，启发能利用充足计算量结构的控制器设计。
+
+## 44. 该研究论文
+
+- **英文标题**：Dependable Agents Need Hard and Fuzzy Rules
 - **作者**：Frederick Roth
 - **分类**：cs.SE, cs.AI
 - **发布时间**：2026-10-31 15:33:22 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.01043v1) · [PDF](https://arxiv.org/pdf/2611.01043v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.01043v1) · [PDF](https://arxiv.org/pdf/2611.01043v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Language models let software read requests in ordinary language, but they keep rules as people do: usually, and less so under pressure. Conventional code keeps rules exactly, but it cannot read a request. We argue that dependable agents need both, because the two kinds of rule cover overlapping and unequal regions of what an agent might do. Code holds the limits that can be stated exactly. Learned fuzzy rules cover the judgment that cannot. We test the hard layer in three domains, purchasing, delegation of authority and data access, on 1,340 episodes written by authors outside our team. Models left to decide for themselves executed unauthorized actions in up to 151 of 340 purchasing episodes and 269 of 470 delegation episodes, and the strongest model breached in every condition. A hard guard between proposal and action executed none, and an exhaustive search of 183,204 proposals agreed. In a further test, where an outsider wrote the owner's rules and a program mapped them to the guard, two episodes breached at a boundary we had written down in advance. We then test the pair. Concept Programming instills a named rule in a model and measures its errors on wording it never saw. A small model taught four judgment rules this way flagged 95 of 96 rule-breaking purchases that no exact rule can see, and 4 of 108 legitimate requests. Placed in front of the guard, it left 1 of 192 rule-breaking requests unstopped, where the guard alone left 77 and 70, and the guard still held every exact limit. A prompted frontier model did about as well, so the claim is that a small taught rule can do the job, not that it does it better.
+### 快速理解
 
-## 45. Jet-QSparse: Accelerating Agentic LLM Inference with 4-Bit Sparse Attention
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 45. Jet-QSparse：利用4比特稀疏注意力加速智能体化大语言模型推理
+
+- **英文标题**：Jet-QSparse: Accelerating Agentic LLM Inference with 4-Bit Sparse Attention
 - **作者**：Haozhan Tang、Hao Kang、Meng Lu、Yecheng Wu、Zerui Wang、Seokho Han、Haocheng Xi、Shuo Yang、Song Han、Han Cai
 - **分类**：cs.LG
 - **发布时间**：2026-10-31 15:06:46 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.01022v1) · [PDF](https://arxiv.org/pdf/2611.01022v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.01022v1) · [PDF](https://arxiv.org/pdf/2611.01022v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Long-horizon reasoning and agentic workloads strain KV-cache capacity and decode attention throughput. We present Jet-QSparse, a training-free method that combines compact NVFP4 cache storage with native FP4 query-key computation on Blackwell tensor cores. A dense scan scores the full key history and selects 128-token blocks for sparse FP16 value aggregation with FP32 accumulation, preserving higher precision in the output-forming step while enabling contiguous tile loads. Calibrated key centering and at most two BF16 pages per sequence and layer address quantization error; FP8 prefill uses a temporary arena while the persistent cache is packed directly from BF16 activations. Across four hybrid LLMs, a budget of 128 blocks per KV head shows no detected accuracy loss on the evaluated mathematical reasoning, coding, and agentic benchmarks, although some smaller budgets incur losses. With 64 blocks, Qwen3.8-27B achieves a $1.94\times$ end-to-end decode speedup over dense BF16 at 128K context and batch size 16 on one GB300, and the measured Qwen KV pools provide $2.58$-$2.76\times$ BF16's token capacity.
+### 快速理解
 
-## 46. Pulse: Long-Horizon Tasks Need Streaming Personalization
+- **研究背景**：长上下文智能体任务需要保存大量KV缓存，使内存容量、带宽和解码注意力吞吐量成为主要瓶颈。传统量化或稀疏注意力方法往往难以同时兼顾低比特计算效率、数值精度和长程信息保留。
+- **核心创新**：Jet-QSparse首次将NVFP4持久化KV缓存与Blackwell张量核心的原生FP4查询—键计算结合，并通过分块稀疏值聚合保留输出精度。校准键中心化、少量BF16纠错页面以及直接从BF16激活打包缓存的设计，进一步抑制量化误差。
+- **方法概览**：该方法先对完整键历史进行稠密评分，选择128 token块，再在Blackwell上以FP4计算查询—键注意力，并以FP16稀疏聚合值、FP32累加生成输出。预填充阶段使用临时FP8内存区，最终持久缓存采用NVFP4格式，并为每个序列和层至多维护两个BF16页面。
+- **结果与结论**：在四种混合架构大语言模型上，每个KV头使用128个块时，数学推理、代码和智能体基准均未检测到精度损失，但更小预算可能损失精度。64块配置下，Qwen3.8-27B在128K上下文、批量大小16和单块GB300条件下取得1.94倍端到端解码加速，KV池容量达到BF16的2.58至2.76倍。
+- **一句话 takeaway**：Jet-QSparse表明，低比特注意力计算与可控的分块稀疏化可以协同提升长上下文智能体推理的速度和缓存容量，同时维持可用精度。其核心启示是应分别优化键匹配、值聚合和缓存存储路径，而非对整个注意力过程采用统一的低精度方案。
 
+**中文摘要**：长程推理与智能体工作负载会持续消耗KV缓存容量，并制约解码阶段注意力计算的吞吐量。本文提出无需训练的Jet-QSparse方法，将紧凑的NVFP4缓存存储与Blackwell张量核心上的原生FP4查询—键计算相结合。该方法通过稠密扫描为完整键历史打分，并选取由128个token组成的块，随后以FP16稀疏方式聚合数值、以FP32累加，从而在输出形成阶段保持较高精度，并实现连续块加载。经过校准的键中心化，以及每个序列和层至多保留两个BF16页面，可降低量化误差；FP8预填充使用临时内存区，而持久化缓存则直接从BF16激活打包。在四种混合架构大语言模型上，每个KV头保留128个块时，所评估的数学推理、代码与智能体基准均未检测到精度损失，但部分更小的块预算会产生损失。使用64个块时，在单块GB300、128K上下文和批量大小16的条件下，Qwen3.8-27B相比稠密BF16实现1.94倍端到端解码加速；实测Qwen KV池的token容量达到BF16的2.58至2.76倍。
+
+## 46. Pulse：长程任务需要流式个性化
+
+- **英文标题**：Pulse: Long-Horizon Tasks Need Streaming Personalization
 - **作者**：Qijia Zhuang、Jialiang Liang、Yuxiang Ren
 - **分类**：cs.AI
 - **发布时间**：2026-10-31 14:26:13 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00988v1) · [PDF](https://arxiv.org/pdf/2611.00988v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00988v1) · [PDF](https://arxiv.org/pdf/2611.00988v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Large language model agents increasingly undertake complex, long-horizon tasks that benefit from sustained personalized support through long-term memory. Existing memory-augmented methods retrieve and use memory primarily from the initial request, with limited awareness of ongoing execution and emerging personalization needs. Agents may therefore overlook user preferences and project constraints during multistep tasks. We propose Pulse, a streaming personalization method for long-horizon tasks. An independent, lightweight memory agent continuously monitors execution, identifies emerging personalization needs and potential preference conflicts, and uses user and project memories to provide targeted interventions at appropriate stages. Reinforcement learning optimizes when and how the memory agent intervenes, improving the timeliness and accuracy of personalized support. Pulse scores 71.9% on $π$-Bench and 46.4% on MCP-Persona, achieving the highest overall scores among the compared methods on both datasets while improving task execution efficiency.
+### 快速理解
 
-## 47. Illusion: Safeguarding Topology Confidentiality in LLM Multi-Agent Systems via Behavior-Preserving Obfuscation
+- **研究背景**：长程任务依赖长期记忆来维持稳定、个性化的支持，但现有记忆增强方法通常只在初始请求阶段检索记忆。由于对执行过程和动态出现的个性化需求缺乏感知，智能体在多步任务中容易忽略用户偏好和项目约束。
+- **核心创新**：Pulse 将个性化从一次性检索扩展为执行过程中的流式干预，由轻量记忆智能体动态发现需求与偏好冲突。其核心创新在于用强化学习学习“何时干预、如何干预”，在及时性与准确性之间取得更好平衡。
+- **方法概览**：方法包含一个独立、轻量的记忆智能体，持续监控长程任务执行，识别新兴个性化需求与潜在偏好冲突，并结合用户记忆和项目记忆在适当时机介入。干预策略通过强化学习优化，以提升个性化支持的时机和质量。
+- **结果与结论**：摘要明确报告：Pulse 在 π-Bench 上得分 71.9%，在 MCP-Persona 上得分 46.4%，在两项数据集的比较方法中均取得最高总分。同时，该方法还提升了任务执行效率。
+- **一句话 takeaway**：长程个性化不应只发生在任务起点，而应在执行中持续感知并适时干预。Pulse 表明，轻量监控加强化学习干预可在长程任务中同时提升个性化质量与效率。
 
+**中文摘要**：大语言模型智能体越来越多地承担复杂的长程任务，这类任务需要借助长期记忆持续获得个性化支持。现有记忆增强方法主要在初始请求时检索和使用记忆，对任务执行过程以及不断涌现的个性化需求感知有限，因此在多步骤任务中可能忽视用户偏好与项目约束。本文提出 Pulse，一种面向长程任务的流式个性化方法：一个独立且轻量的记忆智能体持续监控执行过程，识别新出现的个性化需求和潜在偏好冲突，并利用用户记忆与项目记忆在合适阶段提供有针对性的干预；强化学习用于优化记忆智能体何时以及如何干预，从而提升个性化支持的及时性与准确性。Pulse 在 π-Bench 上得分 71.9%，在 MCP-Persona 上得分 46.4%，在两个数据集的比较方法中均取得最高总分，同时提高了任务执行效率。
+
+## 47. Illusion：通过保持行为不变的混淆技术保护LLM多智能体系统拓扑机密性
+
+- **英文标题**：Illusion: Safeguarding Topology Confidentiality in LLM Multi-Agent Systems via Behavior-Preserving Obfuscation
 - **作者**：Yiu-Fai Cheung、Hongzhi Guo、Miao Pan、Irwin King、Hao Wang
 - **分类**：cs.CR, cs.AI
 - **发布时间**：2026-10-31 13:23:42 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00923v1) · [PDF](https://arxiv.org/pdf/2611.00923v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00923v1) · [PDF](https://arxiv.org/pdf/2611.00923v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：The communication topology of Large Language Model Multi-Agent Systems (LLM-MASs) governs how information propagates among agents and encodes critical domain knowledge and expert workflow design. It is valuable intellectual property and plays a decisive role in system utility and safety, yet remains vulnerable to inference attacks that stealthily reconstruct it from agent outputs. Existing defenses detect or mitigate such attacks but do not proactively conceal the topology itself. We propose \textit{Illusion}, a proactive topology obfuscation defense for LLM-MAS. \textit{Illusion} injects fake edges and fake messages to present attackers with a deceptive topology, while selecting low-impact candidates that preserve output-distribution equivalence and task-accuracy non-inferiority. The resulting fake edges are designed to be indistinguishable from genuine messages under black-box observation. Extensive experiments show that \textit{Illusion} reduces edge-level F1 from over 0.87 to 0.62 and graph similarity from over 0.94 to 0.71. It also largely preserves output distributions and task performance, and its fake edges resist both similarity-based and LLM-judge filtering, even under adaptive pruning.
+### 快速理解
 
-## 48. When 200 OK Is Not an Answer: Silent Fetch Failures in Agentic Web Content Acquisition
+- **研究背景**：LLM-MAS的通信拓扑编码了领域知识与专家工作流，是重要的知识产权，且易受从智能体输出推断重构拓扑的攻击。现有防御只能被动检测或缓解攻击，无法主动隐藏拓扑本身。
+- **核心创新**：首次提出主动的拓扑混淆防御思路：通过注入与真实消息难以区分的虚假边和虚假消息，向攻击者呈现欺骗性拓扑，而非仅检测推断攻击。
+- **方法概览**：在低影响的候选边与消息中进行选择，在保证输出分布等价和任务准确率非劣的前提下注入伪造通信，使虚假边在黑盒观察下与真实消息难以区分。
+- **结果与结论**：Illusion将攻击者的边级F1从0.87以上降至0.62，图相似度从0.94以上降至0.71；同时较好保持输出分布与任务性能，虚假边可抵抗相似度过滤和LLM裁判过滤，且在自适应剪枝下依然有效。
+- **一句话 takeaway**：与其被动检测拓扑推断攻击，不如主动以行为保持的方式混淆通信拓扑；精心构造的虚假边能在几乎不损害系统功能的前提下有效降低拓扑泄露风险。
 
+**中文摘要**：大语言模型多智能体系统（LLM-MAS）的通信拓扑决定了信息在智能体之间的传播方式，编码了关键的领域知识与专家工作流设计。它是宝贵的知识产权，对系统的效用和安全性起着决定性作用，但容易受到隐蔽地从智能体输出中重构拓扑的推断攻击。现有防御只能检测或缓解此类攻击，无法主动隐藏拓扑本身。本文提出Illusion——一种主动的拓扑混淆防御方法。Illusion注入虚假边和虚假消息，向攻击者呈现欺骗性拓扑，同时挑选影响较小的候选，以保持输出分布等价性和任务准确率的非劣性。所生成的虚假边在黑盒观察下与真实消息难以区分。大量实验表明，Illusion将边级F1从0.87以上降至0.62，图相似度从0.94以上降至0.71；同时很大程度上保持了输出分布和任务性能，其虚假边能够抵抗基于相似度的过滤和LLM裁判过滤，即使在自适应剪枝下依然有效。
+
+## 48. 当 200 OK 并非答案：智能体网页内容获取中的静默抓取失败
+
+- **英文标题**：When 200 OK Is Not an Answer: Silent Fetch Failures in Agentic Web Content Acquisition
 - **作者**：Shuyang Zhang
 - **分类**：cs.IR, cs.CL, cs.NI
 - **发布时间**：2026-10-31 12:42:45 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00884v1) · [PDF](https://arxiv.org/pdf/2611.00884v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00884v1) · [PDF](https://arxiv.org/pdf/2611.00884v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Web agents and answer engines fetch pages at question time, and liveness checks of cited sources treat an HTTP 200 response as success. We measure how often that assumption fails and what it does to measurements built on fetched pages. We fetched 10,307 URLs in three days with a polite static client and a rendered browser client: pages from 1,507 sites in five strata, random non-existent paths on every site, and the 4,795 URLs cited by expert-verified claims in ExpertQA. We define a taxonomy of what a 200 response contains, label the static 200 responses automatically, and check the labels against 300 items reviewed by an LLM-based assistant; a human check of 60 of them retained every reviewed usability label after discussion. By the automatic labels, 20.9% of the pages that a static client receives with status 200 do not contain the page's main content: app shells, bot challenges, block pages, error and placeholder pages, and partial content. On the held-out test split, the reviewed sample lowers this estimate from 25.5% to 20.0%. 13.1% of the sites whose random-path probe was answered returned 200. The error propagates: for the cited sources, treating 200 as content overstates the share of claim-source pairs that can be checked against live content by 12.2 points and inflates the apparent silent citation-drift rate from 5.8% to 21.9%. Cheap heuristics catch most of it. Text length, probe comparison and redirect-to-root, combined and tuned on held-out sites, recover 86% of unusable reviewed responses at a false-alarm rate near 5%. Content-reading detectors perform comparably: the best, the text classifier, gains five to seven points of recall at more than twice the false-alarm rate. We argue that agents and their evaluations should report fetch outcomes explicitly instead of inferring them from the status line and will release the labelled data and code.
+### 快速理解
 
-## 49. What Breaks and What Comes Back: Capability Damage and Recovery in Depth-Pruned Small Language Models
+- **研究背景**：网页智能体和答案引擎在回答问题时实时抓取页面，其存活检测与评估普遍将 HTTP 200 响应视为抓取成功。作者质疑这一假设，研究 200 响应中实际不含主体内容的比例及其对下游测量的影响。
+- **核心创新**：提出了对 HTTP 200 响应内容的细粒度分类体系（应用外壳、机器人验证、拦截页、错误页、占位页、部分内容等），并首次系统量化了'200 即成功'假设在真实大规模抓取中的失败率。研究还揭示了该误差如何传播并扭曲基于引用来源的评估指标。
+- **方法概览**：在三天内用静态客户端与渲染浏览器客户端抓取 10,307 个 URL，覆盖五个分层的 1,507 个网站、随机不存在路径探测以及 ExpertQA 的 4,795 条引用 URL。对静态 200 响应进行自动标注，用 LLM 助手审查 300 条样本核对，并对其中 60 条进行人工复核。在留出网站上调参与评估文本长度、探测对比、重定向到根目录等启发式方法及内容感知检测器。
+- **结果与结论**：20.9% 的静态 200 页面不含主体内容（留出测试集审查后为 20.0%），13.1% 对随机路径探测响应的网站返回 200。将 200 视为有内容会使可核查的主张—来源对比例高估 12.2 个百分点，并将静默引用漂移率从 5.8% 夸大到 21.9%。组合启发式方法以约 5% 误报率可召回 86% 的不可用响应，最优文本分类器召回率更高五到七个百分点但误报率翻倍。
+- **一句话 takeaway**：HTTP 状态行不能作为抓取成功的代理指标，智能体及其评估应显式报告抓取结果而非依赖 200 推断。廉价启发式即可捕获大部分静默失败，实践者可低成本集成；作者将发布标注数据与代码以促进后续研究。
 
+**中文摘要**：网页智能体和答案引擎在回答问题时实时抓取页面，而对引用来源的存活检测通常将 HTTP 200 响应视为成功。本文测量这一假设在多大程度上失效，以及它如何影响基于抓取页面的各项测量指标。研究者在三天内用礼貌的静态客户端和渲染浏览器客户端抓取了 10,307 个 URL：包括来自五个分层中 1,507 个网站的页面、每个网站上的随机不存在路径，以及 ExpertQA 中经专家验证的 4,795 条主张所引用的 URL。研究者定义了 200 响应所包含内容的分类体系，对静态 200 响应进行自动标注，并用基于 LLM 的助手审查的 300 条样本核对标注；其中 60 条经人工复核，在讨论后保留了全部审查过的可用性标签。按自动标注，静态客户端收到的状态 200 页面中有 20.9% 不含页面主体内容，包括应用外壳、机器人验证页、拦截页、错误与占位页面以及部分内容。在留出测试集上，经审查的样本将估计值从 25.5% 下调至 20.0%。13.1% 对随机路径探测作出响应的网站返回了 200。这一误差会传播：对于被引用的来源，将 200 当作有内容会使可对照实时内容核查的主张—来源对比例被高估 12.2 个百分点，并将表观的静默引用漂移率从 5.8% 夸大到 21.9%。廉价启发式方法即可捕获其中的大部分：将文本长度、探测对比和重定向到根目录三种方法组合并在留出的网站上调参后，能以约 5% 的误报率找回 86% 的不可用的已审查响应。内容感知检测器表现相当：其中最优的文本分类器可多获得五到七个百分点召回率，但误报率是其两倍多。研究者主张智能体及其评估应显式报告抓取结果，而不是从状态行推断，并将发布标注数据和代码。
+
+## 49. 该研究论文
+
+- **英文标题**：What Breaks and What Comes Back: Capability Damage and Recovery in Depth-Pruned Small Language Models
 - **作者**：Piyush Dhoka、Vedant Pandhare、Varun Inamdar、Aadarsh Pathre、Pavitha Nooji
 - **分类**：cs.CL, cs.LG
 - **发布时间**：2026-10-31 12:25:46 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00877v1) · [PDF](https://arxiv.org/pdf/2611.00877v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00877v1) · [PDF](https://arxiv.org/pdf/2611.00877v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Depth pruning removes whole Transformer blocks to make a language model smaller and faster, but the damage is not spread evenly across what the model can do, and a short fine-tuning run, called healing, decides what comes back. We measure this for small models used as agents. Four instruction-tuned models of 1.2-1.7B parameters (Llama-3.2-1B, Qwen2.5-1.5B, SmolLM2-1.7B and OLMo-2-1B) are pruned and healed, and six capabilities are tracked: structured output, function calling, instruction following, mathematical reasoning, safety refusal and knowledge. Three results hold across the families. First, function calling and math collapse in every model (retention 0.00-0.07 of the unpruned score), and the order in which capabilities break agrees closely across the four (Kendall's W = 0.92; 0.62 after correcting for chance floors). Second, which parameters are trained matters as much as which data: fully tuning the last three blocks instead of adding low-rank adapters to all blocks costs up to 0.18 in capped mean retention on three families, and one 300k-token pilot per scope detects this. Third, we test a planner that allocates a 1M-token healing budget from 21 short pilot heals. At a fixed budget it raises the weakest capability on two families, although only one of these gains survives a test that also resamples training seeds. Once its 3.48M pilot tokens are counted, uniform healing with the same total number of training tokens matches or beats every planned variant on every family and retains math significantly better on three of them in an item-level test (on one when seeds are also resampled). Healing longer is a strong and simple baseline that planned recovery must beat. Code, per-item predictions and every result are public.
+### 快速理解
 
-## 50. Toward Counterfactual Learning for Selective Re-Examination in Agentic Visual Search
+- **研究背景**：该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。
+- **核心创新**：论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。
+- **方法概览**：论文通过相应的模型、算法或实验进行研究，详细方法见原文。
+- **结果与结论**：摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。
+- **一句话 takeaway**：这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。
 
+**中文摘要**：该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。
+
+## 50. 面向智能体视觉搜索中选择性复查的反事实学习
+
+- **英文标题**：Toward Counterfactual Learning for Selective Re-Examination in Agentic Visual Search
 - **作者**：Ao Chen、Shengchao Chen、Yan Luximon
 - **分类**：cs.CV
 - **发布时间**：2026-10-31 11:51:18 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00848v1) · [PDF](https://arxiv.org/pdf/2611.00848v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00848v1) · [PDF](https://arxiv.org/pdf/2611.00848v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Visual search over high-resolution images requires a vision-language model (VLM) not only to determine where to inspect, but also whether another observation is warranted before committing to an answer. Existing prompting, demonstrations, and outcome-based reinforcement learning can encourage re-examination, yet do not directly supervise whether it is beneficial at a particular search state. We introduce ReSee, a benchmark of re-examination decisions comprising 3,227 visual-search trajectories and 8,827 explicit commit-or-re-examine decisions, with counterfactual adjudication that distinguishes states where additional inspection is warranted from those where commitment is preferable. Building on this formulation, we propose CARE (Counterfactual Advantage for Re-Examination), a decision-level reinforcement learning method that compares paired continuations under commit and re-examine verdicts from the same search state. Their cost-aware return difference estimates the counterfactual value of an additional observation and is assigned only to the corresponding verdict tokens, providing localized credit for whether search should continue. Experiments expose limited re-examination selectivity in existing VLMs and show that CARE significantly improves accuracy and decision selectivity over GRPO across two backbones, with higher accuracy and fewer visual requests on six unseen OOD benchmarks.
+### 快速理解
 
-## 51. Can Agentic AI Undermine Its Own Assurance Loop? Closed-Loop Dependency Assurance for Cognitive Network Digital Twins
+- **研究背景**：高分辨率图像视觉搜索要求 VLM 决定查看位置，并在作答前判断是否值得再次观察，但现有提示、演示和结果导向的强化学习无法直接监督特定状态下复查是否有益。
+- **核心创新**：构建了 ReSee 基准，含 3,227 条搜索轨迹和 8,827 个提交/复查决策，并通过反事实裁决标注各状态下复查的价值；提出 CARE 方法，利用同一状态下两种裁决的配对轨迹的回报差估计反事实价值，并将其局部分配给对应裁决词元。
+- **方法概览**：CARE 采用决策级强化学习：从同一搜索状态出发采样“提交”与“复查”两种配对续接轨迹，计算考虑成本的回报差作为反事实优势，仅将其分配给相应裁决词元，实现细粒度信用分配。
+- **结果与结论**：实验显示现有 VLM 的复查选择性有限；在两个骨干模型上，CARE 相比 GRPO 显著提升了准确率和决策选择性，并在六个未见过的分布外基准上以更高准确率和更少视觉请求取得更优表现。
+- **一句话 takeaway**：将“是否复查”建模为需要反事实监督的决策问题，并通过配对轨迹的成本感知回报差进行局部信用分配，是提升智能体视觉搜索效率与准确性的有效途径。
 
+**中文摘要**：在高分辨率图像上进行视觉搜索时，视觉语言模型（VLM）不仅要决定查看哪里，还要在给出答案前判断是否有必要再次观察。现有的提示、示例演示以及基于结果的强化学习虽然能鼓励复查行为，但并未直接监督在特定搜索状态下复查是否有益。本文提出 ReSee 基准，包含 3,227 条视觉搜索轨迹和 8,827 个显式的“提交或复查”决策，并通过反事实裁决区分哪些状态值得进一步检查、哪些状态应直接提交答案。在此基础上，本文提出 CARE（Counterfactual Advantage for Re-Examination），一种决策级强化学习方法，它对同一搜索状态下“提交”和“复查”两种配对的后续轨迹进行比较；两者考虑成本的回报差值估计了额外观察的反事实价值，并仅分配给对应的裁决词元，从而对搜索是否应继续提供局部化的信用分配。实验揭示了现有 VLM 在复查选择性上的不足，并表明在两个骨干模型上，CARE 相比 GRPO 显著提升了准确率和决策选择性；在六个未见过的分布外基准上，CARE 以更高的准确率和更少的视觉请求取得更好表现。
+
+## 51. 智能体AI是否会破坏自身的保障闭环？面向认知网络数字孪生的闭环依赖保障
+
+- **英文标题**：Can Agentic AI Undermine Its Own Assurance Loop? Closed-Loop Dependency Assurance for Cognitive Network Digital Twins
 - **作者**：Ahmed Hussain、Konstantinos Kalogiannis、Salahuddin Salahuddin、Hexu Li、Thiemo Voigt
 - **分类**：cs.AI, cs.ET, cs.NI
 - **发布时间**：2026-10-31 11:41:33 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00838v1) · [PDF](https://arxiv.org/pdf/2611.00838v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00838v1) · [PDF](https://arxiv.org/pdf/2611.00838v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Agentic Artificial Intelligence (AI) and Network Digital Twins (NDTs) are increasingly combined to form Cognitive Digital Twins (CDTs) that translate operational intents into network changes and support closed-loop management. However, a network change may achieve its intended objective while disrupting the monitoring or recovery mechanisms needed for subsequent decisions. For example, a service may be rerouted while its latency-monitoring traffic continues along the original path, producing measurements that no longer reflect the service's performance. We propose Closed-Loop Dependency Assurance (CLDA), an assurance mechanism that augments agentic AI-enabled NDTs with dependency-aware validation. In our framework, an agentic AI planner generates and refines network plans, while the NDT evaluates the projected network outcomes of these plans. CLDA extends this analysis using a Loop Dependency Graph (LDG) that connects service requirements to monitoring mechanisms, forwarding paths, failure domains, and recovery prerequisites. CLDA projects candidate actions onto these dependencies, checks intermediate states of multistep plans, and supports deterministic make-before-break repairs using temporary monitoring mechanisms. Unlike the Large Language Model (LLM)-based planner, CLDA uses explicit, deterministic rules for assurance decisions and repair. We evaluate CLDA through controlled reconfigurations, a 240-trial LLM-based planning campaign, and live network execution. A separate synthetic study examines deterministic assurance scalability across network models representing up to 1,024 routers.
+### 快速理解
 
-## 52. AI Data Analysis: A New Approach - Multi-engine Joint State Data Analysis
+- **研究背景**：智能体AI与网络数字孪生结合形成的认知数字孪生可实现意图驱动的闭环网络管理，但网络变更可能实现预期目标的同时破坏监控或恢复机制，导致后续决策依据失真。例如服务重路由后监控流量仍沿原路径传输，产生不再反映真实性能的测量数据。
+- **核心创新**：提出闭环依赖保障（CLDA）机制，通过闭环依赖图（LDG）将服务需求与监控机制、转发路径、故障域和恢复前提显式关联。CLDA区别于LLM规划器，采用确定性规则进行依赖验证和先建后断修复，保证了保障过程的可解释性与可靠性。
+- **方法概览**：框架中智能体AI规划器负责生成并细化网络计划，NDT评估计划的预期网络结果，CLDA将候选操作投射到LDG依赖关系上并检查多步骤计划的中间状态。修复阶段利用临时监控机制执行确定性的先建后断操作。评估采用受控重配置、240次试验的LLM规划活动、真实网络执行，以及最多1,024台路由器规模的合成可扩展性研究。
+- **结果与结论**：摘要未提供明确实验结果。摘要仅说明通过受控重配置、240次LLM规划试验、真实网络执行和覆盖最多1,024台路由器的合成研究对CLDA进行了评估，但未给出具体的性能数据或实验结论。
+- **一句话 takeaway**：该文指出智能体AI驱动的网络自动化存在自毁保障闭环的风险，并论证了确定性、依赖感知的验证机制对闭环自治网络的必要性。CLDA的核心启示是将保障逻辑与概率性的LLM规划解耦，通过显式依赖建模确保网络变更不破坏监控与恢复能力。
 
+**中文摘要**：智能体人工智能（Agentic AI）与网络数字孪生（NDT）正日益结合形成认知数字孪生（CDT），将运营意图转化为网络变更并支持闭环管理。然而，一次网络变更可能在实现预期目标的同时，破坏后续决策所需的监控或恢复机制。例如，某服务被重新路由后，其时延监控流量仍沿原路径传输，导致测量结果不再反映该服务的真实性能。为此，本文提出闭环依赖保障（CLDA）机制，为基于智能体AI的NDT增加依赖感知验证能力。在该框架中，智能体AI规划器生成并细化网络计划，NDT评估这些计划的预期网络结果；CLDA通过闭环依赖图（LDG）扩展该分析，将服务需求与监控机制、转发路径、故障域和恢复前提条件关联起来。CLDA将候选操作投射到这些依赖关系上，检查多步骤计划的中间状态，并支持利用临时监控机制进行确定性的先建后断（make-before-break）修复。与基于大语言模型（LLM）的规划器不同，CLDA采用显式的确定性规则进行保障决策与修复。作者通过受控重配置、包含240次试验的LLM规划活动以及真实网络执行对CLDA进行评估，另有一项合成研究考察了确定性保障在最多包含1,024台路由器的网络模型上的可扩展性。
+
+## 52. 多引擎联合状态数据分析：一种新型 AI 数据分析方法
+
+- **英文标题**：AI Data Analysis: A New Approach - Multi-engine Joint State Data Analysis
 - **作者**：Jean Ye
 - **分类**：cs.AI
 - **发布时间**：2026-10-31 10:37:36 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00807v1) · [PDF](https://arxiv.org/pdf/2611.00807v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00807v1) · [PDF](https://arxiv.org/pdf/2611.00807v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：AI data analysis today is three fragmented worlds: LLMs understand semantics but cannot compute; BI aggregates precisely but is stateless; ML processes large-scale data on a stateful kernel but lacks semantics. This paper proposes a combination mechanism, named Multi-engine Joint State Data Analysis, that fills a still-open gap - the multi-engine joint context: the data context is embedded into LLM conversational analysis, where the LLM serves only as the semantic, reasoning, and orchestration layer (not computation) and connects four engines through the 1M context window - Python and R ML kernels, SQL over relational databases, Cypher over graph databases - yielding two multiplications, "semantics and precise computation" and "relational and graph", under enterprise-grade governance. The novelty is a four-dimensional coordinate system: horizontal (engine kinds), vertical (state flow - the watershed), spatial (business generalization), temporal (iterative convergence); a deterministic grounding method (one-shot injection of schema.json + notes.md, M+S) carries the spatial and temporal dimensions. Empirically, all four dimensions are substantiated: horizontally, four engines are quantified - SQL, Cypher (96.5% on CypherBench movie), ML in Python and R (TabReD weather); vertically, state flows across engines and grounding is reused across kernels; spatially, SQL generalizes across three business databases - AdventureWorks 91.3%, financial 95.3%, formula_1 94.6% (average), about 20-23 points above single-shot SOTA 74.45%; temporally, accuracy converges monotonically as notes accumulate. The core invariant - the separation of semantics from computation plus a cross-data-domain persistent context - does not expire as LLMs and agents evolve or engine forms change.
+### 快速理解
 
-## 53. Agent4FreeFem: A Verification-Guided Framework for Autonomous Topology Optimization
+- **研究背景**：现有 AI 数据分析被割裂为三类能力：LLM 强语义但不可计算，BI 精确聚合但无状态，ML 有状态可扩展但缺语义。缺口在于缺少一种把语义理解、精确计算、关系与图能力统一在跨引擎持久上下文中的联合分析机制。
+- **核心创新**：提出多引擎联合状态数据分析框架，让 LLM 只负责语义、推理与编排，而不做数值计算，并通过超长上下文连接 Python/R ML 内核、SQL 与 Cypher。创新点包括四维坐标系（引擎种类、状态流动、业务泛化、迭代收敛）以及 M+S 确定性接地方法。
+- **方法概览**：方法将数据上下文注入 LLM 会话，使模型成为协调层，调用 SQL、Cypher、Python/R ML 四类引擎完成分析；通过一次性注入 schema.json 与 notes.md 建立跨数据域持久上下文。实验从横向引擎能力、纵向状态流转、跨业务泛化与迭代收敛四个维度进行验证。
+- **结果与结论**：摘要提供了明确结果：Cypher 在 CypherBench movie 达 96.5%；SQL 在 AdventureWorks、financial、formula_1 平均分别为 91.3%、95.3%、94.6%，平均较单次 SOTA 74.45% 高约 20-23 个点；ML 在 Python/R 内核与 TabReD weather 上得到验证，且 grounding 可跨内核复用、准确率随 notes 积累单调收敛。
+- **一句话 takeaway**：关键洞见是把“语义与计算分离”并保持跨数据域持久上下文，这样分析能力不依赖单一模型或引擎形态。该不变式被定位为可随 LLM、智能体和引擎演进持续成立的架构原则。
 
+**中文摘要**：本文指出当前 AI 数据分析处于三个割裂世界：LLM 具备语义理解但不能计算，BI 能精确聚合但无状态，ML 可在有状态内核上处理大规模数据但缺乏语义。论文提出“多引擎联合状态数据分析”组合机制，将数据上下文嵌入 LLM 会话式分析，使 LLM 仅作为语义、推理与编排层而不承担计算，并通过 1M 上下文窗口连接 Python/R ML 内核、关系数据库上的 SQL 与图数据库上的 Cypher 四类引擎，在企业级治理下实现“语义×精确计算”与“关系×图”的双重乘法。其核心是一个四维坐标系：横向为引擎种类，纵向为状态流动（分水岭），空间为业务泛化，时间为迭代收敛；确定性接地方法通过一次性注入 schema.json + notes.md（M+S）承载空间与时间维度。实验上，四维度均得到验证：横向量化 SQL、Cypher（CypherBench movie 96.5%）与 Python/R 的 ML（TabReD weather）；纵向上状态跨引擎流动且 grounding 可跨内核复用；空间上 SQL 在三个业务数据库泛化，AdventureWorks 91.3%、financial 95.3%、formula_1 94.6%，平均约比单次 SOTA 74.45% 高 20-23 个点；时间上准确率随 notes 积累单调收敛。其核心不变式——语义与计算分离加跨数据域持久上下文——不会随 LLM、智能体演进或引擎形态变化而失效。
+
+## 53. Agent4FreeFem：面向自主拓扑优化的验证引导框架
+
+- **英文标题**：Agent4FreeFem: A Verification-Guided Framework for Autonomous Topology Optimization
 - **作者**：Zhipu Cui、Helin Gong、Shengfeng Zhu
 - **分类**：math.OC, cs.AI
 - **发布时间**：2026-10-31 10:25:13 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00803v1) · [PDF](https://arxiv.org/pdf/2611.00803v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00803v1) · [PDF](https://arxiv.org/pdf/2611.00803v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Topology optimization has become an indispensable design tool in the aerospace, automotive, and mechanical engineering industries. Yet bringing a new problem from its description to an optimized result remains slow, expert-dependent, and unreliable: the workflow spans many manually connected stages, each new problem requires solver code to be written and debugged manually, and such code often fails or yields incorrect results. We present Agent4FreeFem, a pipeline driven by a large language model that turns a natural-language problem description into a set of verified optimization results without manual solver-code development or debugging. The pipeline keeps the problem definition unmodified, localizes errors using independent sources of evidence, and completes constrained repairs automatically, thereby providing efficient end-to-end automation, autonomous execution, and verifiable results. We evaluated Agent4FreeFem on a suite of single-physics and coupled multiphysics problems. Every case passed runtime verification and finished within the repair budget of each stage.
+### 快速理解
 
-## 54. Who Schedules Agent Memory? A Sidecar Approach to Long-Horizon Tasks
+- **研究背景**：拓扑优化广泛用于航空航天、汽车和机械工程设计，但从问题描述到优化结果的链路冗长且高度依赖专家。现有流程需要人工编写、连接和调试求解器代码，容易失败或给出错误结果，限制了新问题快速求解。
+- **核心创新**：核心创新是把大语言模型驱动的代码生成与独立证据定位、受约束自动修复结合，形成不修改问题定义的验证引导闭环。它强调可核验的端到端自动化，而不是只生成一次性求解脚本。
+- **方法概览**：框架接收自然语言问题描述，自动生成并执行求解与优化流程；运行中利用多来源证据隔离错误来源，并在预算内对失败或不一致结果进行约束修复，最终输出经验证的优化结果。
+- **结果与结论**：摘要提供了明确实验结果：在单物理和耦合多物理问题套件上，所有算例均通过运行时验证，并在每个阶段的修复预算内完成；但未给出具体性能指标、问题规模或与基线的定量对比。
+- **一句话 takeaway**：Agent4FreeFem 的价值在于将拓扑优化前端的专家式编码与调试转移为可验证的自主流程。其结论应理解为概念验证级的稳定性与可修复性，而非摘要层面的全面性能超越。
 
+**中文摘要**：拓扑优化已成为航空航天、汽车与机械工程中不可或缺的设计工具，但把一个新问题从自然语言描述推进到可靠优化结果仍然缓慢、依赖专家且不稳定：流程包含多个需人工衔接的阶段，每个新问题都要手工编写并调试求解器代码，且这类代码常失败或产生错误结果。本文提出 Agent4FreeFem，一个由大语言模型驱动的流程，可将自然语言问题描述直接转化为一组经核验的优化结果，无需人工开发或调试求解器代码。该流程保持问题定义不被修改，利用相互独立的证据来源定位错误，并自动完成受约束修复，从而实现高效端到端自动化、自主执行与可验证结果。作者在单物理与耦合多物理问题套件上评估了 Agent4FreeFem；所有算例均通过运行时验证，并在各阶段修复预算内完成。
+
+## 54. 谁来调度智能体记忆？一种面向长时任务的车斗（Sidecar）式方法
+
+- **英文标题**：Who Schedules Agent Memory? A Sidecar Approach to Long-Horizon Tasks
 - **作者**：Qijia Zhuang、Rui Liu、Yuxiang Ren
 - **分类**：cs.AI
 - **发布时间**：2026-10-31 09:45:28 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00779v1) · [PDF](https://arxiv.org/pdf/2611.00779v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00779v1) · [PDF](https://arxiv.org/pdf/2611.00779v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：As large language model agents increasingly undertake complex, long-horizon tasks, memory has become an important component for supporting sustained decision-making and action. Existing methods primarily focus on memory storage, updating, and retrieval, but often overlook how memory scheduling affects task execution: the main agent must identify memory needs, initiate retrieval, and wait for results while advancing the task, increasing both scheduling burden and execution time. To address this problem, we propose MemSidecar, which decouples memory scheduling from task execution through two independently selectable modes. Hooks directly delivers bound memory to the main agent when execution events match predefined conditions. Foresight uses an independent agent to predict potential queries, retrieve results in parallel, and store them in a cache, delivering matching and valid results when actual requests arrive. Hooks and Foresight achieve scores of 41.23% and 44.34% on MCP-Persona, respectively, while effectively reducing execution costs and latency and improving the efficiency of long-horizon agent execution.
+### 快速理解
 
-## 55. Designing Informative Actions: Action Construction for Long-Horizon Research Agents
+- **研究背景**：大型语言模型智能体在长时程任务中越来越依赖记忆组件来维持决策与行动，但现有工作多聚焦于记忆的存储、更新与检索机制。主智能体需自行识别记忆需求、发起检索并等待返回，导致调度负担重、执行时间长。
+- **核心创新**：提出 MemSidecar，将记忆调度与任务执行解耦，并提供两种可独立选择的模式：Hooks 在事件匹配预设条件时直接交付绑定记忆；Foresight 由独立智能体预测潜在查询、并行预检索并缓存，按需交付结果。
+- **方法概览**：Hooks 模式基于预定义条件与执行事件的匹配触发记忆交付；Foresight 模式引入独立智能体进行查询预测与并行检索缓存，从而避免主智能体阻塞等待。
+- **结果与结论**：Hooks 和 Foresight 在 MCP-Persona 基准上分别取得 41.23% 和 44.34% 的得分，同时显著降低了执行成本与延迟，提高了长时程智能体的执行效率。
+- **一句话 takeaway**：记忆调度应与任务执行解耦，通过事件驱动交付或预测式预取缓存，可减轻主智能体的调度负担并提升长时程任务的执行效率与响应速度。
 
+**中文摘要**：随着大型语言模型智能体越来越多地承担复杂的长时程任务，记忆已成为支持持续决策与行动的重要组件。现有方法主要关注记忆的存储、更新与检索，却往往忽视了记忆调度对任务执行的影响：主智能体必须识别记忆需求、发起检索并等待结果，同时还要推进任务，这增加了调度负担和执行时间。为解决这一问题，我们提出 MemSidecar，通过两种可独立选择的模式将记忆调度与任务执行解耦。Hooks 模式在预设条件与执行事件匹配时，直接向主智能体交付绑定的记忆。Foresight 模式则由独立的智能体预测潜在的查询，并行检索结果并缓存，当实际请求到达时交付匹配且有效的结果。Hooks 和 Foresight 在 MCP-Persona 上分别取得 41.23% 和 44.34% 的得分，同时有效降低了执行成本与延迟，提升了长时程智能体的执行效率。
+
+## 55. 设计信息丰富的行动：面向长程研究智能体的行动构建
+
+- **英文标题**：Designing Informative Actions: Action Construction for Long-Horizon Research Agents
 - **作者**：Alkut Arxidin、Shaoning Zeng、Jianhang Zhou、Jianping Gou、Xinzhong Zhu
 - **分类**：cs.AI
 - **发布时间**：2026-10-31 09:33:20 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00773v1) · [PDF](https://arxiv.org/pdf/2611.00773v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00773v1) · [PDF](https://arxiv.org/pdf/2611.00773v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Large language model agents support automated scientific research by connecting literature analysis and planning with experimentation. Evaluating which action an agent selects does not establish which experiment its instruction specifies, because omitted interventions or replication counts leave consequential choices to the executor. We introduce a reading-set framework for evaluating action construction under a common cost rule. Across 30 synthetic states, complete-design requests increase affordable efficiency by 465.98% and 327.91% relative to the action-name baseline in the two model families, respectively. An author-constructed research-action evaluation dataset provides 60 scenarios for complementary judgment evaluation. On this dataset, the scenario-level information-per-cost measure has a mean within-scenario correlation of 0.733 with judgments from 18 human participants. The framework makes design specification and execution ambiguity measurable, providing a reproducible basis for assessing how research agents translate scientific intent into informative, budget-feasible experiments.
+### 快速理解
 
-## 56. DramaVQA: Probing Detailed Understanding of Ultra-Long TV Dramas
+- **研究背景**：长程研究智能体需要把科学意图转化为可执行的实验步骤，但仅评估其选择了哪个行动，无法判断指令是否明确给出干预、重复次数等关键设计。若这些要素被省略，实际实验结果会依赖执行者的隐含选择，影响评估可比性。
+- **核心创新**：提出阅读集框架，在共同成本规则下显式评估行动构建而非仅行动选择。该框架将设计规范完整性与执行模糊性转化为可测指标，并配套构建60场景研究行动评估数据集用于判断评估。
+- **方法概览**：在30个合成状态上比较行动名称基线与完整设计请求在不同模型家族中的表现，以统一成本规则衡量可负担效率。另构建含60个场景的评估数据集，计算场景级单位成本信息，并与18名人类参与者的判断进行相关分析。
+- **结果与结论**：完整设计请求相较行动名称基线，在两个模型家族中分别提升可负担效率465.98%和327.91%。场景级单位成本信息与18名人类判断的平均组内相关系数为0.733，显示其与人类评估具有较强一致性。
+- **一句话 takeaway**：研究智能体评估应关注行动构建质量，即指令是否明确、完整且预算可行，而不只关注选择了哪个行动。显式化干预与重复等设计要素可显著提升实验的信息效率与可复现评估基础。
 
+**中文摘要**：大语言模型智能体通过连接文献分析、规划与实验来支持自动化科学研究，但评估智能体选择了哪个行动，并不能确定其指令具体指定了哪个实验，因为被省略的干预措施或重复次数会把关键选择留给执行者。本文提出一种在共同成本规则下评估行动构建的阅读集框架。在30个合成状态上，相对于行动名称基线，完整设计请求在两个模型家族中分别使可负担效率提高465.98%和327.91%。作者构建的研究行动评估数据集包含60个场景，用于补充判断评估；在该数据集上，场景级“单位成本信息”指标与18名人类参与者判断的平均组内相关系数为0.733。该框架使设计规范与执行模糊性变得可测量，为评估研究智能体如何将科学意图转化为信息丰富且预算可行的实验提供了可复现基础。
+
+## 56. DramaVQA：探测对超长电视剧的细粒度理解能力
+
+- **英文标题**：DramaVQA: Probing Detailed Understanding of Ultra-Long TV Dramas
 - **作者**：Xinyue Huo、Pengfei Chen、Jiannan Ge、Kaiwen Duan、Jiacheng Shao、Yunning Cao、Lingxi Xie、Qi Tian
 - **分类**：cs.CV
 - **发布时间**：2026-10-31 09:31:10 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00769v2) · [PDF](https://arxiv.org/pdf/2611.00769v2)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00769v2) · [PDF](https://arxiv.org/pdf/2611.00769v2)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Despite recent progress in long-form video understanding, current benchmarks mostly focus on short clips or hour-scale videos. This leaves a major gap in evaluating ultra-long video understanding, where videos often last tens of hours. To bridge this gap, we introduce DramaVQA, a large-scale benchmark built upon long-form TV dramas. Containing approximately 20K question-answering (QA) pairs, the scale of DramaVQA exceeds previous long-video datasets, such as Video-MME and LVBench, by an order of magnitude. Our benchmark has two main features that make it stand out from existing datasets. First, we establish a scalable, LLM-assisted annotation pipeline that uses multimodal large language models (MLLMs) to generate complex questions, followed by strict human checking to ensure high data quality. Second, DramaVQA introduces a multi-level time structure; queries are designed across different video lengths, with the hardest questions requiring overall understanding across the entire drama. Extensive evaluations show that state-of-the-art MLLMs face major challenges when tested on these very long videos, highlighting the need for agentic AI algorithms capable of managing long-term memory. The project is available at https://github.com/xinyuehuo/DramaVQA
+### 快速理解
 
-## 57. Architecting Fairness-Aware LLM Interactions
+- **研究背景**：现有长视频理解基准多针对短视频或小时级视频，无法评估长达数十小时的电视剧级理解能力，存在明显评估空白。
+- **核心创新**：构建了规模领先的长视频问答基准 DramaVQA，并设计可扩展的 MLLM 生成加人工审核的标注流程，以及覆盖不同时间跨度的多层次查询结构。
+- **方法概览**：基于长篇电视剧构建约 2 万组问答对，采用多模态大语言模型生成复杂问题并进行严格人工检查，查询按时间跨度分层设计，最难级别要求对整部剧的整体理解。
+- **结果与结论**：大量评估显示最先进的多模态大模型在超长电视剧理解上仍面临显著困难，表明现有模型缺乏有效管理长期记忆的能力。
+- **一句话 takeaway**：超长视频理解是 MLLM 的明显短板，未来需要具备长期记忆管理的智能体式算法；DramaVQA 可作为该方向的重要评估基准。
 
+**中文摘要**：尽管长视频理解近期取得进展，现有基准多聚焦于短视频或小时级视频，缺少对数十小时超长视频理解的评估。为填补这一空白，本文提出 DramaVQA——一个基于长篇电视剧构建的大规模基准，包含约 2 万组问答对，规模较此前长视频数据集（如 Video-MME 和 LVBench）高出一个数量级。该基准有两大特点：其一，建立了可扩展的 LLM 辅助标注流程，先用多模态大语言模型生成复杂问题，再经严格人工审核以保证数据质量；其二，引入多层次时间结构，查询覆盖不同时长跨度，最难的问题需要理解整部剧集。大量评估表明，最先进的多模态大模型在超长视频上仍面临重大挑战，凸显了对具备长期记忆管理能力的智能体算法的需求。
+
+## 57. 面向大语言模型交互的公平性保障架构
+
+- **英文标题**：Architecting Fairness-Aware LLM Interactions
 - **作者**：Alessandra Parziale、Valeria Pontillo、Fabio Palomba、Patrizio Pelliccione
 - **分类**：cs.SE, cs.AI, cs.CY
 - **发布时间**：2026-10-31 07:59:01 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00723v1) · [PDF](https://arxiv.org/pdf/2611.00723v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00723v1) · [PDF](https://arxiv.org/pdf/2611.00723v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Large Language Models (LLMs) are increasingly used as decision-support tools but may generate stereotypical, discriminatory, or unfair responses. As LLMs become embedded in decision-critical software systems, fairness can no longer be treated as a downstream evaluation step, but must become an architectural concern of the interaction itself. Yet current fairness approaches operate as standalone evaluation techniques, lacking a reusable mechanism to verify and mitigate violations at runtime. We propose a fairness-assurance architecture grounded in three reusable design patterns, instantiated as a multi-agent framework that evaluates and iteratively refines LLM responses before delivery. A preliminary evaluation across eight configurations involving different LLM families shows that the architecture identifies fairness violations and iteratively produces compliant responses in all configurations, with behavior differing depending on the model-family composition. These results provide initial evidence for the joint instantiation of the proposed patterns and a first step toward architecting non-functional properties into LLM-based systems.
+### 快速理解
 
-## 58. SAVIER: Source-Anchored Visual Inspection and Evidence-Guided Repair for Vietnamese Cultural Text-to-Image Generation
+- **研究背景**：LLM常被嵌入决策关键软件，但其输出可能带有刻板、歧视或 unfairness 风险，使公平性从事后评测上升为交互设计问题。现有公平性方法多作为独立评估步骤，缺少运行时验证与缓解的可复用机制。
+- **核心创新**：提出一种公平保障架构，基于三个可复用设计模式，并落地为交付前评估与迭代修正LLM响应的多智能体框架。其核心贡献是把公平性等非功能属性从事后评测前移到LLM系统交互架构中。
+- **方法概览**：方法以多智能体框架在运行时检测LLM回复中的公平性违规，并对不合规响应进行迭代优化直至满足要求。作者用涉及不同LLM家族的八种配置开展初步评估。
+- **结果与结论**：摘要提供了初步实验结果：八种配置中，该架构均能识别公平性违规并迭代生成合规响应；同时系统行为随模型家族组成不同而变化。需要注意，该结果仅为初步证据，规模和场景仍有限。
+- **一句话 takeaway**：该工作说明三个设计模式可以联合实例化，为将公平性等非功能属性架构化地嵌入LLM系统提供了第一步。后续仍需更大规模、更多模型与场景下的验证。
 
+**中文摘要**：大语言模型（LLM）正越来越多地被用作决策支持工具，但可能生成刻板化、歧视性或不公平的响应。随着LLM被嵌入决策关键的软件系统，公平性不能再被视为下游评估步骤，而必须成为交互本身的一项架构关注点。然而，现有公平性方法多为独立评估技术，缺乏在运行时验证和缓解违规的可复用机制。本文提出一种基于三个可复用设计模式的公平保障架构，并实例化为一个多智能体框架，在响应交付前对其评估并迭代改进。在涉及不同LLM家族的八种配置上进行的初步评估表明，该架构在所有配置中都能识别公平性违规并迭代生成合规响应，但其行为会因模型家族组成不同而存在差异。这些结果为所提模式的联合实例化提供了初步证据，也是将非功能属性架构化地嵌入基于LLM系统的第一步。
+
+## 58. SAVIER：面向越南文化文本生成图像的源锚定视觉检查与证据引导修复
+
+- **英文标题**：SAVIER: Source-Anchored Visual Inspection and Evidence-Guided Repair for Vietnamese Cultural Text-to-Image Generation
 - **作者**：Gia-Huy Thai、Duc-Tien Khong、Trung-Nghia Le
 - **分类**：cs.CV, cs.AI
 - **发布时间**：2026-10-31 07:53:13 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00722v1) · [PDF](https://arxiv.org/pdf/2611.00722v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00722v1) · [PDF](https://arxiv.org/pdf/2611.00722v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：We present SAVIER, a training-free, one-pass framework that repairs the depiction of a named Vietnamese cultural entity in a generated image while preserving the scene details requested by the user. The problem is hard because a plausible scene can miss the cues that identify the entity, and prompt-level refinement never inspects the image it produces. SAVIER starts from a Culture-TRIP expanded prompt; a Curator separates source-linked cultural cues from prompt-preservation requirements, a prompt-blind Observer describes the first image, and a Refiner turns the discrepancies into at most three positive instructions before one regeneration with the same seed and a fixed bank of reference photographs. On the 50 bilingual prompts of ViCuP, evaluated with SDXL and FLUX.1-dev against a frozen, human-verified visual contract, SAVIER raises contract fulfillment from 55.6 to 69.6 and from 59.1 to 67.3 over Culture-TRIP and raises CAIRE cultural relevance on FLUX.1-dev. A reference-only ablation that removes the agent repair shows that SAVIER's photographs account for most of the contract gain; the agent roles add country-level relevance on FLUX.1-dev without lowering adherence to the original prompt under the official VQAScore. Project page: https://oxyzgiahuy.github.io/savier/
+### 快速理解
 
-## 59. Unsatz: Evaluating Scientific Discovery Without a Given Ansatz
+- **研究背景**：文本到图像模型生成包含越南文化实体的画面时，常出现场景合理但文化识别线索缺失的问题。传统提示词改写只作用于语言输入，无法根据已生成图像进行针对性纠错，因此难以兼顾文化正确性与用户原始场景要求。
+- **核心创新**：SAVIER 的核心创新是把文化实体修复建模为“来源锚定的视觉检查 + 证据引导修复”，并在同一随机种子下只额外再生成一次。Curator、Observer、Refiner 的角色拆分让文化线索、图像事实和修复指令彼此解耦，从而减少盲目改提示带来的场景漂移。
+- **方法概览**：框架先利用 Culture-TRIP 扩展提示，再由 Curator 分离来源可溯文化线索与必须保留的场景约束，Observer 在不看提示的情况下描述首图，Refiner 将观察差异压缩成至多三条正向指令。最后结合固定参考照片库、相同种子和原提示执行一次再生成。
+- **结果与结论**：在 ViCuP 50 条双语提示上，SAVIER 相对 Culture-TRIP 将视觉契约满足率从 55.6 提升至 69.6（SDXL），从 59.1 提升至 67.3（FLUX.1-dev），并提高 FLUX.1-dev 上的 CAIRE 文化相关性。消融显示参考照片贡献大部分契约增益，智能体角色进一步提升国家级相关性且未降低官方 VQAScore 下的原提示遵循度。
+- **一句话 takeaway**：对于命名文化实体的图像修复，关键不是堆叠提示词，而是建立可追溯文化证据、图像观察与受控再生成之间的闭环。SAVIER 表明，小规模、单次的证据引导修复可在不明显牺牲用户场景的前提下提升文化契约满足率。
 
+**中文摘要**：本文提出 SAVIER，一个免训练、单遍运行的框架，用于在尽量保留用户场景细节的同时，修复生成图像中对具名越南文化实体的呈现。该任务难点在于：看似合理的场景可能缺少识别该文化实体的关键线索，而仅优化提示词的方法又不会检查其生成的图像。SAVIER 以 Culture-TRIP 扩展提示为起点，由 Curator 将来源可溯的文化线索与提示保留要求分离，由不查看提示的 Observer 描述首张图像，再由 Refiner 将差异转化为至多三条正向指令，随后使用相同随机种子和固定参考照片库仅再生成一次。在 ViCuP 的 50 条双语提示上，作者以 SDXL 和 FLUX.1-dev 对比冻结且经人工验证的视觉契约进行评估：相比 Culture-TRIP，SAVIER 将契约满足率从 55.6 提升到 69.6、从 59.1 提升到 67.3，并在 FLUX.1-dev 上提升 CAIRE 文化相关性。仅保留参考照片而移除智能体修复的消融实验表明，照片贡献了大部分契约增益；智能体角色在 FLUX.1-dev 上带来国家级相关性提升，且在官方 VQAScore 下不降低对原提示的遵循度。项目页面：https://oxyzgiahuy.github.io/savier/
+
+## 59. Unsatz：在缺乏先验模型形式（Ansatz）的情况下评估科学发现能力
+
+- **英文标题**：Unsatz: Evaluating Scientific Discovery Without a Given Ansatz
 - **作者**：Ethan Ji、Wei Wang、Yizhou Sun
 - **分类**：cs.AI, cs.LG
 - **发布时间**：2026-10-31 04:52:14 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.03713v1) · [PDF](https://arxiv.org/pdf/2611.03713v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.03713v1) · [PDF](https://arxiv.org/pdf/2611.03713v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：Before a scientist fits any parameter, they must decide what the model contains: which quantities exist, which are hidden, how they interact, and how they are measured. Physicists call such a trial form an ansatz. Benchmarks for automated equation discovery mostly supply it, by fixing the variables, a library of candidate terms, or a law to be modified. We introduce Unsatz, a benchmark in which an LLM agent must construct the ansatz itself. Each task is a simulated system, generated from a private seed as a program in a small modeling language: ordinary, delay, or partial differential equations, discrete maps, static and causal models, or stochastic processes, possibly with hidden states, distorted sensors, and uninformative measurement channels. The agent buys experiments within a budget, writes candidate programs in the same language, obtains their coefficients from the benchmark's fitter, and is scored only on how its final program predicts experiments it never saw: conditions outside the range it could explore, interventions, and longer runs. Across 80 systems in 20 domains, nine language models solve between 21% and 60%. On 44 of these systems, classical equation-discovery methods almost never succeed, although the same data usually suffice once the true equations are given with unknown coefficients; the difficulty lies in finding the structure, not in estimating it. Because mechanisms recur across systems, we also give agents the program they discovered for a related system; it helped only when the new system shared the mechanism and the first investigation had succeeded. Stronger agents make fewer unscientific errors; beyond these, agents find which variables a system has but not how they act, and prefer revisions that lower the training error to revisions that predict better.
+### 快速理解
 
-## 60. Discovering Models for Experimental Quantum Systems with Agentic AI
+- **研究背景**：自动化科学发现基准通常直接提供 ansatz（固定变量、候选项库或待修改的定律），使模型结构探索这一关键环节被跳过。本文认为，科学发现在拟合参数之前还需决定模型的构成，包括变量、隐状态、相互作用与测量方式，而这正是现有基准缺失的能力评估环节。
+- **核心创新**：提出 Unsatz 基准，要求 LLM 智能体自行构建模型结构（ansatz），涵盖常微分方程、时滞方程、偏微分方程、离散映射、静态/因果模型和随机过程等多种系统类型，并包含隐状态、传感器失真和无信息量测量通道等现实困难。评分只看智能体最终程序对未见实验（范围外条件、干预、长时间演化）的预测能力，而非训练误差。
+- **方法概览**：每个任务由私有种子通过小型建模语言生成模拟系统程序；智能体在实验预算内购买实验、编写候选程序，由基准内置拟合器估计系数，最终以对从未见过的实验条件的预测表现计分。实验覆盖 20 个领域的 80 个系统，评估九个语言模型，并与经典方程发现方法对比；还测试了向智能体提供相关系统已发现程序的迁移条件。
+- **结果与结论**：九个语言模型在 80 个系统上的解决率为 21% 至 60%。在 44 个系统上经典方程发现方法几乎从不成功，但若给定真实方程仅留未知系数，同样的数据通常足以拟合，表明困难在于发现结构而非参数估计。迁移实验中，提供相关系统的已发现程序仅在机制共享且首次调查成功时才有帮助；更强的智能体非科学性错误更少，但普遍只能发现系统有哪些变量而说不清其作用方式，且偏好降低训练误差而非提升预测外推能力的修改。
+- **一句话 takeaway**：科学自动化的真正瓶颈是模型结构的发现，而非参数估计；现有方程发现方法在结构搜索上远未解决。评估科学发现能力应以对未见条件的外推预测为准，而非训练误差，因为智能体倾向于过拟合可探索范围内的数据。
 
+**中文摘要**：在拟合任何参数之前，科学家必须先决定模型包含什么：哪些量存在、哪些是隐变量、它们如何相互作用以及如何被测量。物理学家将这种试探性形式称为 ansatz（设定形式）。然而，现有的自动化方程发现基准大多直接提供 ansatz，即固定变量、候选项库或待修改的定律。本文提出 Unsatz 基准，要求大语言模型（LLM）智能体自行构建 ansatz。每项任务是一个模拟系统，由私有种子以小型建模语言生成程序，涵盖常微分方程、时滞方程、偏微分方程、离散映射、静态与因果模型以及随机过程，并可能包含隐状态、失真的传感器和无信息量的测量通道。智能体在预算内购买实验、用同一语言编写候选程序、由基准的拟合器求出系数，最终仅按其程序对未见实验的预测能力评分，包括超出探索范围的条件、干预实验和更长时间的演化。在 20 个领域的 80 个系统上，九个语言模型的解决率为 21% 到 60%。在其中 44 个系统上，经典方程发现方法几乎从不成功；但如果给定真实方程仅保留未知系数，同样的数据通常足以拟合成功，说明难点在于发现结构而非估计参数。由于机制在不同系统间复现，研究者还让智能体利用在相关系统上发现的程序：只有当新系统共享该机制且首次调查成功时才有帮助。更强的智能体犯的非科学性错误更少；但除此之外，智能体能够发现系统有哪些变量，却无法弄清它们如何起作用，并且相比提升预测能力的修改，它们更偏好降低训练误差的修改。
+
+## 60. 基于智能体AI从实验量子系统数据中发现物理模型
+
+- **英文标题**：Discovering Models for Experimental Quantum Systems with Agentic AI
 - **作者**：Hannah C. Kleidermacher、Bennet Windt、Miguel Bello、James Zou、Jelena Vučković
 - **分类**：quant-ph, cs.AI, physics.optics
 - **发布时间**：2026-10-31 04:41:02 UTC
-- **链接**：[摘要](https://arxiv.org/abs/2611.00620v1) · [PDF](https://arxiv.org/pdf/2611.00620v1)
+- **链接**：[原文摘要](https://arxiv.org/abs/2611.00620v1) · [PDF](https://arxiv.org/pdf/2611.00620v1)
 - **匹配方向**：LLM + Agent
 
-**摘要**：A central obstacle in realizing color center cavity-QED-based quantum technologies is inhomogeneity, or disorder, among individual emitters. As the number of emitters increases, so does the complexity of the experimental data, making it difficult to quantify the present physical mechanisms of disorder. Here we introduce an artificial intelligence-driven model discovery framework in which a large language model (LLM)-based agent, equipped with tools and a structured workflow, proposes candidate Hamiltonian and Lindbladian models, generates computational tools, and quantitatively evaluates competing physical hypotheses. We apply the workflow to three previously published experimental cavity-QED datasets collected from color centers in diamond and silicon carbide. Across the experiments, the agent successfully identifies physical models for the system and characterizes the disorder. In assessing reproducibility, we find that run-to-run variability is concentrated primarily in the research plan generation step, while the computational analysis itself is substantially more consistent. Our results suggest that structured LLM agent workflows can support model discovery from quantum optical experimental data while simultaneously allowing for human expert supervision and collaboration.
+### 快速理解
+
+- **研究背景**：基于色心腔量子电动力学的量子技术面临个体发射体不均匀性（无序）的障碍，且随着发射体数量增加，实验数据复杂性上升，难以定量刻画无序背后的物理机制。
+- **核心创新**：提出一种AI驱动的模型发现框架：基于大语言模型的智能体配备工具并遵循结构化工作流，可自主提出候选哈密顿量与Lindbladian模型、生成计算工具，并定量评估相互竞争的物理假设。
+- **方法概览**：将该LLM智能体工作流应用于三组此前发表的实验腔量子电动力学数据集，这些数据分别来自金刚石和碳化硅中的色心；同时评估智能体逐次运行的可复现性，考察各工作流步骤的一致性。
+- **结果与结论**：在三项实验中，智能体均成功识别出系统的物理模型并刻画了无序特性；可复现性分析表明，逐次运行的差异主要集中在研究计划生成步骤，而计算分析本身具有相当高的一致性（摘要未提供定量指标）。
+- **一句话 takeaway**：结构化的LLM智能体工作流能够支持从量子光学实验数据中发现物理模型，同时保留人类专家的监督与协作空间；该思路有望推广到其他复杂实验量子系统的模型发现任务。
+
+**中文摘要**：实现基于色心腔量子电动力学的量子技术的一个核心障碍是个体发射体之间存在的不均匀性（即无序）。随着发射体数量的增加，实验数据的复杂性也随之上升，使得定量刻画当前的无序物理机制变得困难。本文提出一种由人工智能驱动的模型发现框架：一个基于大语言模型（LLM）的智能体配备工具并遵循结构化工作流，能够提出候选的哈密顿量和Lindbladian模型、生成计算工具，并对相互竞争的物理假设进行定量评估。我们将该工作流应用于三组此前已发表的实验腔量子电动力学数据，这些数据分别采集自金刚石和碳化硅中的色心。在三项实验中，该智能体均成功识别出系统的物理模型并刻画了无序特性。在可复现性评估方面，我们发现逐次运行的差异主要集中在研究计划生成步骤，而计算分析本身的一致性要高得多。我们的结果表明，结构化的LLM智能体工作流能够在允许人类专家监督与协作的同时，支持从量子光学实验数据中进行模型发现。
 
