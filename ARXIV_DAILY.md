@@ -17,7 +17,7 @@
 
 本实现使用分类和组合兴趣组进行轻量筛选，不需要 Zotero 或额外 API Key。`zotero-arxiv-daily` 的 Zotero 相似度排序和 PDF 全文提取可以作为后续增强；当前的 LLM 摘要层已经独立接入 Kimi。
 
-当前已经接入可选的 Kimi 摘要层。为了生成“研究背景、核心创新、方法概览、结果与结论、一句话 takeaway”，请在 GitHub 仓库的 Settings → Secrets and variables → Actions → Secrets 中新增 `KIMI_API_KEY`，值为你的 Kimi Bearer Token（可带或不带 `Bearer ` 前缀）。K2.8 Preview 在 Coding API 中对应的 Model ID 是 `kimi-for-coding`，接口默认使用你提供的 `https://api.kimi.com/coding/v1/chat/completions`；如需调整，可设置仓库变量 `KIMI_API_URL` 和 `KIMI_MODEL`。不要把 Key 写入 `config/arxiv-daily.json` 或提交到 Git。
+当前接入了两级摘要模型。主模型使用 `KIMI_API_KEY`；如果 Kimi 调用失败，自动切换到 `SILICONFLOW_API_KEY`，默认模型为 `Qwen/Qwen3.5-27B`，接口为 `https://api.siliconflow.cn/v1/chat/completions`。两个模型都失败时仍会生成中文兜底卡片。请在 GitHub 仓库的 Settings → Secrets and variables → Actions → Secrets 中配置这两个 Secret，不要把 Key 写入配置文件或提交到 Git。K2.8 Preview 在 Kimi Coding API 中对应的 Model ID 是 `kimi-for-coding`；接口和模型也可以通过仓库 Variables 覆盖。
 
 本地测试：
 

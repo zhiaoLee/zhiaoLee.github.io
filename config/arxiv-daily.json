@@ -56,6 +56,12 @@
     "enabled": true,
     "apiUrl": "https://api.kimi.com/coding/v1/chat/completions",
     "model": "kimi-for-coding",
-    "maxTokens": 900
+    "maxTokens": 1200,
+    "fallback": {
+      "enabled": true,
+      "apiUrl": "https://api.siliconflow.cn/v1/chat/completions",
+      "model": "Qwen/Qwen3.5-27B",
+      "maxTokens": 1200
+    }
   }
 }

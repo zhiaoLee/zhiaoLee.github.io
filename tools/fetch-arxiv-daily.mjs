@@ -330,20 +330,17 @@ function ensureSummary(paper, summary) {
   return Object.fromEntries(Object.keys(fallback).map((key) => [key, fields[key] || fallback[key]]));
 }
 
-async function summarizeWithKimi(paper) {
-  const llm = config.llm || {};
-  const token = (process.env.KIMI_API_KEY || '').replace(/^Bearer\s+/i, '').trim();
-  if (llm.enabled === false || !token) return null;
-  const response = await fetch(process.env.KIMI_API_URL || llm.apiUrl, {
+async function summarizeWithProvider(paper, provider) {
+  const response = await fetch(provider.apiUrl, {
     method: 'POST',
     headers: {
-      authorization: `Bearer ${token}`,
+      authorization: `Bearer ${provider.token}`,
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: process.env.KIMI_MODEL || llm.model,
+      model: provider.model,
       temperature: 1,
-      max_tokens: Number(process.env.KIMI_MAX_TOKENS || llm.maxTokens || 900),
+      max_tokens: provider.maxTokens,
       messages: [
         {
           role: 'system',
@@ -369,16 +366,59 @@ async function summarizeWithKimi(paper) {
     } catch {
       // Keep the status-only error when the provider does not return JSON.
     }
-    throw new Error(`Kimi HTTP ${response.status}${detail ? `: ${clean(detail).slice(0, 240)}` : ''}`);
+    throw new Error(`${provider.name} HTTP ${response.status}${detail ? `: ${clean(detail).slice(0, 240)}` : ''}`);
   }
   const payload = await response.json();
   return summaryFields(parseJsonObject(payload.choices?.[0]?.message?.content));
 }
 
+function providerFromEnv(name, defaults) {
+  const token = (process.env[defaults.keyEnv] || '').replace(/^Bearer\s+/i, '').trim();
+  if (!token) return null;
+  return {
+    name,
+    token,
+    apiUrl: process.env[defaults.urlEnv] || defaults.apiUrl,
+    model: process.env[defaults.modelEnv] || defaults.model,
+    maxTokens: Number(process.env[defaults.maxTokensEnv] || defaults.maxTokens || 1200)
+  };
+}
+
+async function summarizeWithKimi(paper) {
+  const llm = config.llm || {};
+  if (llm.enabled === false) return null;
+  const provider = providerFromEnv('Kimi', {
+    keyEnv: 'KIMI_API_KEY',
+    urlEnv: 'KIMI_API_URL',
+    modelEnv: 'KIMI_MODEL',
+    maxTokensEnv: 'KIMI_MAX_TOKENS',
+    apiUrl: llm.apiUrl,
+    model: llm.model,
+    maxTokens: llm.maxTokens
+  });
+  return provider ? summarizeWithProvider(paper, provider) : null;
+}
+
+async function summarizeWithSiliconFlow(paper) {
+  const fallback = config.llm?.fallback || {};
+  if (fallback.enabled === false) return null;
+  const provider = providerFromEnv('SiliconFlow', {
+    keyEnv: 'SILICONFLOW_API_KEY',
+    urlEnv: 'SILICONFLOW_API_URL',
+    modelEnv: 'SILICONFLOW_MODEL',
+    maxTokensEnv: 'SILICONFLOW_MAX_TOKENS',
+    apiUrl: fallback.apiUrl,
+    model: fallback.model,
+    maxTokens: fallback.maxTokens
+  });
+  return provider ? summarizeWithProvider(paper, provider) : null;
+}
+
 async function enrichPapers(papers, limit = papers.length) {
-  const token = (process.env.KIMI_API_KEY || '').trim();
-  if (config.llm?.enabled === false || !token) {
-    if (config.llm?.enabled !== false) console.warn('Kimi summary skipped: KIMI_API_KEY is not configured.');
+  const kimiConfigured = config.llm?.enabled !== false && Boolean((process.env.KIMI_API_KEY || '').trim());
+  const siliconFlowConfigured = config.llm?.fallback?.enabled !== false && Boolean((process.env.SILICONFLOW_API_KEY || '').trim());
+  if (!kimiConfigured && !siliconFlowConfigured) {
+    console.warn('No LLM API key is configured; using Chinese fallback cards.');
     return papers.map((paper) => ({ ...paper, llmSummary: fallbackSummary(paper) }));
   }
   const enriched = [];
@@ -387,13 +427,22 @@ async function enrichPapers(papers, limit = papers.length) {
       enriched.push({ ...paper, llmSummary: fallbackSummary(paper) });
       continue;
     }
-    try {
-      const summary = await summarizeWithKimi(paper);
-      enriched.push({ ...paper, llmSummary: ensureSummary(paper, summary) });
-    } catch (error) {
-      console.warn(`Kimi summary failed for ${paper.id}: ${error.message}`);
-      enriched.push({ ...paper, llmSummary: fallbackSummary(paper) });
+    let summary = null;
+    if (kimiConfigured) {
+      try {
+        summary = await summarizeWithKimi(paper);
+      } catch (error) {
+        console.warn(`Kimi summary failed for ${paper.id}: ${error.message}`);
+      }
     }
+    if (!summary && siliconFlowConfigured) {
+      try {
+        summary = await summarizeWithSiliconFlow(paper);
+      } catch (error) {
+        console.warn(`SiliconFlow summary failed for ${paper.id}: ${error.message}`);
+      }
+    }
+    enriched.push({ ...paper, llmSummary: ensureSummary(paper, summary) });
   }
   return enriched;
 }
