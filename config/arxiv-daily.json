@@ -16,9 +16,23 @@
       ]
     },
     {
+      "name": "AI + CAD",
+      "allOf": [
+        ["artificial intelligence", "generative ai", "ai-assisted", "ai-driven", "machine learning", "deep learning"],
+        ["cad", "computer-aided design", "parametric design", "geometric modeling", "design generation"]
+      ]
+    },
+    {
       "name": "LLM + BREP",
       "allOf": [
         ["llm", "large language model", "language model"],
+        ["brep", "b-rep", "boundary representation", "boundary-representation", "solid modeling", "parametric solid", "feature-based modeling"]
+      ]
+    },
+    {
+      "name": "AI + BREP",
+      "allOf": [
+        ["artificial intelligence", "generative ai", "ai-assisted", "ai-driven", "machine learning", "deep learning"],
         ["brep", "b-rep", "boundary representation", "boundary-representation", "solid modeling", "parametric solid", "feature-based modeling"]
       ]
     },
@@ -41,6 +55,13 @@
       "allOf": [
         ["llm", "large language model", "language model"],
         ["agent", "agentic", "tool use", "tool-use", "multi-agent", "autonomous agent"]
+      ]
+    },
+    {
+      "name": "LLM 技术报告",
+      "allOf": [
+        ["llm", "large language model", "language model"],
+        ["technical report", "system report", "model report", "engineering report", "technical note"]
       ]
     }
   ],

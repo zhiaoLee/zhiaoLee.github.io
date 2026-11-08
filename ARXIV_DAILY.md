@@ -13,7 +13,7 @@
 
 当前默认兴趣组是“LLM + 知识图谱”“LLM + CAD”“LLM + Agent”，默认分类覆盖 AI、语言、机器学习、视觉、计算机图形学和机器人学。具体研究方向变化后，可以直接编辑 `config/arxiv-daily.json`。
 
-当前还额外覆盖“LLM + BREP”“LLM + CAD 二维图纸”和“LLM + CAD 三维模型”，每日上限提高到 20 篇。每个兴趣组要求同时命中 LLM 相关词和领域词，减少只有单一关键词造成的误收录。
+当前还额外覆盖“AI + CAD”“LLM + BREP”“AI + BREP”“LLM + CAD 二维图纸”“LLM + CAD 三维模型”和“LLM 技术报告”，每日上限提高到 20 篇。每个兴趣组要求同时命中技术词和领域词，减少只有单一关键词造成的误收录。
 
 本实现使用分类和组合兴趣组进行轻量筛选，不需要 Zotero 或额外 API Key。`zotero-arxiv-daily` 的 Zotero 相似度排序和 PDF 全文提取可以作为后续增强；当前的 LLM 摘要层已经独立接入 Kimi。
 
