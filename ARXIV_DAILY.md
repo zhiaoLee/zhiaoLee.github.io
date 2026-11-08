@@ -25,6 +25,6 @@
 npm run arxiv:daily -- --date 2026-11-06 --max 3 --dry-run
 ```
 
-GitHub Actions 页面可以手动触发工作流：填写 `date` 重跑指定日期，或填写 `month`（例如 `2026-10`）生成上一自然月的月度汇总文章 `source/_posts/arxiv-monthly-YYYY-MM.md`。月度汇总最多收录 60 篇，默认对前 30 篇调用 Kimi 生成中文速读，其余保留原始摘要。
+GitHub Actions 页面可以手动触发工作流：填写 `date` 重跑指定日期，或填写 `month`（例如 `2026-10`）生成上一自然月的月度汇总文章 `source/_posts/arxiv-monthly-YYYY-MM.md`。月度汇总最多收录 60 篇，默认对全部论文调用 Kimi 生成中文标题、中文摘要和快速理解；模型失败时使用中文兜底卡片，确保每篇都有内容。
 
 手动验证已存在日期时，可将 `force` 设为 `true` 覆盖当天文章；定时运行默认保持幂等，不会重复覆盖已有文章。

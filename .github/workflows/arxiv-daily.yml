@@ -22,7 +22,7 @@ on:
       llm_max_papers:
         description: 'Maximum papers to summarize with Kimi'
         required: false
-        default: '30'
+        default: '60'
         type: string
       force:
         description: 'Regenerate an existing date (manual verification only)'
@@ -49,7 +49,7 @@ jobs:
       ARXIV_DAILY_DATE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.date || '' }}
       ARXIV_DAILY_MONTH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.month || '' }}
       ARXIV_DAILY_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.max_papers || '20' }}
-      ARXIV_DAILY_LLM_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.llm_max_papers || '30' }}
+      ARXIV_DAILY_LLM_MAX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.llm_max_papers || '60' }}
       ARXIV_DAILY_FORCE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force || 'false' }}
       KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
       KIMI_API_URL: ${{ vars.KIMI_API_URL || 'https://api.kimi.com/coding/v1/chat/completions' }}

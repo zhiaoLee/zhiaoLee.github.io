@@ -278,7 +278,10 @@ function yamlQuote(value) {
 }
 
 function parseJsonObject(value) {
-  const text = String(value || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const content = Array.isArray(value)
+    ? value.map((item) => typeof item === 'string' ? item : item?.text || item?.content || '').join('\n')
+    : value;
+  const text = String(content || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   try {
     return JSON.parse(text);
   } catch {
@@ -298,6 +301,8 @@ function parseJsonObject(value) {
 function summaryFields(value) {
   if (!value || typeof value !== 'object') return null;
   const fields = {
+    titleZh: clean(value.titleZh || value.title_zh),
+    abstractZh: clean(value.abstractZh || value.abstract_zh),
     background: clean(value.background),
     innovation: clean(value.innovation),
     method: clean(value.method),
@@ -305,6 +310,24 @@ function summaryFields(value) {
     takeaway: clean(value.takeaway)
   };
   return Object.values(fields).some(Boolean) ? fields : null;
+}
+
+function fallbackSummary() {
+  return {
+    titleZh: '该研究论文',
+    abstractZh: '该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。',
+    background: '该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。',
+    innovation: '论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。',
+    method: '论文通过相应的模型、算法或实验进行研究，详细方法见原文。',
+    result: '摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。',
+    takeaway: '这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。'
+  };
+}
+
+function ensureSummary(paper, summary) {
+  const fallback = fallbackSummary(paper);
+  const fields = summary || {};
+  return Object.fromEntries(Object.keys(fallback).map((key) => [key, fields[key] || fallback[key]]));
 }
 
 async function summarizeWithKimi(paper) {
@@ -324,7 +347,7 @@ async function summarizeWithKimi(paper) {
       messages: [
         {
           role: 'system',
-          content: '你是学术论文速读助手。请用简体中文输出严格 JSON，不要 Markdown 代码块。字段必须是 background、innovation、method、result、takeaway；每个字段用 1-3 句清晰说明。如果摘要没有给出实验结果，请明确写“摘要未提供明确实验结果”，不要编造。'
+          content: '你是学术论文速读助手。请用简体中文输出严格 JSON，不要 Markdown 代码块。字段必须是 title_zh、abstract_zh、background、innovation、method、result、takeaway。title_zh 是准确、简洁的中文论文标题；abstract_zh 是完整中文摘要；其余字段各用 1-3 句清晰说明。如果摘要没有给出实验结果，请明确写“摘要未提供明确实验结果”，不要编造。'
         },
         {
           role: 'user',
@@ -356,20 +379,20 @@ async function enrichPapers(papers, limit = papers.length) {
   const token = (process.env.KIMI_API_KEY || '').trim();
   if (config.llm?.enabled === false || !token) {
     if (config.llm?.enabled !== false) console.warn('Kimi summary skipped: KIMI_API_KEY is not configured.');
-    return papers;
+    return papers.map((paper) => ({ ...paper, llmSummary: fallbackSummary(paper) }));
   }
   const enriched = [];
   for (const [index, paper] of papers.entries()) {
     if (index >= limit) {
-      enriched.push({ ...paper, llmSummary: null });
+      enriched.push({ ...paper, llmSummary: fallbackSummary(paper) });
       continue;
     }
     try {
       const summary = await summarizeWithKimi(paper);
-      enriched.push({ ...paper, llmSummary: summary });
+      enriched.push({ ...paper, llmSummary: ensureSummary(paper, summary) });
     } catch (error) {
       console.warn(`Kimi summary failed for ${paper.id}: ${error.message}`);
-      enriched.push({ ...paper, llmSummary: null });
+      enriched.push({ ...paper, llmSummary: fallbackSummary(paper) });
     }
   }
   return enriched;
@@ -400,26 +423,26 @@ function buildPost(period, papers) {
     const published = paper.published ? new Date(paper.published).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC') : '未知';
     const authors = paper.authors.length ? paper.authors.join('、') : '作者信息未提供';
     const categories = paper.categories.length ? paper.categories.join(', ') : '未标注';
-    lines.push(`## ${index + 1}. ${markdownHeading(paper.title)}`);
+    const quickRead = ensureSummary(paper, paper.llmSummary);
+    lines.push(`## ${index + 1}. ${markdownHeading(quickRead.titleZh)}`);
     lines.push('');
+    lines.push(`- **英文标题**：${markdownText(paper.title)}`);
     lines.push(`- **作者**：${markdownText(authors)}`);
     lines.push(`- **分类**：${categories}`);
     lines.push(`- **发布时间**：${published}`);
-    lines.push(`- **链接**：[摘要](${paper.absUrl}) · [PDF](${paper.pdfUrl})`);
+    lines.push(`- **链接**：[原文摘要](${paper.absUrl}) · [PDF](${paper.pdfUrl})`);
     if (paper.matchedKeywords?.length) lines.push(`- **匹配关键词**：${paper.matchedKeywords.join('、')}`);
     if (paper.matchedGroups?.length) lines.push(`- **匹配方向**：${paper.matchedGroups.map((group) => group.name).join('、')}`);
     lines.push('');
-    if (paper.llmSummary) {
-      lines.push('### 快速理解');
-      lines.push('');
-      lines.push(`- **研究背景**：${paper.llmSummary.background || '摘要未说明。'}`);
-      lines.push(`- **核心创新**：${paper.llmSummary.innovation || '摘要未说明。'}`);
-      lines.push(`- **方法概览**：${paper.llmSummary.method || '摘要未说明。'}`);
-      lines.push(`- **结果与结论**：${paper.llmSummary.result || '摘要未提供明确实验结果。'}`);
-      lines.push(`- **一句话 takeaway**：${paper.llmSummary.takeaway || '建议阅读全文。'}`);
-      lines.push('');
-    }
-    lines.push(`**摘要**：${markdownText(paper.summary) || '暂无摘要。'}`);
+    lines.push('### 快速理解');
+    lines.push('');
+    lines.push(`- **研究背景**：${quickRead.background}`);
+    lines.push(`- **核心创新**：${quickRead.innovation}`);
+    lines.push(`- **方法概览**：${quickRead.method}`);
+    lines.push(`- **结果与结论**：${quickRead.result}`);
+    lines.push(`- **一句话 takeaway**：${quickRead.takeaway}`);
+    lines.push('');
+    lines.push(`**中文摘要**：${quickRead.abstractZh}`);
     lines.push('');
   });
   return `${lines.join('\n')}\n`;

@@ -48,7 +48,7 @@
   "excludeKeywords": [],
   "maxPapers": 20,
   "monthlyMaxPapers": 60,
-  "llmMaxPapers": 30,
+  "llmMaxPapers": 60,
   "includeCrossList": false,
   "timezone": "Asia/Shanghai",
   "feedBase": "https://rss.arxiv.org/atom",
