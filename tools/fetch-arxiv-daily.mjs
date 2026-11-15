@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import { assertSummary, createSummarizer, enrichPapers } from './lib/arxiv-summary.mjs';
 
 const root = process.cwd();
 const configPath = path.join(root, 'config', 'arxiv-daily.json');
@@ -277,176 +279,6 @@ function yamlQuote(value) {
   return JSON.stringify(value);
 }
 
-function parseJsonObject(value) {
-  const content = Array.isArray(value)
-    ? value.map((item) => typeof item === 'string' ? item : item?.text || item?.content || '').join('\n')
-    : value;
-  const text = String(content || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  try {
-    return JSON.parse(text);
-  } catch {
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start >= 0 && end > start) {
-      try {
-        return JSON.parse(text.slice(start, end + 1));
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
-}
-
-function summaryFields(value) {
-  if (!value || typeof value !== 'object') return null;
-  const fields = {
-    titleZh: clean(value.titleZh || value.title_zh),
-    abstractZh: clean(value.abstractZh || value.abstract_zh),
-    background: clean(value.background),
-    innovation: clean(value.innovation),
-    method: clean(value.method),
-    result: clean(value.result),
-    takeaway: clean(value.takeaway)
-  };
-  return Object.values(fields).some(Boolean) ? fields : null;
-}
-
-function fallbackSummary() {
-  return {
-    titleZh: '该研究论文',
-    abstractZh: '该论文围绕目标问题展开研究，具体背景、方法和实验结果请参考原文。',
-    background: '该研究围绕论文所关注的问题展开，摘要未能提供更完整的背景信息。',
-    innovation: '论文提出了针对该问题的方法或分析框架，具体创新点请结合原文确认。',
-    method: '论文通过相应的模型、算法或实验进行研究，详细方法见原文。',
-    result: '摘要未提供明确实验结果，建议结合论文正文和实验章节进一步判断。',
-    takeaway: '这篇论文值得从研究问题、方法设计和实验结果三个方面快速阅读。'
-  };
-}
-
-function ensureSummary(paper, summary) {
-  const fallback = fallbackSummary(paper);
-  const fields = summary || {};
-  return Object.fromEntries(Object.keys(fallback).map((key) => [key, fields[key] || fallback[key]]));
-}
-
-async function summarizeWithProvider(paper, provider) {
-  const response = await fetch(provider.apiUrl, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${provider.token}`,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: provider.model,
-      temperature: 1,
-      max_tokens: provider.maxTokens,
-      messages: [
-        {
-          role: 'system',
-          content: '你是学术论文速读助手。请用简体中文输出严格 JSON，不要 Markdown 代码块。字段必须是 title_zh、abstract_zh、background、innovation、method、result、takeaway。title_zh 是准确、简洁的中文论文标题；abstract_zh 是完整中文摘要；其余字段各用 1-3 句清晰说明。如果摘要没有给出实验结果，请明确写“摘要未提供明确实验结果”，不要编造。'
-        },
-        {
-          role: 'user',
-          content: JSON.stringify({
-            title: paper.title,
-            authors: paper.authors,
-            categories: paper.categories,
-            abstract: paper.summary
-          })
-        }
-      ]
-    })
-  });
-  if (!response.ok) {
-    let detail = '';
-    try {
-      const error = await response.json();
-      detail = error?.error?.message || error?.message || '';
-    } catch {
-      // Keep the status-only error when the provider does not return JSON.
-    }
-    throw new Error(`${provider.name} HTTP ${response.status}${detail ? `: ${clean(detail).slice(0, 240)}` : ''}`);
-  }
-  const payload = await response.json();
-  return summaryFields(parseJsonObject(payload.choices?.[0]?.message?.content));
-}
-
-function providerFromEnv(name, defaults) {
-  const token = (process.env[defaults.keyEnv] || '').replace(/^Bearer\s+/i, '').trim();
-  if (!token) return null;
-  return {
-    name,
-    token,
-    apiUrl: process.env[defaults.urlEnv] || defaults.apiUrl,
-    model: process.env[defaults.modelEnv] || defaults.model,
-    maxTokens: Number(process.env[defaults.maxTokensEnv] || defaults.maxTokens || 1200)
-  };
-}
-
-async function summarizeWithKimi(paper) {
-  const llm = config.llm || {};
-  if (llm.enabled === false) return null;
-  const provider = providerFromEnv('Kimi', {
-    keyEnv: 'KIMI_API_KEY',
-    urlEnv: 'KIMI_API_URL',
-    modelEnv: 'KIMI_MODEL',
-    maxTokensEnv: 'KIMI_MAX_TOKENS',
-    apiUrl: llm.apiUrl,
-    model: llm.model,
-    maxTokens: llm.maxTokens
-  });
-  return provider ? summarizeWithProvider(paper, provider) : null;
-}
-
-async function summarizeWithSiliconFlow(paper) {
-  const fallback = config.llm?.fallback || {};
-  if (fallback.enabled === false) return null;
-  const provider = providerFromEnv('SiliconFlow', {
-    keyEnv: 'SILICONFLOW_API_KEY',
-    urlEnv: 'SILICONFLOW_API_URL',
-    modelEnv: 'SILICONFLOW_MODEL',
-    maxTokensEnv: 'SILICONFLOW_MAX_TOKENS',
-    apiUrl: fallback.apiUrl,
-    model: fallback.model,
-    maxTokens: fallback.maxTokens
-  });
-  return provider ? summarizeWithProvider(paper, provider) : null;
-}
-
-async function enrichPapers(papers, limit = papers.length) {
-  const kimiConfigured = config.llm?.enabled !== false && Boolean((process.env.KIMI_API_KEY || '').trim());
-  const siliconFlowConfigured = config.llm?.fallback?.enabled !== false && Boolean((process.env.SILICONFLOW_API_KEY || '').trim());
-  if (!kimiConfigured && !siliconFlowConfigured) {
-    console.warn('No LLM API key is configured; using Chinese fallback cards.');
-    return papers.map((paper) => ({ ...paper, llmSummary: fallbackSummary(paper) }));
-  }
-  const enriched = [];
-  for (const [index, paper] of papers.entries()) {
-    if (index >= limit) {
-      enriched.push({ ...paper, llmSummary: fallbackSummary(paper) });
-      continue;
-    }
-    let summary = null;
-    if (kimiConfigured) {
-      try {
-        summary = await summarizeWithKimi(paper);
-      } catch (error) {
-        console.warn(`Kimi summary failed for ${paper.id}: ${error.message}`);
-      }
-    }
-    if (!summary && siliconFlowConfigured) {
-      try {
-        summary = await summarizeWithSiliconFlow(paper);
-      } catch (error) {
-        console.warn(`SiliconFlow summary failed for ${paper.id}: ${error.message}`);
-      }
-    }
-    enriched.push({ ...paper, llmSummary: ensureSummary(paper, summary) });
-  }
-  return enriched;
-}
-
 function buildPost(period, papers) {
   const isMonthly = period.kind === 'month';
   const title = isMonthly ? `arXiv 月度论文汇总（${period.label}）` : `arXiv 每日论文速递（${period.startDate}）`;
@@ -472,7 +304,7 @@ function buildPost(period, papers) {
     const published = paper.published ? new Date(paper.published).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC') : '未知';
     const authors = paper.authors.length ? paper.authors.join('、') : '作者信息未提供';
     const categories = paper.categories.length ? paper.categories.join(', ') : '未标注';
-    const quickRead = ensureSummary(paper, paper.llmSummary);
+    const quickRead = assertSummary(paper.llmSummary, paper);
     lines.push(`## ${index + 1}. ${markdownHeading(quickRead.titleZh)}`);
     lines.push('');
     lines.push(`- **英文标题**：${markdownText(paper.title)}`);
@@ -497,61 +329,69 @@ function buildPost(period, papers) {
   return `${lines.join('\n')}\n`;
 }
 
-const timezone = config.timezone || 'Asia/Shanghai';
-const requestedMonth = argValue('--month') || process.env.ARXIV_DAILY_MONTH || '';
-const requestedDate = argValue('--date') || process.env.ARXIV_DAILY_DATE || yesterday(timezone);
-let period;
-if (requestedMonth) {
-  if (!/^\d{4}-\d{2}$/.test(requestedMonth)) throw new Error(`Invalid month: ${requestedMonth}`);
-  period = monthRange(requestedMonth, timezone);
-} else {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) throw new Error(`Invalid date: ${requestedDate}`);
-  period = { kind: 'day', label: requestedDate, startDate: requestedDate, endDateExclusive: addDays(requestedDate, 1), timezone };
-}
-const maxPapers = Number(argValue('--max') || process.env.ARXIV_DAILY_MAX || (period.kind === 'month' ? config.monthlyMaxPapers : config.maxPapers) || 12);
-const llmMaxPapers = Number(argValue('--llm-max') || process.env.ARXIV_DAILY_LLM_MAX || config.llmMaxPapers || maxPapers);
-const force = process.argv.includes('--force') || process.env.ARXIV_DAILY_FORCE === 'true';
-const rawPapers = await retrievePapers(period);
-const seen = new Set();
-const papers = rawPapers
-  .filter((paper) => {
-    const key = paper.id || paper.absUrl;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    if (!paper.published) return false;
-    const localDate = dateInTimezone(new Date(paper.published), timezone);
-    if (localDate < period.startDate || localDate >= period.endDateExclusive) return false;
-    if (!config.includeCrossList && paper.announceType && paper.announceType !== 'new') return false;
-    return true;
-  })
-  .map(scorePaper)
-  .filter(Boolean)
-  .sort((left, right) => right.score - left.score || new Date(right.published) - new Date(left.published) || left.title.localeCompare(right.title))
-  .slice(0, maxPapers);
+export { parseFeed, fetchText, buildPost };
 
-if (!papers.length) {
-  console.log(`No matching arXiv papers found for ${period.label}.`);
-  process.exit(0);
-}
+async function main() {
+  const timezone = config.timezone || 'Asia/Shanghai';
+  const requestedMonth = argValue('--month') || process.env.ARXIV_DAILY_MONTH || '';
+  const requestedDate = argValue('--date') || process.env.ARXIV_DAILY_DATE || yesterday(timezone);
+  let period;
+  if (requestedMonth) {
+    if (!/^\d{4}-\d{2}$/.test(requestedMonth)) throw new Error(`Invalid month: ${requestedMonth}`);
+    period = monthRange(requestedMonth, timezone);
+  } else {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) throw new Error(`Invalid date: ${requestedDate}`);
+    period = { kind: 'day', label: requestedDate, startDate: requestedDate, endDateExclusive: addDays(requestedDate, 1), timezone };
+  }
+  const maxPapers = Number(argValue('--max') || process.env.ARXIV_DAILY_MAX || (period.kind === 'month' ? config.monthlyMaxPapers : config.maxPapers) || 12);
+  const llmMaxPapers = Number(argValue('--llm-max') || process.env.ARXIV_DAILY_LLM_MAX || config.llmMaxPapers || maxPapers);
+  const force = process.argv.includes('--force') || process.env.ARXIV_DAILY_FORCE === 'true';
+  const rawPapers = await retrievePapers(period);
+  const seen = new Set();
+  const papers = rawPapers
+    .filter((paper) => {
+      const key = paper.id || paper.absUrl;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (!paper.published) return false;
+      const localDate = dateInTimezone(new Date(paper.published), timezone);
+      if (localDate < period.startDate || localDate >= period.endDateExclusive) return false;
+      if (!config.includeCrossList && paper.announceType && paper.announceType !== 'new') return false;
+      return true;
+    })
+    .map(scorePaper)
+    .filter(Boolean)
+    .sort((left, right) => right.score - left.score || new Date(right.published) - new Date(left.published) || left.title.localeCompare(right.title))
+    .slice(0, maxPapers);
 
-const outputName = period.kind === 'month' ? `arxiv-monthly-${period.label}.md` : `arxiv-daily-${period.startDate}.md`;
-const outputPath = path.join(root, 'source', '_posts', outputName);
-try {
-  await fs.access(outputPath);
-  if (!force) {
-    console.log(`Post already exists: ${path.relative(root, outputPath)}`);
+  if (!papers.length) {
+    console.log(`No matching arXiv papers found for ${period.label}.`);
     process.exit(0);
   }
-  console.log(`Force regenerating: ${path.relative(root, outputPath)}`);
-} catch {
-  // The daily post does not exist yet.
+
+  const outputName = period.kind === 'month' ? `arxiv-monthly-${period.label}.md` : `arxiv-daily-${period.startDate}.md`;
+  const outputPath = path.join(root, 'source', '_posts', outputName);
+  try {
+    await fs.access(outputPath);
+    if (!force) {
+      console.log(`Post already exists: ${path.relative(root, outputPath)}`);
+      process.exit(0);
+    }
+    console.log(`Force regenerating: ${path.relative(root, outputPath)}`);
+  } catch {
+    // The daily post does not exist yet.
+  }
+
+  const enrichedPapers = await enrichPapers(papers, createSummarizer(config), { limit: llmMaxPapers });
+  const content = buildPost(period, enrichedPapers);
+  if (process.argv.includes('--dry-run')) {
+    console.log(content);
+  } else {
+    await fs.writeFile(outputPath, content, 'utf8');
+    console.log(`Wrote ${path.relative(root, outputPath)} with ${papers.length} papers.`);
+  }
 }
 
-const enrichedPapers = await enrichPapers(papers, llmMaxPapers);
-const content = buildPost(period, enrichedPapers);
-if (process.argv.includes('--dry-run')) {
-  console.log(content);
-} else {
-  await fs.writeFile(outputPath, content, 'utf8');
-  console.log(`Wrote ${path.relative(root, outputPath)} with ${papers.length} papers.`);
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main();
 }

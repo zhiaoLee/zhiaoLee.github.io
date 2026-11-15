@@ -12,7 +12,9 @@ description: "按配置的 arXiv 分类与关键词筛选的每日论文摘要�
 
 共筛选出 **2** 篇论文。
 
-## 1. SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization
+## 1. SwarmEvolve：用于进化式发现与优化的潜在空间智能体群
+
+- **英文标题**：SwarmEvolve: Latent Agent Swarms for Evolutionary Discovery and Optimization
 
 - **作者**：Qile Jiang、George Em Karniadakis
 - **分类**：cs.AI, cs.NE
@@ -22,15 +24,17 @@ description: "按配置的 arXiv 分类与关键词筛选的每日论文摘要�
 
 ### 快速理解
 
-- **研究背景**：LLM 引导的进化式搜索通过迭代改进和组合高分方法来解决数学与计算问题，但速度缓慢，因为每轮 LLM 都需要生成冗长的文本思维链，且为维持种群多样性必须重复大量生成。
-- **核心创新**：SwarmEvolve 提出了一种潜空间智能体群框架：每轮数百个低成本智能体以群（swarm）形式协作，在不解码为文本的情况下进行潜空间推理，并通过传递 KV 缓存来共享信息；新颖性过滤器直接基于智能体隐状态向量的距离保留最具差异性的想法，而想法的交叉通过摘要智能体接收全部群成员合并的 KV 缓存自然实现。
-- **方法概览**：每个智能体群从不同角度研究问题，智能体在潜空间推理并通过 KV 缓存通信，利用隐状态距离筛选新颖想法，再由摘要智能体聚合各群信息完成潜空间交叉，从而在数学发现与科学计算的 21 个问题上进行程序搜索。
-- **结果与结论**：SwarmEvolve 取得最高平均分，达到其他最先进框架 60 分钟才能达到的最佳分数仅需中位数 3 到 8 分钟；在若干问题上，使用 Qwen3 8B 的 SwarmEvolve 甚至改进了 AlphaEvolve 此前用前沿大模型首次发现的解。
-- **一句话 takeaway**：研究表明，在潜空间通信的智能体群为科学问题的程序搜索提供了一种快速且低成本的新途径。
+- **研究背景**：LLM 引导的进化式搜索（如 AlphaEvolve 类方法）通过迭代精炼和组合高分方案来改进数学与计算问题的程序，但每轮都要生成长文本思维链，且为维持种群多样性需重复生成多次，导致过程缓慢、成本高。
+- **核心创新**：SwarmEvolve 让每轮数百个低成本智能体以群体形式在潜在空间中推理（不解码为文本），并通过直接传递 KV 缓存共享信息；新颖性过滤器直接度量隐状态向量距离以保留最独特的想法，汇总智能体接收合并的 KV 缓存使想法交叉在潜在空间中自然发生。
+- **方法概览**：框架中每个群体从不同角度研究问题，智能体以潜在空间推理代替文本思维链，信息通过 KV 缓存传递；用隐状态向量距离做新颖性筛选保留多样想法，再由汇总智能体整合全部成员的 KV 缓存实现潜在空间交叉，形成进化式程序搜索循环。
+- **结果与结论**：在数学发现与科学计算的 21 个问题上，SwarmEvolve 取得最高平均分数，达到其他最先进框架 60 分钟才能达到的最佳分数所需时间中位数仅为 3 到 8 分钟；在若干问题上，搭载 Qwen3 8B 的 SwarmEvolve 还改进了 AlphaEvolve 最初用前沿大模型发现的解。
+- **一句话 takeaway**：智能体在潜在空间中通过 KV 缓存通信与交叉，可省去冗长文本思维链的生成开销，使进化式程序搜索在保持甚至提升解质量的同时大幅提速降本，对科学问题的自动求解具有实用价值。
 
-**摘要**：LLM-guided evolutionary search uses AI agents to improve programs for mathematical and computational problems by iteratively refining solutions and combining high-scoring methods. However, the process is often slow because the LLM generates a long textual chain of thought for each round and must repeat this generation many times to maintain population diversity. We present SwarmEvolve, a framework in which hundreds of low-cost agents per round work in swarms, reason in latent space without decoding to text, and share information by passing KV caches. Each swarm studies the problem from a different angle. A novelty filter keeps the most distinct agent ideas by directly measuring the distances between the agents' hidden state vectors. Crossover of ideas happens naturally in latent space, as a summarizer agent receives the combined KV caches of all swarm members. On 21 problems in mathematical discovery and scientific computing, SwarmEvolve gets the highest average score and needs a median of only 3 to 8 minutes to reach the best scores that other state-of-the-art frameworks reach in 60 minutes. On several problems, SwarmEvolve with Qwen3 8B improves on the solutions that AlphaEvolve first found with frontier LLMs. Our work shows that agent swarms that communicate in latent space offer a fast, low-cost approach to program search for scientific problems.
+**中文摘要**：由大语言模型引导的进化式搜索利用 AI 智能体来改进针对数学与计算问题的程序，通过迭代地精炼解决方案并组合高分方法。然而，这一过程往往很慢，因为大语言模型在每一轮都要为生成较长的文本思维链，并且为了维持种群多样性必须重复进行许多次这样的生成。我们提出 SwarmEvolve 框架，其中每轮有数百个低成本智能体以群体方式工作，在潜在空间中推理而不解码为文本，并通过传递 KV 缓存来共享信息。每个群体从不同的角度研究问题。一个新颖性过滤器通过直接度量智能体隐状态向量之间的距离来保留最独特的智能体想法。想法的交叉在潜在空间中自然发生：一个汇总智能体接收所有群体成员的合并 KV 缓存。在数学发现与科学计算领域的 21 个问题上，SwarmEvolve 获得了最高的平均分数，并且达到其他最先进框架在 60 分钟内才能达到的最佳分数，其所需时间的中位数仅为 3 到 8 分钟。在若干问题上，使用 Qwen3 8B 的 SwarmEvolve 改进了 AlphaEvolve 最初用前沿大语言模型发现的解决方案。我们的工作表明，在潜在空间中通信的智能体群为科学问题的程序搜索提供了一种快速、低成本的方法。
 
-## 2. The Power of Meta Access in the Software of the Future --- Demonstrated on LLM Chat UIs and Chat AI
+## 2. 未来软件中元访问的力量——以 LLM 聊天 UI 与 Chat AI 为例
+
+- **英文标题**：The Power of Meta Access in the Software of the Future --- Demonstrated on LLM Chat UIs and Chat AI
 
 - **作者**：Julian Kunkel、Ali Doosthosseini
 - **分类**：cs.AI
@@ -40,11 +44,11 @@ description: "按配置的 arXiv 分类与关键词筛选的每日论文摘要�
 
 ### 快速理解
 
-- **研究背景**：聊天界面仍是大语言模型任务的主要入口，但模型只能看到当前对话，看不到其周围的工作区状态；与此同时，通用智能体框架本质是运行时，因其能修改自身设置，元访问（meta access）具有自反性，需要独立的控制面边界。
-- **核心创新**：作者提出“元访问”概念，即赋予助手结构化、带权限的界面自身视图，并设计了分级阶梯：功能辅导、元数据/设置/偏好访问、基于摘要与消息的检索、需确认的变更、完全编排，从而把聊天客户端从多屏操作变为统一入口。
-- **方法概览**：作者通过Meta Chat原型落地该思路：利用摘要、设置和相关消息构建有界上下文，将引用关联到对话、主题和人物角色，支持可确认、可撤销的修改，提供可浏览的教程库，并推荐用户发起的人物角色对话；同时探讨隐私、提示注入、信任等风险及无障碍扩展。
-- **结果与结论**：摘要未提供明确实验结果，该文为概念性探索与原型设计，主要贡献在于提出元访问框架、分级模型和Meta Chat原型实现。
-- **一句话 takeaway**：元访问将聊天从单一对话的窗口转变为整个工作区的控制层，在不牺牲用户控制的前提下扩展了聊天界面的智能体能力；未来嵌入IDE、仪表盘、办公套件和操作系统的AI界面，应通过类似调试器的接口开放其现有的元模型，暴露结构化、带权限的状态与能力模型。
+- **研究背景**：许多 LLM 任务仍以聊天为默认界面，助手虽能处理当前对话，却无法感知聊天窗口之外的工作区、设置、历史与组织能力；与此同时，OpenCode 等通用智能体运行时能改配置、编排操作，使“助手操作界面自身”的控制边界问题变得突出。
+- **核心创新**：提出“元访问”概念及五级阶梯：功能辅导、元数据/设置/偏好访问、摘要与消息检索、确认式变更、完全编排；并指出通用智能体运行时因能修改自身设置而具有自反性，需要独立控制面边界。
+- **方法概览**：以 Chat AI 客户端的 Meta Chat 原型进行概念验证与设计论证：从摘要、设置、相关消息构建有界上下文，将引用链接到对话、主题和人格，支持经确认且可逆的修改，提供教程库，并按用户发起对话推荐人格；同时分析 grounding、隐私、提示注入和信任风险。
+- **结果与结论**：摘要未给出实验对比或量化指标，结果主要是设计论证与原型机制说明：元访问可把聊天从单对话窗口扩展为覆盖查找、导航、组织和操作整个工作区的控制层，并可能把屏幕阅读器从控件描述推进到语义化工作区操作。
+- **一句话 takeaway**：核心启示是 AI 时代界面应像调试器开放元模型一样，以结构化、授权化的方式暴露状态与能力；对聊天客户端而言，关键不是替代用户自动执行，而是在确认、可逆和权限边界内，把工作区操作收敛到同一聊天入口。
 
-**摘要**：Chat remains the default surface for many large language model (LLM) tasks, even as agentic tools such as OpenCode excel at coding and automation. Yet the model sees the current dialogue but not the workspace around it. We explore meta access---giving the assistant a structured, permissioned view of the interface itself and propose a ladder of levels: feature tutoring; metadata, settings, and preference access; retrieval over summaries and messages, confirmed mutation, and full orchestration. Meta access can turn a chat client from many screens into one entry point for finding, navigating, organising, and operating it, while raising risks around grounding, privacy, prompt injection, and trust. General-purpose agentic harnesses are runtimes; because they can change their own settings, meta access becomes reflexive and needs a separate control-plane boundary. We ground this in the Meta Chat prototype of the Chat AI client. It builds bounded context from, e.g., summaries, settings, and relevant messages; links references to conversations, topics, and personas; supports confirmed, reversible changes; offers a browsable tutorial library; and recommends personas as user-started conversations. By exposing application state in structured form, meta access can extend screen readers from widget descriptions to semantic workspace operations. Meta access thus turns chat from a window onto one conversation into a control layer for the whole workspace, extending chat toward agentic capability without surrendering user control. As assistants become embedded in IDEs, dashboards, office suites, and operating systems, AI-era interfaces should expose a structured, permissioned model of their state and capabilities, ideally by opening their existing metamodels through a debugger-like interface.
+**中文摘要**：即使像 OpenCode 这样的智能体工具在编码与自动化方面表现出色，聊天仍然是许多大语言模型任务的默认入口。然而，模型能看到当前对话，却看不到对话之外的工作区。本文探讨“元访问”——为助手提供一种结构化、经授权的应用界面本身视图，并提出由低到高的层级阶梯：功能辅导；元数据、设置与偏好访问；对摘要与消息的检索；经确认的变更；以及完全编排。元访问可把聊天客户端从许多屏幕压缩为一个用于查找、导航、组织并操作界面的入口，但同时也会带来 grounding、隐私、提示注入与信任方面的风险。通用智能体框架本质上是运行时；因为它们能够修改自身设置，元访问会成为自反性的，因此需要单独的控制面边界。本文以 Chat AI 客户端的 Meta Chat 原型为 grounding：它从摘要、设置和相关消息等来源构建有界上下文；把引用链接到对话、主题和人格；支持经确认且可逆的变更；提供可浏览的教程库；并把人格推荐为用户开启的对话。通过以结构化形式暴露应用状态，元访问能把屏幕阅读器从控件描述扩展到语义化的工作区操作。由此，元访问把聊天从“观察一场对话的窗口”转变为“整个工作区的控制层”，在不让渡用户控制的前提下把聊天推向智能体能力。随着助手被嵌入 IDE、仪表盘、办公套件和操作系统，AI 时代界面应暴露其状态与能力的结构化、授权化模型，理想做法是通过类似调试器的接口开放其既有元模型。
 

@@ -20,12 +20,17 @@ on:
         default: '20'
         type: string
       llm_max_papers:
-        description: 'Maximum papers to summarize with Kimi'
+        description: 'LLM budget; must cover every selected paper'
         required: false
         default: '60'
         type: string
       force:
         description: 'Regenerate an existing date (manual verification only)'
+        required: false
+        default: false
+        type: boolean
+      repair_existing:
+        description: 'Repair incomplete Chinese titles, abstracts and briefs in all existing digests'
         required: false
         default: false
         type: boolean
@@ -70,8 +75,42 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore validated Chinese briefs
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/arxiv-summaries
+          key: ${{ runner.os }}-arxiv-summaries-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ${{ runner.os }}-arxiv-summaries-v2-
+
+      - name: Test Chinese brief validation
+        run: npm run test:arxiv
+
       - name: Fetch and write arXiv digest
+        if: inputs.repair_existing != true
         run: npm run arxiv:daily
+
+      - name: Repair existing Chinese briefs
+        if: inputs.repair_existing == true
+        run: npm run arxiv:repair
+
+      - name: Save validated Chinese briefs
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/arxiv-summaries
+          key: ${{ runner.os }}-arxiv-summaries-v2-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Audit all Chinese paper cards
+        run: npm run arxiv:audit
+
+      - name: Build Hexo site
+        run: |
+          npm run build
+          if find public -type f -size 0 | grep -q .; then
+            echo "Build contains zero-byte files"
+            find public -type f -size 0 -print
+            exit 1
+          fi
 
       - name: Commit digest
         id: change
@@ -88,15 +127,6 @@ jobs:
           git commit -m "post: publish arXiv daily digest"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Build Hexo site
-        run: |
-          npm run build
-          if find public -type f -size 0 | grep -q .; then
-            echo "Build contains zero-byte files"
-            find public -type f -size 0 -print
-            exit 1
-          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
